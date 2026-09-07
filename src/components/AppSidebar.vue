@@ -25,6 +25,7 @@ const styleVars = computed(() => {
   <aside class="mw-sidebar" :class="`mw-sidebar--${variant}`" :style="styleVars">
     <div v-if="$slots.head" class="mw-sidebar__head"><slot name="head" /></div>
     <nav class="mw-sidebar__nav" aria-label="Primary"><slot /></nav>
+    <div v-if="$slots.body" class="mw-sidebar__body"><slot name="body" /></div>
     <div v-if="$slots.foot" class="mw-sidebar__foot"><slot name="foot" /></div>
   </aside>
 </template>
@@ -51,6 +52,10 @@ const styleVars = computed(() => {
   flex: 1 1 auto;
   overflow-y: auto;
 }
+.mw-sidebar__body {
+  flex-shrink: 0;
+}
+
 .mw-sidebar__foot {
   padding: 0.75rem 1rem;
   border-top: 1px solid var(--_border);

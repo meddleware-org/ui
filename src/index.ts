@@ -12,6 +12,7 @@ export { default as UiCard } from './components/UiCard.vue'
 export { default as UiSelect } from './components/UiSelect.vue'
 export { default as UiNotice } from './components/UiNotice.vue'
 export { default as SidebarItem } from './components/SidebarItem.vue'
+export { default as CopyableAddress } from './components/CopyableAddress.vue'
 
 export { default as StatusWidget } from './components/StatusWidget.vue'
 

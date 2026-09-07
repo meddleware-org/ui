@@ -12,6 +12,7 @@
 html,
 body {
   margin: 0;
+  padding: 0;
 }
 
 body {
@@ -23,6 +24,26 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Remove default list chrome when lists are used for navigation/UI (not prose). */
+:where(ul, ol):where([role='list'], [role='listitem']) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Sensible media defaults. */
+:where(img, svg, video, canvas) {
+  display: block;
+  max-width: 100%;
+}
+
+/* Remove default fieldset/legend styling. */
+:where(fieldset) {
+  border: 0;
+  margin: 0;
+  padding: 0;
 }
 
 a {
