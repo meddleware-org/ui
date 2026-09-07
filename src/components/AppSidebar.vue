@@ -32,6 +32,7 @@ const styleVars = computed(() => {
 
 <style scoped>
 .mw-sidebar {
+  height: 100%;
   display: flex;
   flex-direction: column;
   width: var(--mw-sidebar-width, 240px);

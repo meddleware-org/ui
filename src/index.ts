@@ -1,7 +1,8 @@
 // @meddleware/ui — shared Vue 3 component library.
 // Consumers must also import the tokens once at their entry:
 //   import '@meddleware/design-tokens/tokens.css'
-//   import '@meddleware/ui/base.css'        // optional element defaults
+//   import '@meddleware/ui/base.css'        // element defaults + component styles
+import './styles/base.css'
 
 export { default as AppHeader } from './components/AppHeader.vue'
 export { default as AppSidebar } from './components/AppSidebar.vue'

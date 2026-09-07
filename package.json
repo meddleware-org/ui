@@ -1,6 +1,6 @@
 {
   "name": "@meddleware/ui",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Shared Vue 3 component library for @meddleware UIs \u2014 layout shell (header/sidebar/footer), colour-mode control, and primitives. Built on @meddleware/design-tokens.",
   "license": "0BSD",
   "type": "module",
