@@ -14,8 +14,12 @@ export { default as UiSelect } from './components/UiSelect.vue'
 export { default as UiNotice } from './components/UiNotice.vue'
 export { default as SidebarItem } from './components/SidebarItem.vue'
 export { default as CopyableAddress } from './components/CopyableAddress.vue'
+export { default as ExplorerLink } from './components/ExplorerLink.vue'
 
 export { default as StatusWidget } from './components/StatusWidget.vue'
+
+export { suiExplorerUrl } from './explorer.js'
+export type { SuiNetwork, SuiExplorerKind } from './explorer.js'
 
 export { useColorMode } from './composables/useColorMode.js'
 export type { ColorMode } from './composables/useColorMode.js'

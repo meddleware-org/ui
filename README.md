@@ -53,6 +53,24 @@ All three accept a `variant` prop:
 | `UiSelect` | Styled select input. |
 | `UiNotice` | Notice / alert banner. |
 | `SidebarItem` | Navigation button for use inside `AppSidebar`. Accepts `label`, `icon`, `active`, and `disabled` props. |
+| `CopyableAddress` | Shows a value (address/blob id/tx digest) with a dedicated **copy icon** (the value text is not the copy trigger). Put a link in the default slot to make it both linkable and copyable. Props: `address`, `truncate`, `chars`, `label`. |
+| `ExplorerLink` | External block-explorer link with a truncated label (or slot). Chain-agnostic — pass `href` (build it with `suiExplorerUrl`, or an app helper such as a Walruscan URL). Nest inside `CopyableAddress` for link + copy. |
+
+Copy + link compose — nest `ExplorerLink` in `CopyableAddress` so the value links out while the
+icon copies:
+
+```vue
+<CopyableAddress :address="addr">
+  <ExplorerLink :href="suiExplorerUrl('account', addr, 'testnet')" :value="addr" />
+</CopyableAddress>
+```
+
+### Explorer helper
+
+| Export | Type | Description |
+| --- | --- | --- |
+| `suiExplorerUrl(kind, id, network?)` | Function | Builds a SuiVision URL. `kind`: `'account' \| 'object' \| 'txblock'`; `network` defaults to `'testnet'`. Single source of truth for Sui explorer links. |
+| `SuiNetwork`, `SuiExplorerKind` | Types | `'mainnet' \| 'testnet' \| 'devnet'` and the link kinds. |
 
 ### Colour mode
 

@@ -19,7 +19,7 @@ withDefaults(
 defineEmits<{ 'update:modelValue': [ColorMode] }>()
 
 const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system: 'System' }
-const GLYPH: Record<ColorMode, string> = { light: '☀', dark: '☾', system: '◐' }
+const GLYPH: Record<ColorMode, string> = { light: '☀', dark: '☾', system: '🖵' }
 </script>
 
 <template>

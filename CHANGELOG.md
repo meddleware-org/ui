@@ -3,6 +3,22 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.10] - 2026-09-11
+
+### Added
+
+- `ExplorerLink` component — a chain-agnostic external block-explorer link (`href` + truncated
+  label/slot). Nest it inside `CopyableAddress` to make a value both linkable and copyable.
+- `suiExplorerUrl(kind, id, network?)` + `SuiNetwork` / `SuiExplorerKind` types — the single source
+  of truth for Sui explorer links (SuiVision; `explorer.sui.io` was retired).
+
+### Changed
+
+- **`CopyableAddress`**: copy is now triggered by a dedicated **copy icon**, not by clicking the
+  value text. The default slot renders the value (falling back to the truncated `address`), so a
+  link can occupy it while the icon still copies the full value. (Behavioural change; call sites
+  updated.)
+
 ## [0.1.5] - 2026-09-05
 
 ### Added
