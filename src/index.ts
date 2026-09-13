@@ -13,6 +13,8 @@ export { default as UiCard } from './components/UiCard.vue'
 export { default as UiSelect } from './components/UiSelect.vue'
 export { default as UiNotice } from './components/UiNotice.vue'
 export { default as SidebarItem } from './components/SidebarItem.vue'
+export { default as AppTabNav } from './components/AppTabNav.vue'
+export type { AppTab } from './components/AppTabNav.vue'
 export { default as CopyableAddress } from './components/CopyableAddress.vue'
 export { default as ExplorerLink } from './components/ExplorerLink.vue'
 
