@@ -3,6 +3,14 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.12] - 2026-09-17
+
+### Added
+
+- `AppFooter`: new optional `docsUrl` prop — when set, renders a "Documentation" external link in
+  the footer end area. Pass `VITE_DOCS_URL` from the consuming app to make the URL configurable per
+  deployment.
+
 ## [0.1.10] - 2026-09-11
 
 ### Added

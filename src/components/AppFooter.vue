@@ -8,6 +8,11 @@ const props = withDefaults(
     variant?: PanelVariant
     /** Per-instance colour overrides; token values are used by default. */
     colors?: PanelColors
+    /**
+     * When set, renders a "Documentation" link pointing at this URL.
+     * Use `VITE_DOCS_URL` in the consuming app to make this configurable per deployment.
+     */
+    docsUrl?: string
   }>(),
   { variant: 'transparent' },
 )
@@ -19,7 +24,16 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
   <footer class="mw-footer" :class="`mw-footer--${variant}`" :style="styleVars">
     <div class="mw-footer__start"><slot name="start" /></div>
     <div class="mw-footer__center"><slot /></div>
-    <div class="mw-footer__end"><slot name="end" /></div>
+    <div class="mw-footer__end">
+      <slot name="end" />
+      <a
+        v-if="docsUrl"
+        :href="docsUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mw-footer__docs-link"
+      >Documentation</a>
+    </div>
   </footer>
 </template>
 
@@ -44,6 +58,18 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
   min-width: 0;
 }
 .mw-footer__end {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   margin-left: auto;
+}
+.mw-footer__docs-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  opacity: 0.7;
+}
+.mw-footer__docs-link:hover {
+  opacity: 1;
 }
 </style>

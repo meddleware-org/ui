@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// Shared underline-style tab navigation (v-model + typed tabs). Scoped styles are built in so
+// consumers get the canonical appearance with zero extra CSS. Note: dao-ui's raised-tab TabBar is
+// intentionally a separate, bespoke component and does not use this.
 export interface AppTab {
   id: string
   label: string

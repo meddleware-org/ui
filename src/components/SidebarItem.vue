@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// Single sidebar entry button: optional icon + label, active/disabled states, accent-tinted
+// active background. Presentational only — the host owns selection state.
 withDefaults(
   defineProps<{ label: string; icon?: string; active?: boolean; disabled?: boolean }>(),
   { active: false, disabled: false },
