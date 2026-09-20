@@ -33,9 +33,9 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
 .mw-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-sm);
   height: var(--mw-header-height, 56px);
-  padding: 0 1rem;
+  padding: 0 var(--space-sm);
   background: var(--_bg);
   color: var(--_text);
   border-bottom: 1px solid var(--_border);
@@ -49,9 +49,9 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
 .mw-header__brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2xs);
   font-weight: 650;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--tracking-wide);
   white-space: nowrap;
 }
 .mw-header__center {
@@ -61,7 +61,7 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
 .mw-header__actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2xs);
   margin-left: auto;
 }
 </style>

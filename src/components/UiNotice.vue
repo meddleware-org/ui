@@ -27,13 +27,13 @@ const role = computed(() => {
 <style scoped>
 .mw-notice {
   margin: 0;
-  padding: 0.6rem 0.8rem;
+  padding: var(--space-2xs) var(--space-xs);
   border: 1px solid var(--border);
   border-left-width: 3px;
-  border-radius: var(--mw-radius, 10px);
+  border-radius: var(--radius);
   background: var(--lift);
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 .mw-notice--error {
   border-left-color: var(--danger);

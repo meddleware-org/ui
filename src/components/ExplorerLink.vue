@@ -4,6 +4,7 @@
 // — when a value should be both a link and copyable. Build `href` with `suiExplorerUrl` (this
 // package) for Sui entities, or an app-specific helper (e.g. Walruscan) for other targets.
 import { computed } from 'vue'
+import { safeHref } from '../safe-href.js'
 
 const props = withDefaults(
   defineProps<{
@@ -28,7 +29,7 @@ const label = computed(() => {
 </script>
 
 <template>
-  <a class="el-root" :href="href" target="_blank" rel="noopener noreferrer" :title="value">
+  <a class="el-root" :href="safeHref(href)" target="_blank" rel="noopener noreferrer" :title="value">
     <slot>{{ label }}</slot>
   </a>
 </template>

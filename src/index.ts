@@ -28,4 +28,5 @@ export type { ColorMode } from './composables/useColorMode.js'
 export type { PanelVariant, PanelColors } from './internal/panel.js'
 
 export { isStatusLevel, parseSnapshot } from './status.js'
+export { safeHref } from './safe-href.js'
 export type { StatusLevel, StatusComponent, StatusGroup, StatusSnapshot } from './status.js'

@@ -42,14 +42,14 @@ const styleVars = computed(() => {
   font-family: var(--mw-font-sans);
 }
 .mw-sidebar__head {
-  padding: 1rem;
+  padding: var(--space-sm);
   border-bottom: 1px solid var(--_border);
 }
 .mw-sidebar__nav {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.75rem;
+  gap: var(--space-3xs);
+  padding: var(--space-xs);
   flex: 1 1 auto;
   overflow-y: auto;
 }
@@ -58,9 +58,9 @@ const styleVars = computed(() => {
 }
 
 .mw-sidebar__foot {
-  padding: 0.75rem 1rem;
+  padding: var(--space-xs) var(--space-sm);
   border-top: 1px solid var(--_border);
   color: var(--_muted);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
 }
 </style>

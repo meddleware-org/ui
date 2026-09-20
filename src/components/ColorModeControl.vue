@@ -43,25 +43,27 @@ const GLYPH: Record<ColorMode, string> = { light: '☀', dark: '☾', system: '�
 <style scoped>
 .mw-mode {
   display: inline-flex;
+  /* 2px hairlines sit below the Fibonacci spacing floor (0.25rem) — kept literal by intent. */
   gap: 2px;
   padding: 2px;
   border: 1px solid var(--_border, var(--border));
-  border-radius: var(--mw-radius, 10px);
+  border-radius: var(--radius);
   background: color-mix(in srgb, var(--_text, var(--text)) 6%, transparent);
 }
 .mw-mode__btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.5rem;
+  gap: var(--space-3xs);
+  padding: var(--space-3xs) var(--space-2xs);
   border: 0;
-  border-radius: calc(var(--mw-radius, 10px) - 3px);
+  border-radius: calc(var(--radius) - 3px);
   background: transparent;
   color: var(--_text, var(--text));
   font: inherit;
-  font-size: 0.8rem;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   opacity: 0.7;
+  transition: opacity var(--transition-base), background var(--transition-base);
 }
 .mw-mode__btn:hover {
   opacity: 1;
@@ -71,7 +73,7 @@ const GLYPH: Record<ColorMode, string> = { light: '☀', dark: '☾', system: '�
   background: color-mix(in srgb, var(--_text, var(--text)) 14%, transparent);
 }
 .mw-mode__btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
 }
 /* Collapse labels on narrow controls — glyph only. */

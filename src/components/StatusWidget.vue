@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { safeHref } from '../safe-href.js'
 import { parseSnapshot } from '../status.js'
 import type { StatusLevel } from '../status.js'
 
@@ -61,9 +62,9 @@ onUnmounted(() => {
 
 <template>
   <a
-    :href="href"
+    :href="safeHref(href)"
     target="_blank"
-    rel="noopener"
+    rel="noopener noreferrer"
     class="status-widget"
     :class="`status-widget--${state}`"
     :title="`Platform status: ${label}`"
@@ -77,22 +78,24 @@ onUnmounted(() => {
 .status-widget {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2xs);
   text-decoration: none;
   color: inherit;
-  font-size: 0.8rem;
+  font-size: var(--font-size-sm);
   opacity: 0.85;
+  transition: opacity var(--transition-base);
 }
 .status-widget:hover { opacity: 1; }
 
 .status-widget__dot {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: var(--space-2xs);
+  height: var(--space-2xs);
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.status-widget--ok       .status-widget__dot { background: var(--mw-ok-500); }
-.status-widget--degraded .status-widget__dot { background: var(--mw-gold-500); }
-.status-widget--error    .status-widget__dot { background: var(--mw-danger-500); }
+/* Status dots use the role tokens (degraded → --warning, a functional yellow, not gold). */
+.status-widget--ok       .status-widget__dot { background: var(--ok); }
+.status-widget--degraded .status-widget__dot { background: var(--warning); }
+.status-widget--error    .status-widget__dot { background: var(--danger); }
 </style>

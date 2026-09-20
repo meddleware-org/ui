@@ -2,6 +2,11 @@
  * @meddleware/ui base — minimal, opt-in element defaults built on the tokens.
  * Import AFTER '@meddleware/design-tokens/tokens.css'. Apps may skip this and
  * style their own body; the components themselves don't require it.
+ *
+ * Philosophy: design recedes, content dominates. Type/spacing follow the sacred-
+ * geometry scale (φ/Fibonacci) from design-tokens; focus is high-contrast and
+ * visible; motion is human, not slick; controlled imperfection (noise, asymmetry)
+ * is available as opt-in utilities.
  */
 *,
 *::before,
@@ -20,8 +25,10 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--mw-font-sans);
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: var(--font-size-base);
+  /* Generous line-height + a hair of tracking for "breathing room". */
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -49,6 +56,7 @@ body {
 a {
   color: var(--accent);
   text-decoration: none;
+  transition: color var(--transition-base);
 }
 a:hover {
   text-decoration: underline;
@@ -58,13 +66,57 @@ a:hover {
   font-family: inherit;
 }
 
+/* High-contrast, visible focus using the dedicated focus role (blue — never reads
+ * as an error). Distinct from --accent so focus and destructive states don't blur. */
 :where(a, button, input, select, textarea):focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .mw-mono {
   font-family: var(--mw-font-mono);
+}
+
+/* ── Controlled-imperfection utilities (opt-in) ───────────────────────────────
+ * Subtle CSS-native noise for backgrounds — signals human presence over corporate
+ * flatness. Layer it on any surface: <div class="mw-noise"> … </div>. */
+.mw-noise {
+  position: relative;
+  isolation: isolate;
+}
+.mw-noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--noise-overlay);
+  background-repeat: repeat;
+  opacity: var(--noise-opacity);
+  pointer-events: none;
+}
+
+/* Placeholder hook for bespoke hand-drawn SVG / canvas elements added later. It
+ * reserves a positioned slot and is intentionally empty — drop an <svg>/<canvas>
+ * inside, or target `.mw-hand-drawn > svg` from the consuming app. */
+.mw-hand-drawn {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Sigil-like loader that resolves into a simple ring — a small ritual that settles
+ * into calm. Respects reduced-motion (below). Usage: <span class="mw-spinner" />. */
+.mw-spinner {
+  display: inline-block;
+  width: var(--space-sm);
+  height: var(--space-sm);
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: mw-spin var(--transition-slow) linear infinite;
+}
+@keyframes mw-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -73,5 +125,10 @@ a:hover {
   *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+  /* A settled spinner rather than a spinning one for reduced-motion users. */
+  .mw-spinner {
+    animation: none;
+    border-top-color: var(--accent);
   }
 }

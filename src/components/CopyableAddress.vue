@@ -87,10 +87,11 @@ async function copy(): Promise<void> {
 .ca-root {
   display: inline-flex;
   align-items: center;
+  /* font-relative gap (em) — scales with the address text by design. */
   gap: 0.35em;
 }
 .ca-value {
-  font-family: monospace;
+  font-family: var(--mw-font-mono, monospace);
   font-size: inherit;
 }
 .ca-copy {
@@ -103,7 +104,7 @@ async function copy(): Promise<void> {
   color: var(--muted, #888);
   cursor: pointer;
   line-height: 1;
-  transition: color 0.15s;
+  transition: color var(--transition-base);
 }
 .ca-copy:hover {
   color: var(--text, #f0f0f0);

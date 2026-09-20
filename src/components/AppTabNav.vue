@@ -35,7 +35,7 @@ const emit = defineEmits<{
 <style scoped>
 .mw-tab-nav {
   display: flex;
-  gap: 0.25rem;
+  gap: var(--space-3xs);
   border-bottom: 2px solid var(--border);
 }
 
@@ -44,12 +44,12 @@ const emit = defineEmits<{
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 0.5rem 1rem;
+  padding: var(--space-2xs) var(--space-sm);
   margin-bottom: -2px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   color: var(--muted);
-  transition: color 0.1s, border-color 0.1s;
+  transition: color var(--transition-base), border-color var(--transition-base);
 }
 
 .mw-tab-nav__tab:hover {

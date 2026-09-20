@@ -21,24 +21,24 @@ defineProps<{
 .mw-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--mw-radius, 10px);
+  border-radius: var(--radius);
   color: var(--text);
   overflow: hidden;
 }
 .mw-card__header {
-  padding: 0.85rem 1rem;
+  padding: var(--space-xs) var(--space-sm);
   border-bottom: 1px solid var(--border);
 }
 .mw-card__title {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
 }
 .mw-card__body {
-  padding: 1rem;
+  padding: var(--space-sm);
 }
 .mw-card__footer {
-  padding: 0.75rem 1rem;
+  padding: var(--space-xs) var(--space-sm);
   border-top: 1px solid var(--border);
   background: var(--lift);
 }

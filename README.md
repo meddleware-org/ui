@@ -1,6 +1,6 @@
 # @meddleware/ui
 
-Shared Vue 3 component library for the `@meddleware` UIs. Delivers a layout shell (header, sidebar, footer), colour-mode control, and UI primitives — all styled with [`@meddleware/design-tokens`](https://www.npmjs.com/package/@meddleware/design-tokens) (Oxblood / Indigo palette).
+Shared Vue 3 component library for the `@meddleware` UIs. Delivers a layout shell (header, sidebar, footer), colour-mode control, and UI primitives — all styled with [`@meddleware/design-tokens`](https://www.npmjs.com/package/@meddleware/design-tokens): a warm-neutral canvas with functional primary/rainbow accents, sacred-geometry (φ/Fibonacci) type + spacing scales, and optional seasonal theming.
 
 ## Installation
 
@@ -14,17 +14,38 @@ yarn add @meddleware/ui @meddleware/design-tokens
 
 ## Setup
 
-Import both CSS files once at your application entry point:
+Import the CSS once at your application entry point:
 
 ```ts
 // src/main.ts (or equivalent)
-import '@meddleware/design-tokens/tokens.css' // required — registers CSS custom properties
-import '@meddleware/ui/base.css'              // optional — element-level defaults
+import '@meddleware/design-tokens/tokens.css'  // required — registers CSS custom properties
+import '@meddleware/design-tokens/seasons.css' // optional — enables data-season theming
+import '@meddleware/ui/base.css'               // optional — element defaults + scale + utilities
 import { createApp } from 'vue'
 import App from './App.vue'
 
 createApp(App).mount('#app')
 ```
+
+## Styling, scales & utilities
+
+Components consume the design-token **role** tokens (`--accent`, `--warning`, `--focus-ring`, …) and
+the **sacred-geometry scales** (`--space-*`, `--font-size-*`, `--leading-*`, `--tracking-*`) — never
+colour-named or magic-number values. Focus states use the dedicated `--focus-ring` (blue) so they are
+always visible and never read as an error. Component **props and accessibility are unchanged** by the
+theming system — only the styling tokens they resolve to.
+
+`base.css` also ships opt-in utilities (respecting `prefers-reduced-motion`):
+
+| Utility | Purpose |
+| --- | --- |
+| `.mw-noise` | Subtle CSS-native SVG-noise background layer (controlled imperfection over flat polish). |
+| `.mw-mono` | Monospace font (`--mw-font-mono`). |
+| `.mw-spinner` | Sigil-like ring loader that settles into a simple form. |
+| `.mw-hand-drawn` | Empty positioned **placeholder hook** for bespoke hand-drawn SVG/canvas added later — drop an `<svg>`/`<canvas>` inside, or target `.mw-hand-drawn > svg` from your app. |
+
+Seasonal theming is entirely in `@meddleware/design-tokens` (import `seasons.css` + set
+`data-season`); the components pick it up automatically through the role tokens.
 
 ## Exports
 

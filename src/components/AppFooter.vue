@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { panelVars, type PanelVariant, type PanelColors } from '../internal/panel'
+import { safeHref } from '../safe-href.js'
 
 const props = withDefaults(
   defineProps<{
@@ -13,6 +14,11 @@ const props = withDefaults(
      * Use `VITE_DOCS_URL` in the consuming app to make this configurable per deployment.
      */
     docsUrl?: string
+    /**
+     * When set, renders a "Developer docs" link pointing at this URL.
+     * Use `VITE_DEV_URL` in the consuming app to make this configurable per deployment.
+     */
+    devUrl?: string
   }>(),
   { variant: 'transparent' },
 )
@@ -28,11 +34,19 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
       <slot name="end" />
       <a
         v-if="docsUrl"
-        :href="docsUrl"
+        :href="safeHref(docsUrl)"
         target="_blank"
         rel="noopener noreferrer"
         class="mw-footer__docs-link"
       >Documentation</a>
+      <a
+        v-if="devUrl"
+        :href="safeHref(devUrl)"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Developer documentation"
+        class="mw-footer__docs-link"
+      >Developer docs</a>
     </div>
   </footer>
 </template>
@@ -41,14 +55,14 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
 .mw-footer {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-sm);
   flex-wrap: wrap;
-  padding: 0.75rem 1rem;
+  padding: var(--space-xs) var(--space-sm);
   background: var(--_bg);
   color: var(--_muted);
   border-top: 1px solid var(--_border);
   font-family: var(--mw-font-sans);
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
 }
 .mw-footer--transparent {
   border-top: 1px solid var(--border);
@@ -60,7 +74,7 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
 .mw-footer__end {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-sm);
   margin-left: auto;
 }
 .mw-footer__docs-link {

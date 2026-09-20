@@ -28,10 +28,42 @@ export function isStatusLevel(s: unknown): s is StatusLevel {
   return typeof s === 'string' && STATUS_LEVELS.has(s)
 }
 
+/** Coerce an unknown status value to a valid `StatusLevel` (defaults to `'unknown'`). */
+function coerceStatusLevel(s: unknown): StatusLevel {
+  return isStatusLevel(s) ? s : 'unknown'
+}
+
+/** Strip HTML-sensitive characters from a name field (defense-in-depth). */
+function sanitizeName(s: unknown): string {
+  if (typeof s !== 'string' || s.trim() === '') return ''
+  return s.replace(/[<>&"]/g, '')
+}
+
+function parseComponent(raw: unknown): StatusComponent | null {
+  if (raw === null || typeof raw !== 'object') return null
+  const r = raw as Record<string, unknown>
+  const name = sanitizeName(r.name)
+  if (!name) return null
+  return { name, status: coerceStatusLevel(r.status) }
+}
+
+function parseGroup(raw: unknown): StatusGroup | null {
+  if (raw === null || typeof raw !== 'object') return null
+  const r = raw as Record<string, unknown>
+  const name = sanitizeName(r.name)
+  if (!name) return null
+  const components = Array.isArray(r.components)
+    ? r.components.map(parseComponent).filter((c): c is StatusComponent => c !== null)
+    : []
+  return { name, status: coerceStatusLevel(r.status), components }
+}
+
 /**
  * Parse and validate a raw API response as a `StatusSnapshot`.
- * Returns `null` if the required fields are absent or have unexpected types,
- * so callers can treat an invalid response the same as a network error.
+ * Returns `null` if the required top-level fields are absent or have unexpected types.
+ * Per-group and per-component fields are sanitized: unknown status values are coerced to
+ * `'unknown'`; name fields are stripped of HTML-sensitive characters. Groups or components
+ * with empty/missing names are dropped.
  */
 export function parseSnapshot(raw: unknown): StatusSnapshot | null {
   if (raw === null || typeof raw !== 'object') return null
@@ -39,5 +71,6 @@ export function parseSnapshot(raw: unknown): StatusSnapshot | null {
   if (!isStatusLevel(r.overall)) return null
   if (typeof r.generated_at !== 'string') return null
   if (!Array.isArray(r.groups)) return null
-  return raw as StatusSnapshot
+  const groups = r.groups.map(parseGroup).filter((g): g is StatusGroup => g !== null)
+  return { generated_at: r.generated_at, overall: r.overall, groups }
 }

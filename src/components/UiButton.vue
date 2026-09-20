@@ -28,23 +28,23 @@ withDefaults(
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.9rem;
-  border-radius: var(--mw-radius, 10px);
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius);
   border: 1px solid transparent;
   font: inherit;
   font-weight: 550;
   cursor: pointer;
   transition:
-    filter 0.12s ease,
-    background 0.12s ease;
+    filter var(--transition-base),
+    background var(--transition-base);
 }
 .mw-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 .mw-btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 .mw-btn--primary {
@@ -71,7 +71,7 @@ withDefaults(
 }
 .mw-btn--danger {
   background: var(--danger);
-  color: var(--mw-neutral-000);
+  color: var(--accent-contrast);
 }
 .mw-btn--danger:not(:disabled):hover {
   filter: brightness(1.08);

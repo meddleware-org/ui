@@ -28,20 +28,21 @@ const model = defineModel<string>()
 .mw-select select {
   appearance: none;
   width: 100%;
-  padding: 0.5rem 2.5rem 0.5rem 0.7rem;
+  /* right padding = space-md + space-2xs (2.5rem) clears the chevron. */
+  padding: var(--space-2xs) calc(var(--space-md) + var(--space-2xs)) var(--space-2xs) var(--space-xs);
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: var(--mw-radius, 10px);
+  border-radius: var(--radius);
   font: inherit;
 }
 .mw-select select:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
 }
 .mw-select__chevron {
   position: absolute;
-  right: 0.75rem;
+  right: var(--space-xs);
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;

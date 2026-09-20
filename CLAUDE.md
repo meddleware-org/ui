@@ -29,7 +29,20 @@ There IS a build step. The package ships `dist/` to npm consumers. Run `npm run 
 
 ## Theming
 
-- Components use semantic tokens (`--bg`, `--surface`, `--text`, etc.) for theme-aware styling.
+- Components use **colour-agnostic role tokens** (`--bg`, `--surface`, `--text`, `--accent`,
+  `--warning`, `--ok`, `--danger`, `--info`, `--highlight`, `--focus-ring`, …) and the
+  **sacred-geometry scales** (`--space-*`, `--font-size-*`, `--leading-*`, `--tracking-*`,
+  `--radius`) from `@meddleware/design-tokens`. Never hardcode rems/hexes or reference colour-named
+  ramps (`--mw-gold-*`, `--mw-oxblood-*`) — those are retained swatches, not for components. The one
+  allowed literal is a sub-scale hairline (e.g. 2px) where the Fibonacci floor (0.25rem) is too big;
+  comment it.
+- Focus uses `--focus-ring` (a distinct blue), not `--accent`, so focus never reads as an error.
+  Transitions use `--transition-base`. Hover states are subtle colour/opacity shifts, not heavy.
+- `base.css` ships opt-in utilities: `.mw-noise` (SVG-noise layer), `.mw-spinner` (sigil loader),
+  `.mw-hand-drawn` (empty placeholder hook for later bespoke SVG/canvas), `.mw-mono`. All respect
+  `prefers-reduced-motion`.
+- Seasonal theming lives entirely in design-tokens (`seasons.css` + `data-season`); components pick
+  it up automatically via the role tokens — no per-component seasonal code.
 - Layout shell components (`AppHeader`, `AppSidebar`, `AppFooter`) accept a `variant: 'light' | 'dark' | 'transparent'` prop and use the theme-independent `--mw-panel-{dark,light}-*` tokens so a dark header renders correctly on a light page.
 - `useColorMode` manages the `data-theme` attribute on `<html>` and persists to `localStorage`. It is a module singleton — import it anywhere; all callers share the same state.
 - `ColorModeControl` is a presentational component only — it does not own state. Bind it with `v-model` to `useColorMode`.
