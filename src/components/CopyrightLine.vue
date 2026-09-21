@@ -64,7 +64,6 @@ const resolvedRightsStatement = computed(() => {
 .copyright-line {
   display: inherit;
   white-space: nowrap;
-  text-align: center;
 }
 
 .symbol-link {
