@@ -1,4 +1,5 @@
-export function useSeason() {
+/** Maps calendar month to season name and sets data-season on <html>. Call once at app init. */
+export function useSeason(): void {
   if (typeof document === 'undefined') return;
   const month = new Date().getMonth();
   const season =
