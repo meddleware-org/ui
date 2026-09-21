@@ -1,6 +1,7 @@
 <template>
   <small class="copyright-line">
-    <a :href="computedSymbolHref" class="symbol-link" target="_blank" rel="noopener noreferrer" :aria-label="computedSymbolLabel">
+    <a :href="computedSymbolHref" class="symbol-link" target="_blank" rel="noopener noreferrer"
+      :aria-label="computedSymbolLabel">
       <span v-if="resolvedSymbol === 'copyright'">&copy;</span>
       <span v-else-if="resolvedSymbol === 'copyleft'">🄯</span>
       <span v-else-if="resolvedSymbol === 'kopimi'" class="kopimi-symbol">
@@ -12,7 +13,8 @@
           </text>
         </svg>
       </span>
-    </a><span class="text-content"> {{ year }} {{ organisationName }}.<span v-if="resolvedRightsStatement">{{ ` ${resolvedRightsStatement}` }}</span></span>
+    </a><span class="text-content"> {{ year }} {{ organisationName }}.<span v-if="resolvedRightsStatement">{{ `
+        ${resolvedRightsStatement}` }}</span></span>
   </small>
 </template>
 
@@ -60,8 +62,9 @@ const resolvedRightsStatement = computed(() => {
 
 <style scoped>
 .copyright-line {
-  display: inline;
+  display: inherit;
   white-space: nowrap;
+  text-align: center;
 }
 
 .symbol-link {
@@ -69,7 +72,8 @@ const resolvedRightsStatement = computed(() => {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  vertical-align: middle;
+  vertical-align: text-bottom;
+  font-size: initial;
 }
 
 .symbol-link:hover {
