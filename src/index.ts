@@ -25,6 +25,7 @@ export type { SuiNetwork, SuiExplorerKind } from './explorer.js'
 
 export { useColorMode } from './composables/useColorMode.js'
 export type { ColorMode } from './composables/useColorMode.js'
+export { useSeason } from './composables/useSeason.js'
 export type { PanelVariant, PanelColors } from './internal/panel.js'
 
 export { isStatusLevel, parseSnapshot } from './status.js'
