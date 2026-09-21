@@ -1,9 +1,9 @@
 <template>
-  <small>
+  <small class="copyright-line">
     <a :href="computedSymbolHref" class="symbol-link" target="_blank" rel="noopener noreferrer" :aria-label="computedSymbolLabel">
       <span v-if="resolvedSymbol === 'copyright'">&copy;</span>
       <span v-else-if="resolvedSymbol === 'copyleft'">🄯</span>
-      <span v-else-if="resolvedSymbol === 'kopimi'">
+      <span v-else-if="resolvedSymbol === 'kopimi'" class="kopimi-symbol">
         <svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false" class="kopimi-mark">
           <path d="M12 4L22 23H2Z" fill="none" stroke="currentColor" stroke-width="1.5" />
           <text x="12" y="18" text-anchor="middle" dominant-baseline="middle" font-family="system-ui, sans-serif"
@@ -12,8 +12,7 @@
           </text>
         </svg>
       </span>
-    </a>
-    {{ year }} {{ organisationName }}.<span v-if="resolvedRightsStatement">{{ ` ${resolvedRightsStatement}` }}</span>
+    </a><span class="text-content"> {{ year }} {{ organisationName }}.<span v-if="resolvedRightsStatement">{{ ` ${resolvedRightsStatement}` }}</span></span>
   </small>
 </template>
 
@@ -60,12 +59,35 @@ const resolvedRightsStatement = computed(() => {
 </script>
 
 <style scoped>
+.copyright-line {
+  display: inline;
+  white-space: nowrap;
+}
+
 .symbol-link {
   color: inherit;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
 
 .symbol-link:hover {
   text-decoration: underline;
+}
+
+.kopimi-symbol {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.kopimi-mark {
+  display: inline;
+  vertical-align: -0.15em;
+}
+
+.text-content {
+  display: inline;
 }
 </style>
