@@ -27,6 +27,39 @@ There IS a build step. The package ships `dist/` to npm consumers. Run `npm run 
 3. Run `npm run build` to verify it compiles cleanly.
 4. Add a row to the exports table in `README.md`.
 
+## CopyrightLine component
+
+`CopyrightLine` is a reusable copyright statement component. It renders a symbol link (copyright, copyleft, or kopimi) followed by a year and organisation name, plus an optional rights statement.
+
+### Legal files
+
+The `public/legal/` directory contains legal documents linked by CopyrightLine:
+
+- `copyright.html` — Standard copyright notice
+- `copyleft.html` — Copyleft legal notice
+- `powr.broccoli-kopimi.pdf` — Kopimi legal notice
+
+**For consuming apps:** Copy the legal files to each app's `public/legal/` directory so they are served at `/legal/`. The component links to these paths at runtime.
+
+### Usage
+
+```vue
+<CopyrightLine
+  symbolVariant="kopimi"
+  organisation-name="Meddleware"
+  rightsStatement="jam"
+/>
+```
+
+### Props
+
+- `organisationName` (string, required) — Organisation name to display
+- `year` (number, optional) — Year to display; defaults to current year
+- `rightsStatement` (string, optional) — Rights statement: `'all'` (default), `'none'`, `'jam'`, or a custom string
+- `symbolVariant` (string, optional) — Symbol type: `'copyright'` (default), `'copyleft'`, or `'kopimi'`
+- `symbolHref` (string, optional) — Override the legal document link
+- `symbolLabel` (string, optional) — Override the link aria-label
+
 ## Theming
 
 - Components use **colour-agnostic role tokens** (`--bg`, `--surface`, `--text`, `--accent`,

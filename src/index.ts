@@ -17,6 +17,7 @@ export { default as AppTabNav } from './components/AppTabNav.vue'
 export type { AppTab } from './components/AppTabNav.vue'
 export { default as CopyableAddress } from './components/CopyableAddress.vue'
 export { default as ExplorerLink } from './components/ExplorerLink.vue'
+export { default as CopyrightLine } from './components/CopyrightLine.vue'
 
 export { default as StatusWidget } from './components/StatusWidget.vue'
 
