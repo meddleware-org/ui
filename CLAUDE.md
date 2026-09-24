@@ -60,6 +60,54 @@ The `public/legal/` directory contains legal documents linked by CopyrightLine:
 - `symbolHref` (string, optional) — Override the legal document link
 - `symbolLabel` (string, optional) — Override the link aria-label
 
+## Sidebar navigation components
+
+Two companion components build accessible hierarchical sidebar navigation.
+
+### `SidebarItem`
+
+Presentational entry button: label + optional emoji icon, active and disabled states.
+The host owns selection state and must pass `:active` and `@click`. Use with
+`<router-link custom v-slot="{ navigate }">` for router-driven navigation.
+
+**Props:** `label` (string, required), `icon` (string, optional emoji),
+`active` (boolean, default `false`), `disabled` (boolean, default `false`).
+
+### `SidebarGroup`
+
+Wraps related `SidebarItem`s under a visible section header with correct WAI-ARIA
+semantics: the container has `role="group"` and `aria-label`; the visible label element
+carries `aria-hidden="true"` to prevent double-announcement by screen readers.
+
+**Props:** `label` (string, required), `level` (`1 | 2`, default `1`).
+
+Two visual levels:
+
+- `level="1"` — top-level category (e.g. "Blockchain"): uppercase, `--tracking-wide`,
+  75 % opacity. Adds `--space-2xs` top gap when preceded by a sibling group.
+- `level="2"` — sub-group within a category (e.g. "Sui"): normal case, 60 % opacity,
+  indented label; items gain `--space-3xs` left padding.
+
+**Pattern — two-tier sidebar hierarchy:**
+
+```vue
+<SidebarGroup label="Blockchain" :level="1">
+  <SidebarGroup label="Sui" :level="2">
+    <router-link to="/dao" custom v-slot="{ navigate }">
+      <SidebarItem label="DAO" icon="🏛" :active="isDao" @click="navigate" />
+    </router-link>
+    <!-- … more items … -->
+  </SidebarGroup>
+</SidebarGroup>
+```
+
+**Accessibility output (abbreviated):**
+> "Blockchain, group; Sui, group; DAO, button, current page"
+
+**Scaling:** add more `<SidebarGroup label="Ethereum" :level="2">` blocks (or a new
+`level="1"` group for a different top-level category) as new chains are added. No
+changes to existing items or groups are required.
+
 ## Theming
 
 - Components use **colour-agnostic role tokens** (`--bg`, `--surface`, `--text`, `--accent`,
