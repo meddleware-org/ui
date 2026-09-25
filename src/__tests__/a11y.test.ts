@@ -4,6 +4,8 @@ import { mount } from '@vue/test-utils'
 import { axe } from 'vitest-axe'
 import * as axeMatchers from 'vitest-axe/matchers'
 
+// Runtime registration (vitest globals are off, so register explicitly).
+// The matcher's TYPE augmentation lives in ./vitest-axe.d.ts.
 expect.extend(axeMatchers)
 
 // Component fragments are not full pages, so page-level landmark rules
