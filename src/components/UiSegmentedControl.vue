@@ -61,6 +61,9 @@ const emit = defineEmits<{
      with no top/bottom gap artefacts from line-height + padding interaction. */
   height: 2rem;
   padding: 0 var(--space-sm);
+  /* Reset any host-app label margin (e.g. form label rules) — items in a continuous
+     segmented group must never carry external margin. */
+  margin: 0;
   border-right: 1px solid var(--border);
   cursor: pointer;
   font-size: var(--font-size-sm);
