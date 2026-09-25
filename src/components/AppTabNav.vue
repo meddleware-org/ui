@@ -117,10 +117,7 @@ const emit = defineEmits<{
 .mw-tab-nav--raised .mw-tab-nav__tab--active {
   color: var(--text);
   background: var(--bg);
-  border-top-color: var(--accent);
-  border-left-color: var(--border);
-  border-right-color: var(--border);
-  border-bottom-color: var(--bg); /* erase — merges visually with content area */
+  border-color: var(--accent) var(--border) var(--bg) var(--border); /* erase — merges visually with content area */
   font-weight: 600;
 }
 </style>

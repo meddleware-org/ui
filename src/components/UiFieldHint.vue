@@ -68,7 +68,7 @@ function onKeyDown(e: KeyboardEvent) {
   font-weight: 400;
   line-height: 1.5;
   color: var(--text);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
   visibility: hidden;
   opacity: 0;
   transition:

@@ -77,7 +77,7 @@ const GLYPH: Record<ColorMode, string> = { light: '☀', dark: '☾', system: '�
   outline-offset: 1px;
 }
 /* Collapse labels on narrow controls — glyph only. */
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .mw-mode__label {
     display: none;
   }

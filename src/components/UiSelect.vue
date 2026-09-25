@@ -7,6 +7,9 @@ const model = defineModel<string>()
 
 <template>
   <div class="mw-select">
+    <!-- Labelled by the consuming context (UiFormField's label[for], or an
+         aria-label passed through $attrs); this primitive carries no own label. -->
+    <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
     <select v-bind="$attrs" v-model="model"><slot /></select>
     <svg
       class="mw-select__chevron"
