@@ -21,6 +21,8 @@ export { default as ExplorerLink } from './components/ExplorerLink.vue'
 export { default as CopyrightLine } from './components/CopyrightLine.vue'
 export { default as UiStepper } from './components/UiStepper.vue'
 export type { StepperStep } from './components/UiStepper.vue'
+export { default as UiSegmentedControl } from './components/UiSegmentedControl.vue'
+export type { SegmentedOption } from './components/UiSegmentedControl.vue'
 export { default as UiFieldHint } from './components/UiFieldHint.vue'
 export { default as UiFormField } from './components/UiFormField.vue'
 
