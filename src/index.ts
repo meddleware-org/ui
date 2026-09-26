@@ -26,6 +26,20 @@ export type { SegmentedOption } from './components/UiSegmentedControl.vue'
 export { default as UiFieldHint } from './components/UiFieldHint.vue'
 export { default as UiFormField } from './components/UiFormField.vue'
 
+// Desktop-console ("qt") primitives — panels, tables, stat grids, badges, toolbar,
+// status bar, and activity feed. Design-token driven, scoped styles.
+export { default as UiPanel } from './components/UiPanel.vue'
+export { default as UiBadge } from './components/UiBadge.vue'
+export { default as UiToolbar } from './components/UiToolbar.vue'
+export { default as UiToolbarButton } from './components/UiToolbarButton.vue'
+export { default as UiStatGrid } from './components/UiStatGrid.vue'
+export { default as UiStatRow } from './components/UiStatRow.vue'
+export { default as UiDataTable } from './components/UiDataTable.vue'
+export { default as UiStatusBar } from './components/UiStatusBar.vue'
+export { default as UiStatusDot } from './components/UiStatusDot.vue'
+export { default as UiActivityFeed } from './components/UiActivityFeed.vue'
+export { default as UiActivityItem } from './components/UiActivityItem.vue'
+
 export { default as StatusWidget } from './components/StatusWidget.vue'
 
 export { suiExplorerUrl } from './explorer.js'

@@ -18,6 +18,11 @@ export default {
     'declaration-block-single-line-max-declarations': null,
     // Preserve camelCase CSS keyword values (e.g. text-rendering: optimizeLegibility).
     'value-keyword-case': null,
+    // Vue SFC scoped-style pseudo-classes.
+    'selector-pseudo-class-no-unknown': [
+      true,
+      { ignorePseudoClasses: ['deep', 'slotted', 'global'] },
+    ],
     // Private panel vars use a leading-underscore convention (--_bg, --_text).
     'custom-property-pattern': null,
     // Vendor-prefixed properties are emitted by autoprefixer at build time; the
