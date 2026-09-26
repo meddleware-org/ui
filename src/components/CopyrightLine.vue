@@ -62,7 +62,12 @@ const resolvedRightsStatement = computed(() => {
 
 <style scoped>
 .copyright-line {
-  display: inherit;
+  /* Self-contained inline formatting context. `display: inherit` broke inside a
+     flex parent (e.g. the dashboard sidebar's flex-column) — it turned the
+     <small> into a flex container, which blockified the symbol/text children and
+     silently voided their vertical-align. inline-block keeps children inline so
+     the kopimi mark aligns consistently in every context. */
+  display: inline-block;
   white-space: nowrap;
   text-align: center;
 }
