@@ -141,7 +141,8 @@ defineExpose({ close })
 }
 .mw-dialog__title {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
 }
 .mw-dialog__close {
   padding: 0 var(--space-3xs);
