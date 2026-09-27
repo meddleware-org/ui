@@ -14,7 +14,10 @@ withDefaults(
   </button>
 </template>
 <style scoped>
-.sidebar-item { display: flex; align-items: center; gap: var(--space-2xs); width: 100%; padding: var(--space-2xs) var(--space-xs); border: 0; border-radius: var(--radius); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; opacity: 0.85; transition: background var(--transition-base), opacity var(--transition-base); }
+/* Square corners + full width so the hover/active highlight reads as a solid horizontal
+   block across the whole sidebar (the nav container drops its horizontal padding to let it
+   bleed to the edges; this item's own horizontal padding keeps the text inset). */
+.sidebar-item { display: flex; align-items: center; gap: var(--space-2xs); width: 100%; padding: var(--space-2xs) var(--space-sm); border: 0; border-radius: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; opacity: 0.85; transition: background var(--transition-base), opacity var(--transition-base); }
 .sidebar-item:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); opacity: 1; }
 .sidebar-item.is-active { background: color-mix(in srgb, var(--accent) 26%, transparent); opacity: 1; }
 .sidebar-item:disabled { cursor: default; }

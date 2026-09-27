@@ -25,6 +25,7 @@ export { default as UiSegmentedControl } from './components/UiSegmentedControl.v
 export type { SegmentedOption } from './components/UiSegmentedControl.vue'
 export { default as UiFieldHint } from './components/UiFieldHint.vue'
 export { default as UiFormField } from './components/UiFormField.vue'
+export { default as UiToolIntro } from './components/UiToolIntro.vue'
 
 // Desktop-console ("qt") primitives — panels, tables, stat grids, badges, toolbar,
 // status bar, and activity feed. Design-token driven, scoped styles.

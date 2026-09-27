@@ -49,7 +49,9 @@ const styleVars = computed(() => {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
-  padding: var(--space-xs);
+  /* Vertical padding only — items span the full width so their hover/active highlight bleeds
+     edge-to-edge. Each SidebarItem provides its own horizontal padding for text inset. */
+  padding: var(--space-xs) 0;
   flex: 1 1 auto;
   overflow-y: auto;
 }

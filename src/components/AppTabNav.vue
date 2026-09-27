@@ -13,8 +13,10 @@ withDefaults(
     modelValue: string
     ariaLabel?: string
     variant?: 'underline' | 'raised'
+    /** 'lg' enlarges the tabs (padding + font) so they stand out from body text. */
+    size?: 'md' | 'lg'
   }>(),
-  { variant: 'underline' },
+  { variant: 'underline', size: 'md' },
 )
 
 const emit = defineEmits<{
@@ -25,7 +27,7 @@ const emit = defineEmits<{
 <template>
   <nav
     class="mw-tab-nav"
-    :class="{ 'mw-tab-nav--raised': variant === 'raised' }"
+    :class="{ 'mw-tab-nav--raised': variant === 'raised', 'mw-tab-nav--lg': size === 'lg' }"
     :aria-label="ariaLabel"
   >
     <button
@@ -118,6 +120,18 @@ const emit = defineEmits<{
   color: var(--text);
   background: var(--bg);
   border-color: var(--accent) var(--border) var(--bg) var(--border); /* erase — merges visually with content area */
+  font-weight: 600;
+}
+
+/* Large raised tabs — bigger padding + font so they stand out from body text (used on the
+   dashboard's Blockchain tools page). */
+.mw-tab-nav--raised.mw-tab-nav--lg {
+  gap: 3px;
+  padding: 6px 6px 0;
+}
+.mw-tab-nav--raised.mw-tab-nav--lg .mw-tab-nav__tab {
+  padding: 9px 20px 10px;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 </style>
