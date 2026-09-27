@@ -75,9 +75,9 @@ The host owns selection state and must pass `:active` and `@click`. Use with
 
 ### `SidebarGroup`
 
-Wraps related `SidebarItem`s under a visible section header with correct WAI-ARIA
-semantics: the container has `role="group"` and `aria-label`; the visible label element
-carries `aria-hidden="true"` to prevent double-announcement by screen readers.
+Wraps related `SidebarItem`s under a visible section header using native semantics: a
+`<fieldset>` (implicit `group` role) whose visible `<legend>` is the group's accessible
+name — announced once, with no ARIA attributes or hidden duplicate label.
 
 **Props:** `label` (string, required), `level` (`1 | 2`, default `1`).
 
@@ -108,6 +108,23 @@ Two visual levels:
 `level="1"` group for a different top-level category) as new chains are added. No
 changes to existing items or groups are required.
 
+## Markup conventions (semantic HTML)
+
+- Prefer the semantic element over a `div`: `<dl>` for key/value (UiStatGrid), `<menu>` for a
+  toolbar, `<fieldset>`/`<legend>` for named groups (ColorModeControl, UiSegmentedControl,
+  SidebarGroup), `<section>` + heading for titled surfaces (UiPanel, UiCard), `<small>`/`<time>`
+  for secondary metadata. A `div` is used only where no element fits and a box is required
+  (`UiDataTable`'s scroll container, `AppTabNav`'s `role="tablist"`).
+- Layout-shell slots render **directly** (no wrapper elements); consumers style their own slot
+  content. Only component-owned content is grouped (e.g. AppFooter's documentation `<nav>`).
+- Per-instance style values go through SFC `v-bind()` in the `<style>` block (routed via a local
+  custom property such as `--_width`), never a `:style` attribute in the template.
+- Dialogs use `UiDialog` (native `<dialog>` › `<article>` › `<header>`/`<footer>`); dismissal uses
+  the native `closedby` attribute plus a script-attached backdrop fallback, so no interactive
+  handler sits on the non-interactive `<dialog>`.
+- `npm run lint:html` (html-validate + html-validate-vue) checks template nesting/content models;
+  `src/__tests__/a11y.test.ts` runs axe over every component. Keep both green when adding one.
+
 ## Theming
 
 - Components use **colour-agnostic role tokens** (`--bg`, `--surface`, `--text`, `--accent`,
@@ -120,8 +137,8 @@ changes to existing items or groups are required.
 - Focus uses `--focus-ring` (a distinct blue), not `--accent`, so focus never reads as an error.
   Transitions use `--transition-base`. Hover states are subtle colour/opacity shifts, not heavy.
 - `base.css` ships opt-in utilities: `.mw-noise` (SVG-noise layer), `.mw-spinner` (sigil loader),
-  `.mw-hand-drawn` (empty placeholder hook for later bespoke SVG/canvas), `.mw-mono`. All respect
-  `prefers-reduced-motion`.
+  `.mw-hand-drawn` (empty placeholder hook for later bespoke SVG/canvas), `.mw-mono`,
+  `.mw-visually-hidden` (assistive-technology-only text). All respect `prefers-reduced-motion`.
 - Seasonal theming lives entirely in design-tokens (`seasons.css` + `data-season`); components pick
   it up automatically via the role tokens — no per-component seasonal code.
 - Layout shell components (`AppHeader`, `AppSidebar`, `AppFooter`) accept a `variant: 'light' | 'dark' | 'transparent'` prop and use the theme-independent `--mw-panel-{dark,light}-*` tokens so a dark header renders correctly on a light page.

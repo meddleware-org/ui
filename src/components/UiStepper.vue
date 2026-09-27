@@ -31,18 +31,17 @@ function onClick(i: number): void {
       :key="step.id"
       class="ui-stepper__step"
       :class="`is-${stepState(i)}`"
+      :aria-current="stepState(i) === 'active' ? 'step' : undefined"
     >
-      <component
-        :is="stepState(i) === 'done' ? 'button' : 'span'"
+      <!-- Completed steps are buttons (go back); others show a decorative step number. -->
+      <button
+        v-if="stepState(i) === 'done'"
+        type="button"
         class="ui-stepper__badge"
-        :type="stepState(i) === 'done' ? 'button' : undefined"
-        :aria-label="stepState(i) === 'done' ? `Back to ${step.label}` : undefined"
-        :aria-current="stepState(i) === 'active' ? 'step' : undefined"
-        @click="stepState(i) === 'done' && onClick(i)"
-      >
-        <span v-if="stepState(i) === 'done'" aria-hidden="true">✓</span>
-        <span v-else aria-hidden="true">{{ i + 1 }}</span>
-      </component>
+        :aria-label="`Back to ${step.label}`"
+        @click="onClick(i)"
+      >✓</button>
+      <span v-else class="ui-stepper__badge" aria-hidden="true">{{ i + 1 }}</span>
       <span class="ui-stepper__label">{{ step.label }}</span>
     </li>
   </ol>

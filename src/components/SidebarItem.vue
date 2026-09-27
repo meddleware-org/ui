@@ -10,7 +10,7 @@ withDefaults(
   <button type="button" class="sidebar-item" :class="{ 'is-active': active }"
     :disabled="disabled" :aria-current="active ? 'page' : undefined">
     <span v-if="icon" class="sidebar-item__icon" aria-hidden="true">{{ icon }}</span>
-    <span class="sidebar-item__label">{{ label }}</span>
+    {{ label }}
   </button>
 </template>
 <style scoped>

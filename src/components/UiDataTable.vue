@@ -6,6 +6,9 @@ const slots = defineSlots<{ head(): unknown; default(): unknown }>()
 </script>
 
 <template>
+  <!-- The wrapper is the horizontal scroll container. Deliberately not done on the <table> itself:
+       giving a table display:block (needed for its own overflow) strips its table semantics in
+       some browser/assistive-technology combinations. -->
   <div class="mw-data-table-wrap">
     <table class="mw-data-table">
       <thead>

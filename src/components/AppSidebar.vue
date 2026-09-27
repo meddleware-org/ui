@@ -14,36 +14,38 @@ const props = withDefaults(
   { variant: 'dark' },
 )
 
-const styleVars = computed(() => {
-  const vars = panelVars(props.variant, props.colors) as Record<string, string>
-  if (props.width) vars['--mw-sidebar-width'] = props.width
-  return vars
-})
+const panel = computed(() => panelVars(props.variant, props.colors) as Record<string, string>)
+const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width, 240px)')
 </script>
 
 <template>
-  <aside class="mw-sidebar" :class="`mw-sidebar--${variant}`" :style="styleVars">
-    <div v-if="$slots.head" class="mw-sidebar__head"><slot name="head" /></div>
+  <!-- Only the navigation block is component-owned. head/body/foot slot content renders directly
+       and styles itself; the nav grows to fill, so body/foot content settles at the bottom. -->
+  <aside class="mw-sidebar" :class="`mw-sidebar--${variant}`">
+    <slot name="head" />
     <nav class="mw-sidebar__nav" aria-label="Primary"><slot /></nav>
-    <div v-if="$slots.body" class="mw-sidebar__body"><slot name="body" /></div>
-    <div v-if="$slots.foot" class="mw-sidebar__foot"><slot name="foot" /></div>
+    <slot name="body" />
+    <slot name="foot" />
   </aside>
 </template>
 
 <style scoped>
 .mw-sidebar {
+  /* Panel colour variables (variant defaults or per-instance overrides), bound from script. */
+  --_bg: v-bind('panel["--_bg"]');
+  --_surface: v-bind('panel["--_surface"]');
+  --_text: v-bind('panel["--_text"]');
+  --_muted: v-bind('panel["--_muted"]');
+  --_border: v-bind('panel["--_border"]');
   height: 100%;
   display: flex;
   flex-direction: column;
-  width: var(--mw-sidebar-width, 240px);
+  --_width: v-bind(sidebarWidth);
+  width: var(--_width);
   background: var(--_bg);
   color: var(--_text);
   border-right: 1px solid var(--_border);
   font-family: var(--mw-font-sans);
-}
-.mw-sidebar__head {
-  padding: var(--space-sm);
-  border-bottom: 1px solid var(--_border);
 }
 .mw-sidebar__nav {
   display: flex;
@@ -54,15 +56,5 @@ const styleVars = computed(() => {
   padding: var(--space-xs) 0;
   flex: 1 1 auto;
   overflow-y: auto;
-}
-.mw-sidebar__body {
-  flex-shrink: 0;
-}
-
-.mw-sidebar__foot {
-  padding: var(--space-xs) var(--space-sm);
-  border-top: 1px solid var(--_border);
-  color: var(--_muted);
-  font-size: var(--font-size-sm);
 }
 </style>

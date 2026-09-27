@@ -1,7 +1,6 @@
 <script setup lang="ts">
-// A label/value pair inside UiStatGrid. Renders as two sibling grid cells (a
-// fragment) so the label and value land in the grid's two columns directly.
-// `align` controls the value alignment (right by default; use 'left' for rich
+// A term/value pair inside UiStatGrid: a <dt>/<dd> fragment, so both land in the grid's two
+// columns directly. `align` controls the value alignment (right by default; use 'left' for rich
 // content like addresses).
 withDefaults(defineProps<{ label: string; align?: 'left' | 'right' }>(), {
   align: 'right',
@@ -9,10 +8,10 @@ withDefaults(defineProps<{ label: string; align?: 'left' | 'right' }>(), {
 </script>
 
 <template>
-  <span class="mw-stat-grid__label">{{ label }}</span>
-  <span class="mw-stat-grid__value" :class="{ 'mw-stat-grid__value--left': align === 'left' }">
+  <dt class="mw-stat-grid__label">{{ label }}</dt>
+  <dd class="mw-stat-grid__value" :class="{ 'mw-stat-grid__value--left': align === 'left' }">
     <slot />
-  </span>
+  </dd>
 </template>
 
 <style scoped>
@@ -21,6 +20,7 @@ withDefaults(defineProps<{ label: string; align?: 'left' | 'right' }>(), {
   white-space: nowrap;
 }
 .mw-stat-grid__value {
+  margin: 0;
   font-family: var(--mw-font-mono);
   color: var(--text);
   text-align: right;

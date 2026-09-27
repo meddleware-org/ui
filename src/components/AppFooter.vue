@@ -23,21 +23,22 @@ const props = withDefaults(
   { variant: 'transparent' },
 )
 
-const styleVars = computed(() => panelVars(props.variant, props.colors))
+const panel = computed(() => panelVars(props.variant, props.colors) as Record<string, string>)
 </script>
 
 <template>
-  <footer class="mw-footer" :class="`mw-footer--${variant}`" :style="styleVars">
-    <div class="mw-footer__start"><slot name="start" /></div>
-    <div class="mw-footer__center"><slot /></div>
-    <div class="mw-footer__end">
-      <slot name="end" />
+  <footer class="mw-footer" :class="`mw-footer--${variant}`">
+    <!-- Slots render directly (no layout wrappers); consumers style their own content. Only the
+         component-owned documentation links are grouped, as a navigation block at the inline end. -->
+    <slot name="start" />
+    <slot />
+    <slot name="end" />
+    <nav v-if="docsUrl || devUrl" class="mw-footer__docs" aria-label="Documentation">
       <a
         v-if="docsUrl"
         :href="safeHref(docsUrl)"
         target="_blank"
         rel="noopener noreferrer"
-        class="mw-footer__docs-link"
       >Documentation</a>
       <a
         v-if="devUrl"
@@ -45,14 +46,19 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Developer documentation"
-        class="mw-footer__docs-link"
       >Developer docs</a>
-    </div>
+    </nav>
   </footer>
 </template>
 
 <style scoped>
 .mw-footer {
+  /* Panel colour variables (variant defaults or per-instance overrides), bound from script. */
+  --_bg: v-bind('panel["--_bg"]');
+  --_surface: v-bind('panel["--_surface"]');
+  --_text: v-bind('panel["--_text"]');
+  --_muted: v-bind('panel["--_muted"]');
+  --_border: v-bind('panel["--_border"]');
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -67,23 +73,19 @@ const styleVars = computed(() => panelVars(props.variant, props.colors))
 .mw-footer--transparent {
   border-top: 1px solid var(--border);
 }
-.mw-footer__center {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.mw-footer__end {
+.mw-footer__docs {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  margin-left: auto;
+  margin-inline-start: auto;
 }
-.mw-footer__docs-link {
+.mw-footer__docs a {
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
   opacity: 0.7;
 }
-.mw-footer__docs-link:hover {
+.mw-footer__docs a:hover {
   opacity: 1;
 }
 </style>

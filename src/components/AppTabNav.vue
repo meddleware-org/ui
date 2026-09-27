@@ -1,16 +1,24 @@
 <script setup lang="ts">
-// Shared tab navigation — v-model + typed tabs.
-// variant="underline" (default): page-level nav with active-underline indicator.
+// Tab list for switching views within the same page — the WAI-ARIA tabs pattern (HTML has no
+// native tabs element, so the role supplies the semantics). Pair each tab set with UiTabPanel,
+// passing the same `idPrefix`, so tabs and panels reference each other.
+// Keyboard: Left/Right move between tabs (wrapping), Home/End jump to the ends; the focused tab
+// is activated immediately. Only the selected tab is in the Tab sequence (roving tabindex).
+// variant="underline" (default): active-underline indicator.
 // variant="raised": desktop-app raised-tab style (active tab "opens" into content area).
+import { tabIds } from '../tabs.js'
+
 export interface AppTab {
   id: string
   label: string
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     tabs: AppTab[]
     modelValue: string
+    /** Shared with the UiTabPanel(s) of this tab set to link tab ↔ panel ids. */
+    idPrefix: string
     ariaLabel?: string
     variant?: 'underline' | 'raised'
     /** 'lg' enlarges the tabs (padding + font) so they stand out from body text. */
@@ -22,24 +30,54 @@ withDefaults(
 const emit = defineEmits<{
   'update:modelValue': [id: string]
 }>()
+
+// Indexed explicitly: Vue does not guarantee v-for template-ref array order.
+const buttons: HTMLButtonElement[] = []
+
+function select(index: number): void {
+  const tab = props.tabs[index]
+  if (!tab) return
+  emit('update:modelValue', tab.id)
+  buttons[index]?.focus()
+}
+
+function onKeydown(e: KeyboardEvent, index: number): void {
+  const last = props.tabs.length - 1
+  const target =
+    e.key === 'ArrowRight' ? (index === last ? 0 : index + 1)
+    : e.key === 'ArrowLeft' ? (index === 0 ? last : index - 1)
+    : e.key === 'Home' ? 0
+    : e.key === 'End' ? last
+    : -1
+  if (target < 0) return
+  e.preventDefault()
+  select(target)
+}
 </script>
 
 <template>
-  <nav
+  <div
+    role="tablist"
     class="mw-tab-nav"
     :class="{ 'mw-tab-nav--raised': variant === 'raised', 'mw-tab-nav--lg': size === 'lg' }"
     :aria-label="ariaLabel"
   >
     <button
-      v-for="tab in tabs"
+      v-for="(tab, i) in tabs"
+      :id="tabIds(idPrefix, tab.id).tab"
       :key="tab.id"
+      :ref="(el) => { buttons[i] = el as HTMLButtonElement }"
       type="button"
+      role="tab"
       class="mw-tab-nav__tab"
       :class="{ 'mw-tab-nav__tab--active': modelValue === tab.id }"
-      :aria-current="modelValue === tab.id ? 'page' : undefined"
+      :aria-selected="modelValue === tab.id"
+      :aria-controls="tabIds(idPrefix, tab.id).panel"
+      :tabindex="modelValue === tab.id ? 0 : -1"
       @click="emit('update:modelValue', tab.id)"
+      @keydown="onKeydown($event, i)"
     >{{ tab.label }}</button>
-  </nav>
+  </div>
 </template>
 
 <style scoped>

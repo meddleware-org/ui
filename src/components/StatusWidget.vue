@@ -68,10 +68,7 @@ onUnmounted(() => {
     class="status-widget"
     :class="`status-widget--${state}`"
     :title="`Platform status: ${label}`"
-  >
-    <span class="status-widget__dot" aria-hidden="true" />
-    <span class="status-widget__label">{{ label }}</span>
-  </a>
+  >{{ label }}</a>
 </template>
 
 <style scoped>
@@ -87,7 +84,9 @@ onUnmounted(() => {
 }
 .status-widget:hover { opacity: 1; }
 
-.status-widget__dot {
+/* Decorative status dot (the label text carries the meaning). */
+.status-widget::before {
+  content: '';
   width: var(--space-2xs);
   height: var(--space-2xs);
   border-radius: 50%;
@@ -95,7 +94,7 @@ onUnmounted(() => {
 }
 
 /* Status dots use the role tokens (degraded → --warning, a functional yellow, not gold). */
-.status-widget--ok       .status-widget__dot { background: var(--ok); }
-.status-widget--degraded .status-widget__dot { background: var(--warning); }
-.status-widget--error    .status-widget__dot { background: var(--danger); }
+.status-widget--ok::before       { background: var(--ok); }
+.status-widget--degraded::before { background: var(--warning); }
+.status-widget--error::before    { background: var(--danger); }
 </style>

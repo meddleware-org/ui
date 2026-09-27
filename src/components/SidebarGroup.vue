@@ -1,11 +1,10 @@
 <script setup lang="ts">
 /**
- * SidebarGroup — accessible section-header wrapper for sidebar navigation.
+ * SidebarGroup — accessible, labelled group of sidebar navigation items.
  *
- * Renders a visible group label and wraps its children in a WAI-ARIA `group` so
- * assistive technology announces the category before reading the contained items.
- * The visible label element carries `aria-hidden="true"` — its content is already
- * conveyed by `aria-label` on the group container, preventing double-announcement.
+ * Renders a native `<fieldset>` (implicit `group` role) whose visible `<legend>` is also
+ * the group's accessible name, so assistive technology announces the category once
+ * before reading the contained items — no ARIA attributes or hidden duplicates needed.
  *
  * Two visual levels are supported via the {@link SidebarGroupProps.level} prop:
  * - `1` — top-level category label (e.g. "Blockchain"): uppercase, wide tracking,
@@ -30,10 +29,7 @@
  */
 withDefaults(
   defineProps<{
-    /**
-     * Human-readable group name. Used as both the `aria-label` on the group
-     * container and the rendered visible section header.
-     */
+    /** Human-readable group name, rendered as the group's visible `<legend>`. */
     label: string
     /**
      * Visual hierarchy level.
@@ -53,29 +49,38 @@ withDefaults(
 </script>
 
 <template>
-  <div
-    class="sidebar-group"
-    :class="`sidebar-group--l${level}`"
-    role="group"
-    :aria-label="label"
-  >
-    <div class="sidebar-group__label" aria-hidden="true">{{ label }}</div>
-    <div class="sidebar-group__items"><slot /></div>
-  </div>
+  <fieldset class="sidebar-group" :class="`sidebar-group--l${level}`">
+    <legend class="sidebar-group__label">{{ label }}</legend>
+    <slot />
+  </fieldset>
 </template>
 
 <style scoped>
+.sidebar-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
 /* Separate consecutive top-level groups with a leading gap. */
 .sidebar-group--l1 + .sidebar-group--l1 {
   margin-block-start: var(--space-2xs);
 }
 
+/* Floated full-width so the legend lays out as an ordinary block row above the items
+   instead of sitting in the (absent) fieldset border. */
 .sidebar-group__label {
+  float: inline-start;
+  width: 100%;
   padding: var(--space-3xs) var(--space-xs);
   font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--muted);
   user-select: none;
+}
+.sidebar-group__label + :deep(*) {
+  clear: both;
 }
 
 /* Level-1: "BLOCKCHAIN" — uppercase, wide tracking, 75 % opacity. */
@@ -85,14 +90,13 @@ withDefaults(
   opacity: 0.75;
 }
 
-/* Level-2: "Sui" — normal case, indented, slightly more muted. */
-.sidebar-group--l2 > .sidebar-group__label {
-  padding-inline-start: calc(var(--space-xs) + var(--space-3xs));
-  opacity: 0.6;
-}
-
-/* Level-2 items: left indent to visually nest under the chain label. */
-.sidebar-group--l2 > .sidebar-group__items {
+/* Level-2: "Sui" — normal case, indented, slightly more muted; its items gain a left
+   indent to visually nest under the chain label. */
+.sidebar-group--l2 {
   padding-inline-start: var(--space-3xs);
+}
+.sidebar-group--l2 > .sidebar-group__label {
+  padding-inline-start: var(--space-xs);
+  opacity: 0.6;
 }
 </style>

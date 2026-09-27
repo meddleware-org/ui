@@ -3,6 +3,41 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Semantic-HTML refactor. Contains **breaking** component-contract changes (see Changed) — release
+as a minor bump (0.2.0) and raise consumers' `@meddleware/ui` ranges accordingly.
+
+### Added
+
+- `UiDialog` — modal on the native `<dialog>` (`<article>` › `<header>` · body · `<footer>`),
+  `v-model:open`, `dismissible` via native `closedby` (+ backdrop fallback), `close(returnValue)`.
+- `UiTabPanel` + `tabIds()` — tab panels linked to `AppTabNav` tabs.
+- `UiToolIntro` — shared one-line tool description.
+- `.mw-visually-hidden` utility; `menu` list reset; fieldset `min-inline-size` / legend resets.
+- `UiStatusBar` props `network`, `healthy`, `epoch`, `lastRefresh` (standard items built in).
+- `UiPanel` `level` prop; `UiActivityItem` `datetime` prop; `AppTabNav` `size` prop.
+- html-validate (`lint:html`) and axe + behaviour tests for the components.
+
+### Changed (breaking)
+
+- `AppHeader` / `AppFooter` / `AppSidebar`: slot wrapper elements removed — slot content renders
+  directly and styles itself. AppHeader's brand is its first child; AppFooter's docs links are a
+  `<nav aria-label="Documentation">`; AppSidebar no longer styles `head`/`body`/`foot`.
+- `AppTabNav`: now the WAI-ARIA tabs pattern (`role="tablist"`/`tab`, arrow keys, roving
+  tabindex) and requires `idPrefix`; wrap content in `UiTabPanel`.
+- `UiToolbar`: `<menu>` driven by an `actions` prop (emits `action`); no default slot.
+- `UiStatusBar`: `<ul>` list (was `<footer>`); separators are CSS.
+- `UiPanel`: `<section>` + heading; `head` slot replaced by `title` slot.
+- `UiFormField`: `<p>` root; `label-suffix` moved outside the `<label>`; hint/error are `<small>`.
+- `UiSelect`: single `<select>` root (no wrapper); chevron drawn in CSS.
+- `UiStatGrid` / `UiStatRow`: `<dl>` / `<dt>` + `<dd>`.
+- `ColorModeControl`, `UiSegmentedControl`, `SidebarGroup`: `<fieldset>` + `<legend>` groups.
+- `UiCard`: body wrapper removed. `UiActivityItem`: `<small>`/`<time>` meta, CSS dot.
+  `StatusWidget`: CSS dot. `SidebarItem`: label span removed. `UiStepper`: click bound only on
+  the back button; `aria-current="step"` on the `<li>`.
+- `SidebarItem` hover is full-width with square corners.
+
 ## [0.1.12] - 2026-09-17
 
 ### Added

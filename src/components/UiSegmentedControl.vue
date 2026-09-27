@@ -2,7 +2,10 @@
 // Segmented control — radio-group–based selection between labelled options.
 // Semantically distinct from AppTabNav (navigation): this is a form input
 // control for switching between mutually exclusive modes within a single view.
-// The hidden radio inputs keep keyboard + screen-reader semantics correct.
+// The hidden radio inputs keep keyboard + screen-reader semantics correct; a shared `name`
+// makes them one native radio group (arrow keys move the selection).
+import { useId } from 'vue'
+
 export interface SegmentedOption {
   id: string
   label: string
@@ -19,10 +22,15 @@ defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [id: string]
 }>()
+
+const groupName = useId()
 </script>
 
 <template>
-  <div class="mw-seg" role="group" :aria-label="ariaLabel">
+  <!-- Canonical radio-group markup: the fieldset carries the segmented-pill styling and the
+       (visually hidden) legend names the group. -->
+  <fieldset class="mw-seg">
+    <legend v-if="ariaLabel" class="mw-visually-hidden">{{ ariaLabel }}</legend>
     <label
       v-for="opt in options"
       :key="opt.id"
@@ -35,6 +43,7 @@ const emit = defineEmits<{
     >
       <input
         type="radio"
+        :name="groupName"
         :value="opt.id"
         :checked="modelValue === opt.id"
         :disabled="opt.disabled"
@@ -42,12 +51,15 @@ const emit = defineEmits<{
       />
       {{ opt.label }}
     </label>
-  </div>
+  </fieldset>
 </template>
 
 <style scoped>
 .mw-seg {
   display: inline-flex;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
@@ -81,6 +93,12 @@ const emit = defineEmits<{
 .mw-seg__item--active {
   background: var(--accent);
   color: var(--accent-contrast);
+}
+
+/* The radio itself is hidden, so surface its keyboard focus on the segment. */
+.mw-seg__item:has(input:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
 }
 
 .mw-seg__item--disabled {

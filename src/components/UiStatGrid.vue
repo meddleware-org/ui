@@ -1,9 +1,10 @@
 <script setup lang="ts">
-// Two-column key/value grid for compact stat readouts. Fill it with UiStatRow.
+// Two-column key/value readout — a description list. Fill it with UiStatRow (each renders a
+// <dt>/<dd> pair that lands directly in the grid's two columns).
 </script>
 
 <template>
-  <div class="mw-stat-grid"><slot /></div>
+  <dl class="mw-stat-grid"><slot /></dl>
 </template>
 
 <style scoped>
@@ -11,6 +12,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 3px 12px;
+  margin: 0;
   font-size: 0.8rem;
 }
 </style>

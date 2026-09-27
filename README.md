@@ -43,6 +43,7 @@ theming system — only the styling tokens they resolve to.
 | `.mw-mono` | Monospace font (`--mw-font-mono`). |
 | `.mw-spinner` | Sigil-like ring loader that settles into a simple form. |
 | `.mw-hand-drawn` | Empty positioned **placeholder hook** for bespoke hand-drawn SVG/canvas added later — drop an `<svg>`/`<canvas>` inside, or target `.mw-hand-drawn > svg` from your app. |
+| `.mw-visually-hidden` | Hides content visually while keeping it available to assistive technology (e.g. a group's `<legend>`). |
 
 Seasonal theming is entirely in `@meddleware/design-tokens` (import `seasons.css` + set
 `data-season`); the components pick it up automatically through the role tokens.
@@ -53,9 +54,9 @@ Seasonal theming is entirely in `@meddleware/design-tokens` (import `seasons.css
 
 | Component | Description |
 | --- | --- |
-| `AppHeader` | Top navigation bar. Accepts `variant`, optional `colors` override, and named slots for dynamic content. |
-| `AppSidebar` | Side navigation panel. Same API as `AppHeader`. |
-| `AppFooter` | Page footer. Same API as `AppHeader`. |
+| `AppHeader` | Top bar (`<header>`). Slots `brand`, default and `actions` render **directly** in the header — no wrapper elements. The brand slot's single element comes first and takes the brand typography, pushing everything after it to the inline end; default-slot content that should fill the gap sets its own `flex: 1`. |
+| `AppSidebar` | Side panel (`<aside>`) around a component-owned `<nav aria-label="Primary">` (default slot). The `head`, `body` and `foot` slots render directly and style themselves; the nav grows, so body/foot content settles at the bottom. |
+| `AppFooter` | Page footer (`<footer>`). Slots `start`, default and `end` render directly; `docsUrl` / `devUrl` render a component-owned `<nav aria-label="Documentation">` at the inline end. |
 
 All three accept a `variant` prop:
 
@@ -70,10 +71,14 @@ All three accept a `variant` prop:
 | Component | Description |
 | --- | --- |
 | `UiButton` | Styled button. |
-| `UiCard` | Card container with surface background and border. |
-| `UiSelect` | Styled select input. |
+| `UiCard` | Card `<section>`: optional `<header>` (title), body content directly inside, optional `<footer>`. |
+| `UiSelect` | Styled native `<select>` (single root; attributes fall through; chevron painted in CSS). Label it with `UiFormField` or an `aria-label`. |
+| `UiFormField` | A labelled field as a `<p>`: `<label for>` + `label-suffix` slot (e.g. `UiFieldHint`, kept outside the label) + control slot (receives `attrs` with `id` / `aria-*`) + hint/error `<small>`. Slot content must be phrasing content. |
 | `UiNotice` | Notice / alert banner. |
+| `UiDialog` | Modal on the native `<dialog>`: `<article>` › `<header>` (h2 title + close) · body slot · `<footer>` (`actions` slot, scoped `close(value)`). `v-model:open`, `title`, `dismissible` (Escape/backdrop/close button via native `closedby`), `width`; emits `close(returnValue)`. |
+| `AppTabNav` / `UiTabPanel` | WAI-ARIA tabs: `AppTabNav` is the `tablist` (arrow keys, Home/End, roving tabindex); wrap each view's content in `UiTabPanel` with the same `idPrefix` and the shown `tab` id. `tabIds(prefix, id)` returns the linked ids. |
 | `SidebarItem` | Navigation button for use inside `AppSidebar`. Accepts `label`, `icon`, `active`, and `disabled` props. |
+| `SidebarGroup` | Labelled group of sidebar items: a `<fieldset>` whose visible `<legend>` names the group. |
 | `CopyableAddress` | Shows a value (address/blob id/tx digest) with a dedicated **copy icon** (the value text is not the copy trigger). Put a link in the default slot to make it both linkable and copyable. Props: `address`, `truncate`, `chars`, `label`. |
 | `ExplorerLink` | External block-explorer link with a truncated label (or slot). Chain-agnostic — pass `href` (build it with `suiExplorerUrl`, or an app helper such as a Walruscan URL). Nest inside `CopyableAddress` for link + copy. |
 
@@ -85,6 +90,17 @@ icon copies:
   <ExplorerLink :href="suiExplorerUrl('account', addr, 'testnet')" :value="addr" />
 </CopyableAddress>
 ```
+
+### Desktop-console primitives
+
+| Component | Description |
+| --- | --- |
+| `UiPanel` | Titled surface: `<section>` + heading (`title` prop/slot; `level` 2–6, default 2) + body content directly inside. |
+| `UiStatGrid` / `UiStatRow` | Key/value readout as a description list (`<dl>` with `<dt>`/`<dd>` pairs). |
+| `UiToolbar` | Toolbar as `<menu>` (a list of commands). Props: `actions: ToolbarAction[]` (`{ id, label, disabled? }`); emits `action(id)`. |
+| `UiToolbarButton` | Compact console button; also usable standalone (refresh, pagination). |
+| `UiStatusBar` | Status bar as a list. Standard items from optional props `network` (+ `healthy`), `epoch`, `lastRefresh`; extra `<li>` items in the default slot. |
+| `UiDataTable`, `UiBadge`, `UiStatusDot`, `UiActivityFeed` / `UiActivityItem` | Scrollable table; status pill; health dot; activity list (`UiActivityItem` takes `type`, `time`, optional `datetime` to render a `<time>`). |
 
 ### Explorer helper
 

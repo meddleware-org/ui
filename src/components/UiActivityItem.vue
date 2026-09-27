@@ -1,14 +1,16 @@
 <script setup lang="ts">
-// A single row in UiActivityFeed: a leading dot, a type label, and a right-aligned
-// time/meta. Provide text via props or override with the `type` / `time` slots.
-defineProps<{ type?: string; time?: string }>()
+// A single row in UiActivityFeed: the event type, then right-aligned secondary metadata.
+// Provide text via props or override with the `type` / `time` slots. When the metadata is a real
+// date/time, pass `datetime` (a valid datetime string) and it renders as <time>; otherwise it is
+// side information and renders as <small>. The leading dot is decorative (CSS).
+defineProps<{ type?: string; time?: string; datetime?: string }>()
 </script>
 
 <template>
   <li class="mw-feed__item">
-    <span class="mw-feed__dot" aria-hidden="true" />
-    <span class="mw-feed__type"><slot name="type">{{ type }}</slot></span>
-    <span class="mw-feed__time"><slot name="time">{{ time }}</slot></span>
+    <slot name="type">{{ type }}</slot>
+    <time v-if="datetime" class="mw-feed__meta" :datetime="datetime"><slot name="time">{{ time }}</slot></time>
+    <small v-else class="mw-feed__meta"><slot name="time">{{ time }}</slot></small>
   </li>
 </template>
 
@@ -19,12 +21,12 @@ defineProps<{ type?: string; time?: string }>()
   gap: 8px;
   padding: 4px 0;
   border-bottom: 1px solid var(--border);
-  color: var(--muted);
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
 }
-.mw-feed__item:last-child {
-  border-bottom: none;
-}
-.mw-feed__dot {
+.mw-feed__item::before {
+  content: '';
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -32,15 +34,14 @@ defineProps<{ type?: string; time?: string }>()
   margin-top: 4px;
   flex-shrink: 0;
 }
-.mw-feed__type {
-  color: var(--text);
-  font-weight: 500;
-  white-space: nowrap;
+.mw-feed__item:last-child {
+  border-bottom: none;
 }
-.mw-feed__time {
+.mw-feed__meta {
   margin-left: auto;
-  white-space: nowrap;
+  color: var(--muted);
   font-family: var(--mw-font-mono);
   font-size: 0.72rem;
+  font-weight: 400;
 }
 </style>

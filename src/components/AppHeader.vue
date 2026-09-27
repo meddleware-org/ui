@@ -20,7 +20,7 @@ const props = withDefaults(
   { variant: 'dark', sticky: true, solidifyOnScroll: false },
 )
 
-const styleVars = computed(() => panelVars(props.variant, props.colors))
+const panel = computed(() => panelVars(props.variant, props.colors) as Record<string, string>)
 
 // Track scroll position only when solidify-on-scroll is requested.
 const scrolled = ref(false)
@@ -45,19 +45,27 @@ onBeforeUnmount(() => {
       `mw-header--${variant}`,
       { 'mw-header--sticky': sticky, 'mw-header--scrolled': solidifyOnScroll && scrolled },
     ]"
-    :style="styleVars"
   >
-    <div class="mw-header__brand"><slot name="brand" /></div>
-    <div class="mw-header__center"><slot /></div>
-    <div class="mw-header__actions"><slot name="actions" /></div>
+    <!-- Slots render directly (no layout wrappers). Contract: the brand slot's single element is
+         the header's first child — it takes the brand typography and pushes everything after it to
+         the inline end. Default-slot content that should fill the gap sets its own `flex: 1`. -->
+    <slot name="brand" />
+    <slot />
+    <slot name="actions" />
   </header>
 </template>
 
 <style scoped>
 .mw-header {
+  /* Panel colour variables (variant defaults or per-instance overrides), bound from script. */
+  --_bg: v-bind('panel["--_bg"]');
+  --_surface: v-bind('panel["--_surface"]');
+  --_text: v-bind('panel["--_text"]');
+  --_muted: v-bind('panel["--_muted"]');
+  --_border: v-bind('panel["--_border"]');
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-2xs);
   height: var(--mw-header-height, 56px);
   padding: 0 var(--space-sm);
   background: var(--_bg);
@@ -81,22 +89,13 @@ onBeforeUnmount(() => {
   border-bottom-color: var(--border);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 60%, transparent);
 }
-.mw-header__brand {
+.mw-header > :slotted(:first-child) {
   display: flex;
   align-items: center;
   gap: var(--space-2xs);
+  margin-inline-end: auto;
   font-weight: 650;
   letter-spacing: var(--tracking-wide);
   white-space: nowrap;
-}
-.mw-header__center {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.mw-header__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2xs);
-  margin-left: auto;
 }
 </style>

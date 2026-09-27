@@ -23,7 +23,10 @@ const GLYPH: Record<ColorMode, string> = { light: '☀', dark: '☾', system: '�
 </script>
 
 <template>
-  <div class="mw-mode" role="group" aria-label="Colour mode">
+  <!-- Native group for the three mode buttons: the fieldset carries the pill styling and the
+       (visually hidden) legend names the group. -->
+  <fieldset class="mw-mode">
+    <legend class="mw-visually-hidden">Colour mode</legend>
     <button
       v-for="m in modes"
       :key="m"
@@ -37,12 +40,14 @@ const GLYPH: Record<ColorMode, string> = { light: '☀', dark: '☾', system: '�
       <span aria-hidden="true">{{ GLYPH[m] }}</span>
       <span class="mw-mode__label">{{ LABEL[m] }}</span>
     </button>
-  </div>
+  </fieldset>
 </template>
 
 <style scoped>
 .mw-mode {
   display: inline-flex;
+  margin: 0;
+  min-inline-size: 0;
   /* 2px hairlines sit below the Fibonacci spacing floor (0.25rem) — kept literal by intent. */
   gap: 2px;
   padding: 2px;
