@@ -10,6 +10,11 @@ import { installDialogShim } from './dialog-shim'
 // The matcher's TYPE augmentation lives in ./vitest-axe.d.ts.
 expect.extend(axeMatchers)
 
+// jsdom has no canvas: axe-core probes getContext() during some checks, and jsdom logs
+// "Not implemented" before returning null. Return null up front — the same result axe already
+// gets — so the noise goes away without changing what is tested.
+HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext
+
 // Component fragments are not full pages, so page-level landmark rules
 // (region/landmark) don't apply — disable them for isolated component tests.
 const opts = { rules: { region: { enabled: false } } }

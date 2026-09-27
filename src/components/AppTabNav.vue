@@ -56,28 +56,30 @@ function onKeydown(e: KeyboardEvent, index: number): void {
 </script>
 
 <template>
-  <div
+  <menu
     role="tablist"
     class="mw-tab-nav"
     :class="{ 'mw-tab-nav--raised': variant === 'raised', 'mw-tab-nav--lg': size === 'lg' }"
     :aria-label="ariaLabel"
   >
-    <button
-      v-for="(tab, i) in tabs"
-      :id="tabIds(idPrefix, tab.id).tab"
-      :key="tab.id"
-      :ref="(el) => { buttons[i] = el as HTMLButtonElement }"
-      type="button"
-      role="tab"
-      class="mw-tab-nav__tab"
-      :class="{ 'mw-tab-nav__tab--active': modelValue === tab.id }"
-      :aria-selected="modelValue === tab.id"
-      :aria-controls="tabIds(idPrefix, tab.id).panel"
-      :tabindex="modelValue === tab.id ? 0 : -1"
-      @click="emit('update:modelValue', tab.id)"
-      @keydown="onKeydown($event, i)"
-    >{{ tab.label }}</button>
-  </div>
+    <!-- role="presentation": a tablist may only own tabs, so the list item is transparent to
+         assistive technology (and display: contents keeps it out of layout). -->
+    <li v-for="(tab, i) in tabs" :key="tab.id" role="presentation" class="mw-tab-nav__item">
+      <button
+        :id="tabIds(idPrefix, tab.id).tab"
+        :ref="(el) => { buttons[i] = el as HTMLButtonElement }"
+        type="button"
+        role="tab"
+        class="mw-tab-nav__tab"
+        :class="{ 'mw-tab-nav__tab--active': modelValue === tab.id }"
+        :aria-selected="modelValue === tab.id"
+        :aria-controls="tabIds(idPrefix, tab.id).panel"
+        :tabindex="modelValue === tab.id ? 0 : -1"
+        @click="emit('update:modelValue', tab.id)"
+        @keydown="onKeydown($event, i)"
+      >{{ tab.label }}</button>
+    </li>
+  </menu>
 </template>
 
 <style scoped>
@@ -86,7 +88,16 @@ function onKeydown(e: KeyboardEvent, index: number): void {
 .mw-tab-nav {
   display: flex;
   gap: var(--space-3xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
   border-bottom: 2px solid var(--border);
+}
+
+/* The list items generate no box: the tab buttons stay the flex items, so every rule below
+   (including the negative margins that punch through the bottom border) applies unchanged. */
+.mw-tab-nav__item {
+  display: contents;
 }
 
 .mw-tab-nav__tab {
