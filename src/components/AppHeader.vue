@@ -63,6 +63,9 @@ onBeforeUnmount(() => {
   --_text: v-bind('panel["--_text"]');
   --_muted: v-bind('panel["--_muted"]');
   --_border: v-bind('panel["--_border"]');
+  --_ok: v-bind('panel["--_ok"]');
+  --_danger: v-bind('panel["--_danger"]');
+  --_info: v-bind('panel["--_info"]');
   display: flex;
   align-items: center;
   gap: var(--space-2xs);
@@ -97,5 +100,12 @@ onBeforeUnmount(() => {
   font-weight: 650;
   letter-spacing: var(--tracking-wide);
   white-space: nowrap;
+}
+
+/* Status text inside a light/dark panel uses the panel's own legible status colours. */
+.mw-header:not(.mw-header--transparent) {
+  --ok: var(--_ok);
+  --danger: var(--_danger);
+  --info: var(--_info);
 }
 </style>

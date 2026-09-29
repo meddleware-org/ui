@@ -101,7 +101,7 @@ async function copy(): Promise<void> {
   background: none;
   border: none;
   padding: 0;
-  color: var(--muted, #888);
+  color: var(--muted, #6e635c);
   cursor: pointer;
   line-height: 1;
   transition: color var(--transition-base);

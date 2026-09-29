@@ -37,6 +37,9 @@ const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width, 240p
   --_text: v-bind('panel["--_text"]');
   --_muted: v-bind('panel["--_muted"]');
   --_border: v-bind('panel["--_border"]');
+  --_ok: v-bind('panel["--_ok"]');
+  --_danger: v-bind('panel["--_danger"]');
+  --_info: v-bind('panel["--_info"]');
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -56,5 +59,12 @@ const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width, 240p
   padding: var(--space-xs) 0;
   flex: 1 1 auto;
   overflow-y: auto;
+}
+
+/* Status text inside a light/dark panel uses the panel's own legible status colours. */
+.mw-sidebar:not(.mw-sidebar--transparent) {
+  --ok: var(--_ok);
+  --danger: var(--_danger);
+  --info: var(--_info);
 }
 </style>

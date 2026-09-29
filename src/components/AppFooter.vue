@@ -59,6 +59,9 @@ const panel = computed(() => panelVars(props.variant, props.colors) as Record<st
   --_text: v-bind('panel["--_text"]');
   --_muted: v-bind('panel["--_muted"]');
   --_border: v-bind('panel["--_border"]');
+  --_ok: v-bind('panel["--_ok"]');
+  --_danger: v-bind('panel["--_danger"]');
+  --_info: v-bind('panel["--_info"]');
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -87,5 +90,12 @@ const panel = computed(() => panelVars(props.variant, props.colors) as Record<st
 }
 .mw-footer__docs a:hover {
   opacity: 1;
+}
+
+/* Status text inside a light/dark panel uses the panel's own legible status colours. */
+.mw-footer:not(.mw-footer--transparent) {
+  --ok: var(--_ok);
+  --danger: var(--_danger);
+  --info: var(--_info);
 }
 </style>
