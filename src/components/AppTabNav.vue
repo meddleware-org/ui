@@ -2,6 +2,9 @@
 // Tab list for switching views within the same page — the WAI-ARIA tabs pattern (HTML has no
 // native tabs element, so the role supplies the semantics). Pair each tab set with UiTabPanel,
 // passing the same `idPrefix`, so tabs and panels reference each other.
+// aria-controls must reference an element in the DOM: by default only the selected tab carries it
+// (one panel rendered, its content swapped). Set `allPanels` when every tab's panel stays mounted
+// (e.g. hidden with v-show) so each tab points at its own panel.
 // Keyboard: Left/Right move between tabs (wrapping), Home/End jump to the ends; the focused tab
 // is activated immediately. Only the selected tab is in the Tab sequence (roving tabindex).
 // variant="underline" (default): active-underline indicator.
@@ -23,8 +26,10 @@ const props = withDefaults(
     variant?: 'underline' | 'raised'
     /** 'lg' enlarges the tabs (padding + font) so they stand out from body text. */
     size?: 'md' | 'lg'
+    /** Every tab's UiTabPanel is in the DOM (inactive ones hidden), not only the selected one. */
+    allPanels?: boolean
   }>(),
-  { variant: 'underline', size: 'md' },
+  { variant: 'underline', size: 'md', allPanels: false },
 )
 
 const emit = defineEmits<{
@@ -73,7 +78,7 @@ function onKeydown(e: KeyboardEvent, index: number): void {
         class="mw-tab-nav__tab"
         :class="{ 'mw-tab-nav__tab--active': modelValue === tab.id }"
         :aria-selected="modelValue === tab.id"
-        :aria-controls="tabIds(idPrefix, tab.id).panel"
+        :aria-controls="allPanels || modelValue === tab.id ? tabIds(idPrefix, tab.id).panel : undefined"
         :tabindex="modelValue === tab.id ? 0 : -1"
         @click="emit('update:modelValue', tab.id)"
         @keydown="onKeydown($event, i)"

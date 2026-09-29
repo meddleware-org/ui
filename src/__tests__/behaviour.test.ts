@@ -17,9 +17,9 @@ const TABS = [
 ]
 
 describe('AppTabNav (WAI-ARIA tabs)', () => {
-  function mountTabs(modelValue = 'a') {
+  function mountTabs(modelValue = 'a', allPanels = false) {
     return mount(AppTabNav, {
-      props: { tabs: TABS, modelValue, idPrefix: 'x', 'onUpdate:modelValue': () => {} },
+      props: { tabs: TABS, modelValue, idPrefix: 'x', allPanels, 'onUpdate:modelValue': () => {} },
       attachTo: document.body,
     })
   }
@@ -30,10 +30,23 @@ describe('AppTabNav (WAI-ARIA tabs)', () => {
     expect(w.find('[role="tablist"]').exists()).toBe(true)
     expect(tabs[1].attributes('id')).toBe('x-tab-b')
     expect(tabs[1].attributes('aria-controls')).toBe('x-panel-b')
+    // Inactive tabs' panels are not rendered, so they must not reference them.
+    expect(tabs[0].attributes('aria-controls')).toBeUndefined()
+    expect(tabs[2].attributes('aria-controls')).toBeUndefined()
     expect(tabs[1].attributes('aria-selected')).toBe('true')
     expect(tabs[0].attributes('aria-selected')).toBe('false')
     // Roving tabindex: only the selected tab is in the tab sequence.
     expect(tabs.map((t) => t.attributes('tabindex'))).toEqual(['-1', '0', '-1'])
+    w.unmount()
+  })
+
+  it('links every tab to its panel when all panels are mounted', () => {
+    const w = mountTabs('b', true)
+    expect(w.findAll('[role="tab"]').map((t) => t.attributes('aria-controls'))).toEqual([
+      'x-panel-a',
+      'x-panel-b',
+      'x-panel-c',
+    ])
     w.unmount()
   })
 

@@ -76,7 +76,7 @@ All three accept a `variant` prop:
 | `UiFormField` | A labelled field as a `<p>`: `<label for>` + `label-suffix` slot (e.g. `UiFieldHint`, kept outside the label) + control slot (receives `attrs` with `id` / `aria-*`) + hint/error `<small>`. Slot content must be phrasing content. |
 | `UiNotice` | Notice / alert banner. |
 | `UiDialog` | Modal on the native `<dialog>`: `<article>` › `<header>` (h2 title + close) · body slot · `<footer>` (`actions` slot, scoped `close(value)`). `v-model:open`, `title`, `dismissible` (Escape/backdrop/close button via native `closedby`), `width`; emits `close(returnValue)`. |
-| `AppTabNav` / `UiTabPanel` | WAI-ARIA tabs: `AppTabNav` is the `tablist` (arrow keys, Home/End, roving tabindex); wrap each view's content in `UiTabPanel` with the same `idPrefix` and the shown `tab` id. `tabIds(prefix, id)` returns the linked ids. |
+| `AppTabNav` / `UiTabPanel` | WAI-ARIA tabs: `AppTabNav` is the `tablist` (arrow keys, Home/End, roving tabindex); wrap each view's content in `UiTabPanel` with the same `idPrefix` and the shown `tab` id. Only the selected tab gets `aria-controls` (one panel rendered); pass `all-panels` when every tab's panel stays mounted. `tabIds(prefix, id)` returns the linked ids. |
 | `SidebarItem` | Navigation button for use inside `AppSidebar`. Accepts `label`, `icon`, `active`, and `disabled` props. |
 | `SidebarGroup` | Labelled group of sidebar items: a `<fieldset>` whose visible `<legend>` names the group. |
 | `CopyableAddress` | Shows a value (address/blob id/tx digest) with a dedicated **copy icon** (the value text is not the copy trigger). Put a link in the default slot to make it both linkable and copyable. Props: `address`, `truncate`, `chars`, `label`. |
