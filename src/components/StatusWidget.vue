@@ -39,7 +39,8 @@ let timer: ReturnType<typeof setInterval> | null = null
 
 async function poll(): Promise<void> {
   try {
-    const res = await fetch(props.apiUrl)
+    // Bounded so a hung request cannot stall polling (the next poll retries).
+    const res = await fetch(props.apiUrl, { signal: AbortSignal.timeout(10_000) })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const snap = parseSnapshot(await res.json())
     if (!snap) throw new Error('unexpected response shape')
