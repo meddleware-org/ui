@@ -3,6 +3,13 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.30] - 2026-10-03
+
+### Fixed
+
+- Requires `@meddleware/design-tokens` ^0.1.8, which defines the `--mw-panel-*` status tokens the
+  panel status colours (0.1.29) use.
+
 ## [0.1.29] - 2026-10-03
 
 ### Fixed
