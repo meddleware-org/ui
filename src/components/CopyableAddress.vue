@@ -28,7 +28,12 @@ const display = computed(() => {
 })
 
 async function copy(): Promise<void> {
-  await navigator.clipboard.writeText(props.address)
+  try {
+    await navigator.clipboard.writeText(props.address)
+  } catch {
+    // Clipboard unavailable or denied (insecure context, permissions): nothing was copied.
+    return
+  }
   copied.value = true
   setTimeout(() => {
     copied.value = false

@@ -32,5 +32,6 @@ export function suiExplorerUrl(
   network: SuiNetwork = 'testnet',
 ): string {
   const origin = SUIVISION_ORIGIN[network] ?? SUIVISION_ORIGIN.testnet
-  return `${origin}/${kind}/${id}`
+  // The id is chain data: encoded, so it can only ever be one path segment.
+  return `${origin}/${kind}/${encodeURIComponent(id)}`
 }

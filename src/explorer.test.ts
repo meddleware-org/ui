@@ -16,3 +16,11 @@ describe('suiExplorerUrl', () => {
     expect(suiExplorerUrl('account', '0xabc')).toBe('https://testnet.suivision.xyz/account/0xabc')
   })
 })
+
+describe('suiExplorerUrl encoding', () => {
+  it('keeps a chain-supplied id to one path segment', () => {
+    expect(suiExplorerUrl('object', '../txblock/x?y=1#z', 'testnet')).toBe(
+      'https://testnet.suivision.xyz/object/..%2Ftxblock%2Fx%3Fy%3D1%23z',
+    )
+  })
+})

@@ -3,10 +3,27 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.1.29] - 2026-10-03
 
-Semantic-HTML refactor. Contains **breaking** component-contract changes (see Changed) — release
-as a minor bump (0.2.0) and raise consumers' `@meddleware/ui` ranges accordingly.
+### Fixed
+
+- `suiExplorerUrl` encodes the id, so a chain-supplied value is always one path segment.
+- `CopyrightLine` `symbolHref` accepts only a root-relative path or a URL `safeHref` allows; anything
+  else falls back to the default link.
+- `CopyableAddress` no longer rejects (or shows "Copied") when the clipboard refuses the write.
+- `useColorMode` restores only `light`, `dark` or `system` from storage.
+- `StatusWidget` requests time out after 10 s, so a hung request cannot stall polling.
+- `AppTabNav` sets `aria-controls` only for tabs whose panel is rendered; status colours stay legible
+  in light and dark panels.
+
+### Changed
+
+- `repository` declared for npm provenance; CI gates `npm audit` through an expiring allowlist.
+
+## [0.1.28] - 2026-09-27
+
+Semantic-HTML refactor. Contains **breaking** component-contract changes (see Changed), released as
+a patch under the pre-0.2 versioning rule.
 
 ### Added
 

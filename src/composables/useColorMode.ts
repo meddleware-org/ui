@@ -37,9 +37,9 @@ export function useColorMode(defaultMode: ColorMode = 'system') {
     initialized = true
     let stored: ColorMode | null = null
     try {
-      stored = (typeof localStorage !== 'undefined'
-        ? (localStorage.getItem(STORAGE_KEY) as ColorMode | null)
-        : null)
+      const value = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+      // Only a known mode is restored; anything else stored under the key is ignored.
+      if (value === 'light' || value === 'dark' || value === 'system') stored = value
     } catch {
       /* private mode / no storage — ignore */
     }

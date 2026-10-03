@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { safeHref } from '../safe-href.js'
 
 type RightsStatementVariant = 'all' | 'none' | 'jam' | 'custom'
 type SymbolVariant = 'copyright' | 'copyleft' | 'kopimi'
@@ -41,8 +42,13 @@ const props = withDefaults(defineProps<{
 
 const resolvedSymbol = computed(() => props.symbolVariant)
 
+/** A root-relative path (never `//host` or `/\host`, which leave the site) or a URL `safeHref` allows. */
+function symbolLink(href: string): string | undefined {
+  return /^\/(?![/\\])/.test(href) ? href : safeHref(href)
+}
+
 const computedSymbolHref = computed(() =>
-  props.symbolHref ||
+  (props.symbolHref ? symbolLink(props.symbolHref) : undefined) ||
   (resolvedSymbol.value === 'kopimi' ? '/legal/powr.broccoli-kopimi.pdf' : resolvedSymbol.value === 'copyleft' ? '/legal/copyleft.html' : '/legal/copyright.html'),
 )
 
