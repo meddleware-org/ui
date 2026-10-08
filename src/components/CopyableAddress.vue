@@ -4,27 +4,30 @@
 // value slot can hold a link (nest an <ExplorerLink> in the default slot) while the icon still
 // copies. With no slot it shows the truncated `address`.
 import { computed, ref } from 'vue'
+import { DEFAULT_TRUNCATE_CHARS, truncateMiddle } from '../truncate.js'
 
 const props = withDefaults(
   defineProps<{
     /** The full value to copy (and to truncate for the default label). */
     address: string
-    /** Prefix…suffix truncation for the default label (default true). Ignored when a slot is given. */
+    /**
+     * Prefix…suffix truncation for the default label (default true). Ignored when a slot is given. Set
+     * `false` wherever a user chooses where funds go (a treasury, a recipient): a truncated label can be
+     * matched by a look-alike address (address poisoning).
+     */
     truncate?: boolean
-    /** [prefixChars, suffixChars] — only used for the default label when truncate is true. */
+    /** [prefixChars, suffixChars] — only used for the default label when truncate is true. Default [12, 10]. */
     chars?: [number, number]
     /** Accessible label / tooltip for the copy button (default "Copy"). */
     label?: string
   }>(),
-  { truncate: true, chars: () => [6, 4], label: 'Copy' },
+  { truncate: true, chars: () => [...DEFAULT_TRUNCATE_CHARS], label: 'Copy' },
 )
 
 const copied = ref(false)
 
 const display = computed(() => {
-  if (!props.truncate) return props.address
-  const [pre, suf] = props.chars
-  return `${props.address.slice(0, pre)}…${props.address.slice(-suf)}`
+  return props.truncate ? truncateMiddle(props.address, props.chars) : props.address
 })
 
 async function copy(): Promise<void> {
@@ -106,16 +109,16 @@ async function copy(): Promise<void> {
   background: none;
   border: none;
   padding: 0;
-  color: var(--muted, #6e635c);
+  color: var(--muted);
   cursor: pointer;
   line-height: 1;
   transition: color var(--transition-base);
 }
 .ca-copy:hover {
-  color: var(--text, #f0f0f0);
+  color: var(--text);
 }
 .ca-copy--copied {
-  color: var(--accent, #6366f1);
+  color: var(--accent);
 }
 .ca-icon {
   display: block;

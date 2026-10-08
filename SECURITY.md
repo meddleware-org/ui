@@ -18,8 +18,13 @@ treated as high severity:
 1. **No dynamic HTML sinks.** No component uses `v-html`/`innerHTML`; all content renders through
    text or attribute binding. A slot or prop that reaches an HTML sink would be a vulnerability.
 2. **URLs render into `<a :href>` only**, with `target="_blank"` links carrying
-   `rel="noopener noreferrer"`. Consumers should pass only trusted `http(s)`/relative URLs (the kit
-   does not currently reject `javascript:`/`data:` schemes — treat consumer-supplied URLs as trusted).
+   `rel="noopener noreferrer"`, and only after `safeHref` / `safePath` (both exported):
+   - `safeHref` accepts `https:` (and `http:` on localhost/127.0.0.1), refuses credentials in the authority
+     (`https://good.example@evil.example/`), control characters, spaces and backslashes, and returns the
+     normalised `URL.href`, so what is rendered is what was checked;
+   - `safePath` accepts a single-slash root-relative path that resolves to the same site (`//host`,
+     `/\host` and `/<TAB>/host` are refused).
+   Any other scheme renders no `href` at all.
 3. **No secrets, keys, wallet, or chain interaction.** This is a presentation kit; it holds no
    authority and performs no network calls except an explicit, text-rendered status fetch.
 

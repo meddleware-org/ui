@@ -1,6 +1,6 @@
 {
   "name": "@meddleware/ui",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "description": "Shared Vue 3 component library for @meddleware UIs — layout shell (header/sidebar/footer), colour-mode control, and primitives. Built on @meddleware/design-tokens.",
   "homepage": "https://docs.meddleware.co.uk/",
   "license": "0BSD",
@@ -33,15 +33,19 @@
     "lint:js": "eslint .",
     "lint": "npm run lint:css && npm run lint:js && npm run lint:html",
     "test": "vitest run",
-    "lint:html": "html-validate \"src/**/*.vue\""
+    "lint:html": "html-validate \"src/**/*.vue\"",
+    "build:gallery": "vite build --config vite.gallery.config.ts",
+    "test:e2e": "playwright test"
   },
   "peerDependencies": {
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@meddleware/design-tokens": "^0.1.8"
+    "@meddleware/design-tokens": "^0.1.9"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "~1.63.0",
     "@vitejs/plugin-vue": "^6.0.9",
     "@vue/eslint-config-typescript": "^14.9.0",
     "@vue/test-utils": "^2.5.1",

@@ -3,6 +3,42 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.31] - 2026-10-08
+
+### Security
+
+- `safeHref` refuses credentials in the authority (`https://suivision.xyz@evil.example/`), control
+  characters, spaces and backslashes, and returns the normalised `URL.href`. New `safePath` validates
+  root-relative paths; `CopyrightLine` uses it, closing the `/<TAB>/evil.example` bypass (the URL parser
+  deletes the tab, leaving `//evil.example`).
+
+### Fixed
+
+- **Accessibility, measured in a real browser.** A Playwright + axe gate over a component gallery, across
+  every theme × season, found and fixed: header/sidebar/footer slot links drawing the page accent on a panel
+  of the other theme; sidebar-group labels, pending status-bar items and footer links dimmed with opacity
+  below 4.5:1; badge tints that took their text below 4.5:1; the pending badge using the bright
+  `--warning` as text (now `--warning-text`).
+- Links are underlined by default (colour alone was the only cue); the step badge uses
+  `--accent-contrast` instead of `#fff`.
+- `useColorMode`'s watcher no longer stops when the component that called it first unmounts.
+- `StatusWidget` starts in "Checking status…" instead of claiming "All systems operational", raises
+  `pollInterval` to at least 15 s and does not poll while the tab is hidden.
+- Address truncation defaults to `[12, 10]` (10 hex characters each side, against address-poisoning
+  look-alikes); a value that fits is shown whole; a zero count no longer prints the full value after the
+  ellipsis. New `truncateMiddle`. Pass `:truncate="false"` where a user chooses where funds go.
+- No hard-coded colour fallbacks (`var(--accent, #6366f1)`, `#fff`); stylelint `color-no-hex` enforces it.
+
+### Changed
+
+- The 11.6 MB kopimi PDF and the legal HTML are no longer in the package (tarball 11.8 MB → 112 kB);
+  they live in `legal/` for apps to copy, with the PDF's checksum and the note that its source is
+  unrecorded. Emitted assets other than the stylesheet keep hashed names instead of overwriting `base.css`.
+- Requires `@meddleware/design-tokens` ^0.1.9 (per-theme seasons, `--warning-text`).
+- CI runs lint, a package-contents check and the real-browser gate; the release workflow runs the same
+  workflow on the tagged commit (it skipped lint) and no step uses `--if-present` any more.
+- All 33 components are mounted in the jsdom axe tests (11 were not); documentation drift corrected.
+
 ## [0.1.30] - 2026-10-03
 
 ### Fixed

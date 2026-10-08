@@ -76,27 +76,28 @@ withDefaults(
   padding: var(--space-3xs) var(--space-xs);
   font-size: var(--font-size-xs);
   font-weight: 600;
-  color: var(--muted);
+  /* Inside a light/dark panel the panel's own muted colour; on the page, the page role. */
+  color: var(--_muted, var(--muted));
   user-select: none;
 }
 .sidebar-group__label + :deep(*) {
   clear: both;
 }
 
-/* Level-1: "BLOCKCHAIN" — uppercase, wide tracking, 75 % opacity. */
+/* Level-1: "BLOCKCHAIN" — uppercase, wide tracking. (Opacity is not used to dim labels: it takes
+   them below 4.5:1.) */
 .sidebar-group--l1 > .sidebar-group__label {
   text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
-  opacity: 0.75;
 }
 
-/* Level-2: "Sui" — normal case, indented, slightly more muted; its items gain a left
+/* Level-2: "Sui" — normal case, indented, lighter weight; its items gain a left
    indent to visually nest under the chain label. */
 .sidebar-group--l2 {
   padding-inline-start: var(--space-3xs);
 }
 .sidebar-group--l2 > .sidebar-group__label {
   padding-inline-start: var(--space-xs);
-  opacity: 0.6;
+  font-weight: 500;
 }
 </style>

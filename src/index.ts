@@ -57,5 +57,6 @@ export { useSeason } from './composables/useSeason.js'
 export type { PanelVariant, PanelColors } from './internal/panel.js'
 
 export { isStatusLevel, parseSnapshot } from './status.js'
-export { safeHref } from './safe-href.js'
+export { safeHref, safePath } from './safe-href.js'
+export { truncateMiddle, DEFAULT_TRUNCATE_CHARS } from './truncate.js'
 export type { StatusLevel, StatusComponent, StatusGroup, StatusSnapshot } from './status.js'

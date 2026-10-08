@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<{
   apiUrl?: string
   /** URL the widget links to (the human-readable status page). */
   href?: string
-  /** Poll interval in milliseconds. */
+  /** Poll interval in milliseconds (at least 15 000; smaller values are raised to it). */
   pollInterval?: number
 }>(), {
   apiUrl: 'https://status.meddleware.co.uk/api/status',
@@ -17,7 +17,10 @@ const props = withDefaults(defineProps<{
   pollInterval: 60_000,
 })
 
-type WidgetState = 'ok' | 'degraded' | 'error'
+type WidgetState = 'checking' | 'ok' | 'degraded' | 'error'
+
+/** The shortest interval honoured, so a tiny `pollInterval` cannot hammer the status endpoint. */
+const MIN_POLL_MS = 15_000
 
 const STATE_MAP: Record<StatusLevel, WidgetState> = {
   operational: 'ok',
@@ -33,8 +36,9 @@ const LABEL: Record<StatusLevel, string> = {
   unknown: 'Status unknown',
 }
 
-const state = ref<WidgetState>('ok')
-const label = ref('All systems operational')
+// Nothing is claimed until the first answer: the widget starts in "checking" (also what SSR renders).
+const state = ref<WidgetState>('checking')
+const label = ref('Checking status…')
 let timer: ReturnType<typeof setInterval> | null = null
 
 async function poll(): Promise<void> {
@@ -52,12 +56,19 @@ async function poll(): Promise<void> {
   }
 }
 
+/** Poll unless the tab is hidden; a hidden tab catches up when it becomes visible again. */
+function pollIfVisible(): void {
+  if (!document.hidden) void poll()
+}
+
 onMounted(() => {
-  poll()
-  timer = setInterval(poll, props.pollInterval)
+  void poll()
+  timer = setInterval(pollIfVisible, Math.max(props.pollInterval, MIN_POLL_MS))
+  document.addEventListener('visibilitychange', pollIfVisible)
 })
 onUnmounted(() => {
   if (timer !== null) clearInterval(timer)
+  document.removeEventListener('visibilitychange', pollIfVisible)
 })
 </script>
 
@@ -95,6 +106,7 @@ onUnmounted(() => {
 }
 
 /* Status dots use the role tokens (degraded → --warning, a functional yellow, not gold). */
+.status-widget--checking::before { background: var(--muted); }
 .status-widget--ok::before       { background: var(--ok); }
 .status-widget--degraded::before { background: var(--warning); }
 .status-widget--error::before    { background: var(--danger); }

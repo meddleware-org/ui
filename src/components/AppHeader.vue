@@ -100,6 +100,12 @@ onBeforeUnmount(() => {
   font-weight: 650;
   letter-spacing: var(--tracking-wide);
   white-space: nowrap;
+  text-decoration: none;
+}
+/* Links the host slots into the header take the header's own text colour, not the page accent: a light
+   header on a dark page would otherwise draw the dark theme's accent on white. */
+.mw-header :slotted(a) {
+  color: inherit;
 }
 
 /* Status text inside a light/dark panel uses the panel's own legible status colours. */

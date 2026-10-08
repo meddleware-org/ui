@@ -20,6 +20,16 @@ describe('CopyrightLine symbol link', () => {
     expect(href('//evil.example/x')).toBe('/legal/copyright.html')
     expect(href('/\\evil.example/x')).toBe('/legal/copyright.html')
   })
+
+  it('refuses a tab, newline or space after the slash (the URL parser deletes them, leaving //host)', () => {
+    for (const bad of ['/\t/evil.example', '/\n/evil.example', '/\r/evil.example', '/ /evil.example', '\t//evil.example']) {
+      expect(href(bad), JSON.stringify(bad)).toBe('/legal/copyright.html')
+    }
+  })
+
+  it('refuses an absolute URL with credentials', () => {
+    expect(href('https://example.org@evil.example/legal')).toBe('/legal/copyright.html')
+  })
 })
 
 describe('CopyableAddress', () => {
@@ -50,6 +60,20 @@ describe('useColorMode', () => {
     vi.resetModules()
     const { useColorMode } = await import('../composables/useColorMode.js')
     expect(useColorMode('dark').mode.value).toBe('dark')
+  })
+
+  it('keeps applying and persisting after the component that called it first unmounts', async () => {
+    vi.resetModules()
+    const { defineComponent, h, nextTick } = await import('vue')
+    const { mount } = await import('@vue/test-utils')
+    const { useColorMode } = await import('../composables/useColorMode.js')
+    // The first caller is a component's setup (an embedded tool view) that goes away.
+    const First = defineComponent({ setup: () => { useColorMode('light'); return () => h('div') } })
+    mount(First).unmount()
+    useColorMode().set('dark')
+    await nextTick()
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+    expect(localStorage.getItem('mw-color-mode')).toBe('dark')
   })
 
   it('restores a known stored mode', async () => {

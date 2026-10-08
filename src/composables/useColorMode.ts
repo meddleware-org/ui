@@ -1,4 +1,4 @@
-import { ref, watch, type Ref } from 'vue'
+import { effectScope, ref, watch, type Ref } from 'vue'
 
 /** The user's colour-mode preference: force `light`/`dark`, or follow the OS with `system`. */
 export type ColorMode = 'light' | 'dark' | 'system'
@@ -54,13 +54,17 @@ export function useColorMode(defaultMode: ColorMode = 'system') {
         })
     }
 
-    watch(mode, (m) => {
-      apply(m)
-      try {
-        if (typeof localStorage !== 'undefined') localStorage.setItem(STORAGE_KEY, m)
-      } catch {
-        /* ignore */
-      }
+    // A detached scope: the first caller may be a component that later unmounts, and a watcher created
+    // in its setup would stop with it (theme changes would silently stop applying and persisting).
+    effectScope(true).run(() => {
+      watch(mode, (m) => {
+        apply(m)
+        try {
+          if (typeof localStorage !== 'undefined') localStorage.setItem(STORAGE_KEY, m)
+        } catch {
+          /* ignore */
+        }
+      })
     })
   }
 

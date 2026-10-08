@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, vi } from 'vitest'
 import { h } from 'vue'
 import { mount } from '@vue/test-utils'
 import { axe } from 'vitest-axe'
@@ -40,6 +40,17 @@ import UiPanel from '../components/UiPanel.vue'
 import UiCard from '../components/UiCard.vue'
 import UiActivityFeed from '../components/UiActivityFeed.vue'
 import UiActivityItem from '../components/UiActivityItem.vue'
+import CopyableAddress from '../components/CopyableAddress.vue'
+import ExplorerLink from '../components/ExplorerLink.vue'
+import StatusWidget from '../components/StatusWidget.vue'
+import UiBadge from '../components/UiBadge.vue'
+import UiDataTable from '../components/UiDataTable.vue'
+import UiFieldHint from '../components/UiFieldHint.vue'
+import UiNotice from '../components/UiNotice.vue'
+import UiStatusDot from '../components/UiStatusDot.vue'
+import UiStepper from '../components/UiStepper.vue'
+import UiToolIntro from '../components/UiToolIntro.vue'
+import UiToolbarButton from '../components/UiToolbarButton.vue'
 
 beforeAll(installDialogShim)
 
@@ -166,5 +177,59 @@ describe('accessibility (axe)', () => {
     })
     const card = mount(UiCard, { props: { title: 'Gate' }, slots: { default: '<p>Body</p>', footer: '<p>Foot</p>' } })
     await expectNoViolations(panel.html() + card.html())
+  })
+
+  // The components below were not covered before; every component in src/components is mounted here.
+  it('CopyableAddress and ExplorerLink have no violations', async () => {
+    const address = `0x${'ab'.repeat(32)}`
+    const copyable = mount(CopyableAddress, { props: { address } })
+    const link = mount(ExplorerLink, { props: { href: 'https://suiscan.xyz/mainnet/account/0x1', value: address } })
+    await expectNoViolations(copyable.html() + link.html())
+  })
+
+  it('StatusWidget has no violations while checking', async () => {
+    vi.stubGlobal('fetch', () => new Promise(() => {})) // never answers: the initial state is what is checked
+    try {
+      const wrapper = mount(StatusWidget)
+      await expectNoViolations(wrapper.html())
+      wrapper.unmount()
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('UiBadge, UiStatusDot, UiNotice and UiToolIntro have no violations', async () => {
+    const html = [
+      mount(UiBadge, { props: { variant: 'active' }, slots: { default: 'Active' } }).html(),
+      mount(UiStatusDot, { props: { status: 'warn' } }).html(),
+      mount(UiNotice, { props: { type: 'error' }, slots: { default: 'Something failed' } }).html(),
+      mount(UiNotice, { props: { type: 'ok' }, slots: { default: 'Saved' } }).html(),
+      mount(UiToolIntro, { slots: { default: 'Deploy a token.' } }).html(),
+    ].join('')
+    await expectNoViolations(html)
+  })
+
+  it('UiDataTable (with rows and empty) and UiToolbarButton have no violations', async () => {
+    const rows = mount(UiDataTable, {
+      slots: { head: '<th scope="col">Name</th>', default: '<tr><td>Alpha</td></tr>' },
+    })
+    const empty = mount(UiDataTable, { props: { empty: 'Nothing yet' }, slots: { head: '<th scope="col">Name</th>' } })
+    const button = mount(UiToolbarButton, { slots: { default: 'Refresh' } })
+    await expectNoViolations(rows.html() + empty.html() + button.html())
+  })
+
+  it('UiFieldHint and UiStepper have no violations', async () => {
+    const hint = mount(UiFieldHint, { props: { fieldId: 'f1' }, slots: { default: 'Explains the field.' } })
+    const stepper = mount(UiStepper, {
+      props: {
+        steps: [
+          { id: 'a', label: 'Details' },
+          { id: 'b', label: 'Review' },
+          { id: 'c', label: 'Deploy' },
+        ],
+        modelValue: 1,
+      },
+    })
+    await expectNoViolations(hint.html() + stepper.html())
   })
 })

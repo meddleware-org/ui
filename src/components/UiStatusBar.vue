@@ -79,7 +79,8 @@ function timeAgo(d: Date): string {
   margin-inline-end: 16px;
   color: var(--border);
 }
+/* A pending value is set apart by style, not by dimming it (opacity takes the text below 4.5:1). */
 .mw-statusbar__pending {
-  opacity: 0.7;
+  font-style: italic;
 }
 </style>

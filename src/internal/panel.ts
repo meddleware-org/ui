@@ -45,9 +45,9 @@ export function panelVars(variant: PanelVariant, colors?: PanelColors): CSSPrope
       '--_text': 'var(--mw-panel-light-text)',
       '--_muted': 'var(--mw-panel-light-muted)',
       '--_border': 'var(--mw-panel-light-border)',
-      '--_ok': 'var(--mw-panel-light-ok, #177542)',
-      '--_danger': 'var(--mw-panel-light-danger, #b3261e)',
-      '--_info': 'var(--mw-panel-light-info, #1558b5)',
+      '--_ok': 'var(--mw-panel-light-ok)',
+      '--_danger': 'var(--mw-panel-light-danger)',
+      '--_info': 'var(--mw-panel-light-info)',
     }
   } else {
     base = {
@@ -56,9 +56,9 @@ export function panelVars(variant: PanelVariant, colors?: PanelColors): CSSPrope
       '--_text': 'var(--mw-panel-dark-text)',
       '--_muted': 'var(--mw-panel-dark-muted)',
       '--_border': 'var(--mw-panel-dark-border)',
-      '--_ok': 'var(--mw-panel-dark-ok, #5bb392)',
-      '--_danger': 'var(--mw-panel-dark-danger, #f08a7e)',
-      '--_info': 'var(--mw-panel-dark-info, #6ea8fe)',
+      '--_ok': 'var(--mw-panel-dark-ok)',
+      '--_danger': 'var(--mw-panel-dark-danger)',
+      '--_info': 'var(--mw-panel-dark-info)',
     }
   }
   if (colors) {

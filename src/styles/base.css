@@ -73,21 +73,25 @@ body {
   padding: 0;
 }
 
+/* Links are underlined: colour alone is not a sufficient cue (WCAG 1.4.1). Components that style their
+ * own anchors (buttons, nav items, badges) set text-decoration themselves and win on specificity. */
 a {
   color: var(--accent);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
   transition: color var(--transition-base);
 }
 a:hover {
-  text-decoration: underline;
+  text-decoration-thickness: 0.14em;
 }
 
 :where(button, input, select, textarea) {
   font-family: inherit;
 }
 
-/* High-contrast, visible focus using the dedicated focus role (blue — never reads
- * as an error). Distinct from --accent so focus and destructive states don't blur. */
+/* High-contrast, visible focus using the dedicated focus role (slate or blue, never red —
+ * it must not read as an error). Distinct from --accent so focus and destructive states don't blur. */
 :where(a, button, input, select, textarea):focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;

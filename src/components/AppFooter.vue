@@ -86,10 +86,13 @@ const panel = computed(() => panelVars(props.variant, props.colors) as Record<st
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
-  opacity: 0.7;
 }
 .mw-footer__docs a:hover {
-  opacity: 1;
+  text-decoration-thickness: 0.14em;
+}
+/* Links the host slots into the footer take the footer's own text colour, not the page accent. */
+.mw-footer :slotted(a) {
+  color: inherit;
 }
 
 /* Status text inside a light/dark panel uses the panel's own legible status colours. */

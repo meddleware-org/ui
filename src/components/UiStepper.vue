@@ -117,7 +117,7 @@ button.ui-stepper__badge:focus-visible {
 .is-done .ui-stepper__badge {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
 }
 
 .is-active .ui-stepper__badge {

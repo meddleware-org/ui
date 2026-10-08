@@ -25,6 +25,8 @@ export default {
     ],
     // Private panel vars use a leading-underscore convention (--_bg, --_text).
     'custom-property-pattern': null,
+    // Colours come from design-tokens role tokens, never literals (a literal drifts when tokens are retuned).
+    'color-no-hex': true,
     // Vendor-prefixed properties are emitted by autoprefixer at build time; the
     // hand-written -webkit-/-moz- font-smoothing pair is intentional.
     'property-no-vendor-prefix': null,

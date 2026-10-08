@@ -4,6 +4,9 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  // No public dir: the legal documents live in /legal as source files for consuming apps to copy; they
+  // are not part of the package (the kopimi PDF alone is 11.6 MB).
+  publicDir: false,
   build: {
     emptyOutDir: false,
     lib: {
@@ -18,7 +21,9 @@ export default defineConfig({
       output: {
         globals: { vue: 'Vue' },
         // Emit the base CSS alongside the JS bundle
-        assetFileNames: () => 'base.css',
+        // The one stylesheet is base.css; any other emitted asset keeps a hashed name instead of
+        // overwriting it.
+        assetFileNames: (asset) => (asset.names?.some((n) => n.endsWith('.css')) ? 'base.css' : 'assets/[name]-[hash][extname]'),
       },
     },
   },

@@ -5,6 +5,7 @@
 // package) for Sui entities, or an app-specific helper (e.g. Walruscan) for other targets.
 import { computed } from 'vue'
 import { safeHref } from '../safe-href.js'
+import { DEFAULT_TRUNCATE_CHARS, truncateMiddle } from '../truncate.js'
 
 const props = withDefaults(
   defineProps<{
@@ -12,19 +13,17 @@ const props = withDefaults(
     href: string
     /** Value used for the truncated label + title; omit when providing slot content. */
     value?: string
-    /** Prefix…suffix truncation of `value` (default true). */
+    /** Prefix…suffix truncation of `value` (default true); `false` shows it whole (see `CopyableAddress`). */
     truncate?: boolean
-    /** [prefixChars, suffixChars] — only used when truncate is true. */
+    /** [prefixChars, suffixChars] — only used when truncate is true. Default [12, 10]. */
     chars?: [number, number]
   }>(),
-  { truncate: true, chars: () => [6, 4] },
+  { truncate: true, chars: () => [...DEFAULT_TRUNCATE_CHARS] },
 )
 
 const label = computed(() => {
   if (!props.value) return ''
-  if (!props.truncate) return props.value
-  const [pre, suf] = props.chars
-  return `${props.value.slice(0, pre)}…${props.value.slice(-suf)}`
+  return props.truncate ? truncateMiddle(props.value, props.chars) : props.value
 })
 </script>
 
@@ -38,13 +37,13 @@ const label = computed(() => {
 .el-root {
   font-family: monospace;
   font-size: inherit;
-  color: var(--accent, #6366f1);
+  color: var(--accent);
   text-decoration: underline dotted;
   text-underline-offset: 2px;
   transition: color 0.15s;
 }
 .el-root:hover {
-  color: var(--text, #f0f0f0);
+  color: var(--text);
   text-decoration-style: solid;
 }
 </style>

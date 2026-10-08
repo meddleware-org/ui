@@ -61,6 +61,11 @@ const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width, 240p
   overflow-y: auto;
 }
 
+/* Links the host slots into the sidebar take the sidebar's own text colour, not the page accent. */
+.mw-sidebar :slotted(a) {
+  color: inherit;
+}
+
 /* Status text inside a light/dark panel uses the panel's own legible status colours. */
 .mw-sidebar:not(.mw-sidebar--transparent) {
   --ok: var(--_ok);

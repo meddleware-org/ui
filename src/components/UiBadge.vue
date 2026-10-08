@@ -21,16 +21,16 @@ withDefaults(
   text-transform: uppercase;
 }
 .mw-badge--active {
-  background: color-mix(in srgb, var(--ok) 20%, transparent);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
   color: var(--ok);
 }
 .mw-badge--closed {
-  background: color-mix(in srgb, var(--muted) 20%, transparent);
+  background: color-mix(in srgb, var(--muted) 10%, transparent);
   color: var(--muted);
 }
 .mw-badge--pending {
-  background: color-mix(in srgb, var(--warning) 20%, transparent);
-  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning-text);
 }
 .mw-badge--neutral {
   background: var(--lift);

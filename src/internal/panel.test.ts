@@ -2,16 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { panelVars } from './panel'
 
 describe('panelVars', () => {
-  it('gives light and dark panels their own status colours, with token-equal fallbacks', () => {
+  it('gives light and dark panels their own status colours, from the panel palette tokens (no duplicated hex fallbacks)', () => {
     expect(panelVars('light')).toMatchObject({
-      '--_ok': 'var(--mw-panel-light-ok, #177542)',
-      '--_danger': 'var(--mw-panel-light-danger, #b3261e)',
-      '--_info': 'var(--mw-panel-light-info, #1558b5)',
+      '--_ok': 'var(--mw-panel-light-ok)',
+      '--_danger': 'var(--mw-panel-light-danger)',
+      '--_info': 'var(--mw-panel-light-info)',
     })
     expect(panelVars('dark')).toMatchObject({
-      '--_ok': 'var(--mw-panel-dark-ok, #5bb392)',
-      '--_danger': 'var(--mw-panel-dark-danger, #f08a7e)',
-      '--_info': 'var(--mw-panel-dark-info, #6ea8fe)',
+      '--_ok': 'var(--mw-panel-dark-ok)',
+      '--_danger': 'var(--mw-panel-dark-danger)',
+      '--_info': 'var(--mw-panel-dark-info)',
     })
   })
 

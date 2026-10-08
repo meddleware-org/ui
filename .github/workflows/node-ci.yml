@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # The release workflow runs the same checks on the tagged commit.
+  workflow_call:
 
 permissions:
   contents: read
@@ -31,17 +33,44 @@ jobs:
       - name: Type-check
         run: npm run type-check
 
-      - name: Lint CSS (stylelint)
-        run: npm run lint:css --if-present
-
-      - name: Lint JS (eslint + vuejs-a11y)
-        run: npm run lint:js --if-present
-
-      - name: Lint HTML (html-validate)
-        run: npm run lint:html --if-present
+      - name: Lint (stylelint, eslint + vuejs-a11y, html-validate)
+        run: npm run lint
 
       - name: Unit tests (incl. axe a11y)
-        run: npm run test --if-present
+        run: npm test
 
       - name: Build
-        run: npm run build --if-present
+        run: npm run build
+
+      - name: Package contents (file list and size)
+        run: |
+          npm pack --dry-run --json > pack.json
+          node -e "
+            const [p] = JSON.parse(require('fs').readFileSync('pack.json', 'utf8'))
+            const files = p.files.map((f) => f.path)
+            const stray = files.filter((f) => !/^(dist\/|package\.json$|LICENSE$|README\.md$|CHANGELOG\.md$)/.test(f))
+            if (stray.length) { console.error('unexpected files in the tarball:', stray); process.exit(1) }
+            if (!files.includes('dist/ui.js') || !files.includes('dist/base.css')) { console.error('dist/ui.js or dist/base.css missing'); process.exit(1) }
+            if (p.unpackedSize > 1_000_000) { console.error('unpacked size', p.unpackedSize, 'exceeds 1 MB'); process.exit(1) }
+            console.log('tarball:', files.length, 'files,', p.unpackedSize, 'bytes unpacked')
+          "
+
+  e2e:
+    name: Real-browser accessibility (Playwright + axe, theme × season)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Component gallery, every theme × season
+        run: npm run test:e2e
