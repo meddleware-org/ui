@@ -1,9 +1,11 @@
 import { resolve } from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  // Playwright specs (e2e/) run under `npm run test:e2e`, not vitest.
+  test: { exclude: ['e2e/**', 'node_modules/**', 'gallery-dist/**'] },
   // No public dir: the legal documents live in /legal as source files for consuming apps to copy; they
   // are not part of the package (the kopimi PDF alone is 11.6 MB).
   publicDir: false,
