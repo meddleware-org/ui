@@ -29,13 +29,19 @@ AUTH, OPS, IMG (no image; consumers host it), SITE.
 
 - npm `@meddleware/ui` **0.1.31**, published by trusted publishing (OIDC) with an SLSA v1 provenance
   attestation; 47 files, about 112 kB unpacked (0.1.30 was 49 files, 11.8 MB). Tag `v0.1.31` =
-  `19d0855`; `main` HEAD `fe87de4` adds only Dependabot merges (jsdom 30.1.2, the npm-minor-patch
-  group) (2026-10-09).
-- Requires `@meddleware/design-tokens` `^0.1.9` (per-theme seasons, `--warning-text`).
-- Consumers: every Meddleware app — dashboard, landing, status-page, walrus-ui, access-gate-ui,
-  seal-ui, dao-ui, treasury-ui, token-deployer-ui — plus walrus-relay and wallet-adapter (peer).
+  `19d0855`; `main` HEAD `fe87de4` added only Dependabot merges (jsdom 30.1.2, the npm-minor-patch
+  group) (2026-10-09). **0.1.31 is still `latest` on npm (checked 2026-10-18, published 2026-10-08T10:48Z; no
+  newer release).** `main` is ahead of the tag with one unreleased commit, `60e0a9d` (2026-10-18, lint-only:
+  the Sui boundary rule of `@meddleware/eslint-config` 0.0.3, and `CopyrightLine` binds through
+  `safePath` / `safeHref`, behaviour unchanged); it ships with the next release.
+- Requires `@meddleware/design-tokens` `^0.1.9` (per-theme seasons, `--warning-text`); the lockfile resolves 0.1.9.
+  design-tokens 0.1.10 (released 2026-10-10, npm and JSR) satisfies the range; ui has not taken it yet and moves
+  with its next release.
+- Consumers (every `^0.1.31` on 2026-10-18, verified in `repos/*/package.json`): every Meddleware app — dashboard,
+  landing, status-page, walrus-ui, access-gate-ui, seal-ui, dao-ui, treasury-ui, token-deployer-ui, docs and dev —
+  plus walrus-relay and wallet-adapter (peer).
 
-**Review date:** 2026-10-03; re-verified 2026-10-09
+**Review date:** 2026-10-03; re-verified 2026-10-09; release status 2026-10-18
 **Reviewer:** Internal review
 **Severity ceiling:** Medium.
 
@@ -873,6 +879,10 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
   - **Lens coverage:** A6 now includes the VUE lens "Colour & links" row (real-browser contrast across
     theme × season, links distinguishable without colour); the TS B.1 shared-dependency matrix row and
     TS-M9 (N/A) recorded.
+- 2026-10-18 — release status checked: no new release (`@meddleware/ui` 0.1.31 is still `latest`, SLSA v1 provenance present; tag
+  `v0.1.31` = `19d0855`), consumers unchanged at `^0.1.31`. `main` carries one lint-only commit (`60e0a9d`, the Sui boundary rule
+  of eslint-config 0.0.3; `CopyrightLine` binds through `safePath` / `safeHref`, no behaviour change) that ships with the next release.
+  design-tokens 0.1.10 is out and in range; ui's lockfile still resolves 0.1.9. No finding or Section D box changes.
 
 ## Pre-save consistency checklist (this pass)
 
