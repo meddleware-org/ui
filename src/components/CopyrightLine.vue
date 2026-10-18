@@ -1,6 +1,6 @@
 <template>
   <small class="copyright-line">
-    <a :href="computedSymbolHref" class="symbol-link" target="_blank" rel="noopener noreferrer"
+    <a :href="symbolIsPath ? safePath(computedSymbolHref) : safeHref(computedSymbolHref)" class="symbol-link" target="_blank" rel="noopener noreferrer"
       :aria-label="computedSymbolLabel">
       <span v-if="resolvedSymbol === 'copyright'">&copy;</span>
       <span v-else-if="resolvedSymbol === 'copyleft'">🄯</span>
@@ -51,6 +51,10 @@ const computedSymbolHref = computed(() =>
   (props.symbolHref ? symbolLink(props.symbolHref) : undefined) ||
   (resolvedSymbol.value === 'kopimi' ? '/legal/powr.broccoli-kopimi.pdf' : resolvedSymbol.value === 'copyleft' ? '/legal/copyleft.html' : '/legal/copyright.html'),
 )
+
+// The binding in the template re-checks the value with the matching sanitiser, so the link is safe by
+// construction there (the boundary lint rule requires a helper call in the binding).
+const symbolIsPath = computed(() => computedSymbolHref.value.startsWith('/'))
 
 const computedSymbolLabel = computed(() =>
   props.symbolLabel ||
