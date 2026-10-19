@@ -27,21 +27,24 @@ AUTH, OPS, IMG (no image; consumers host it), SITE.
 
 **Deployment status:**
 
-- npm `@meddleware/ui` **0.1.31**, published by trusted publishing (OIDC) with an SLSA v1 provenance
-  attestation; 47 files, about 112 kB unpacked (0.1.30 was 49 files, 11.8 MB). Tag `v0.1.31` =
-  `19d0855`; `main` HEAD `fe87de4` added only Dependabot merges (jsdom 30.1.2, the npm-minor-patch
-  group) (2026-10-09). **0.1.31 is still `latest` on npm (checked 2026-10-18, published 2026-10-08T10:48Z; no
-  newer release).** `main` is ahead of the tag with one unreleased commit, `60e0a9d` (2026-10-18, lint-only:
-  the Sui boundary rule of `@meddleware/eslint-config` 0.0.3, and `CopyrightLine` binds through
-  `safePath` / `safeHref`, behaviour unchanged); it ships with the next release.
-- Requires `@meddleware/design-tokens` `^0.1.9` (per-theme seasons, `--warning-text`); the lockfile resolves 0.1.9.
-  design-tokens 0.1.10 (released 2026-10-10, npm and JSR) satisfies the range; ui has not taken it yet and moves
-  with its next release.
-- Consumers (every `^0.1.31` on 2026-10-18, verified in `repos/*/package.json`): every Meddleware app — dashboard,
+- npm `@meddleware/ui` **0.1.32** (released 2026-10-19; tag `v0.1.32`, publish run 39185227316, whose release
+  gate included "Real-browser accessibility (Playwright + axe, theme × season)"), published by trusted publishing
+  (OIDC) with an SLSA v1 provenance attestation; 47 files, 112,052 bytes unpacked (`npm view` 2026-10-19).
+  It is `latest` on npm. 0.1.32 ships the `AppFooter` Label-in-Name fix (F12), `CopyrightLine` binding through
+  `safePath` / `safeHref` in the template, and the repository's own `suiBoundary()` lint rule
+  (`@meddleware/eslint-config` ^0.0.3; lint only). History: 0.1.31 (tag `v0.1.31` = `19d0855`, published
+  2026-10-08T10:48Z) carried the first-pass fixes; `main` HEAD `fe87de4` added only Dependabot merges (2026-10-09).
+  The Dependabot npm group (#6: axe-core 4.14, Playwright 1.64.1, design-tokens 0.1.10, Vite 8.3.4, vitest 5.0.5,
+  Vue 3.5.44 and others) was merged 2026-10-19 after it had failed CI on the Label-in-Name violation.
+- Requires `@meddleware/design-tokens` `^0.1.9` (per-theme seasons, `--warning-text`); the lockfile now resolves
+  0.1.10 (released 2026-10-10, npm and JSR; taken by the merged Dependabot group, checked in `package-lock.json`
+  2026-10-19).
+- Consumers (every `^0.1.31` on 2026-10-19, verified in `repos/*/package.json`; the caret range already admits 0.1.32,
+  and no consumer has been re-released for it): every Meddleware app — dashboard,
   landing, status-page, walrus-ui, access-gate-ui, seal-ui, dao-ui, treasury-ui, token-deployer-ui, docs and dev —
   plus walrus-relay and wallet-adapter (peer).
 
-**Review date:** 2026-10-03; re-verified 2026-10-09; release status 2026-10-18
+**Review date:** 2026-10-03; re-verified 2026-10-09; release status 2026-10-19
 **Reviewer:** Internal review
 **Severity ceiling:** Medium.
 
@@ -54,9 +57,9 @@ AUTH, OPS, IMG (no image; consumers host it), SITE.
   - the theme and season state.
 - A defect can mislead users about what they copy or click, or make status and actions illegible.
   It cannot move funds by itself.
-- Realised ceiling at this pass: **Low**; after the 0.1.31 fixes no finding is open at any severity.
+- Realised ceiling at this pass: **Low**; after the 0.1.31 and 0.1.32 fixes no finding is open at any severity.
 
-**Status:** re-verified 2026-10-09 (first-pass baseline 2026-10-03, `v0.1.30`; fixes released in `v0.1.31`).
+**Status:** re-verified 2026-10-09 (first-pass baseline 2026-10-03, `v0.1.30`; fixes released in `v0.1.31`); release status re-checked 2026-10-19 (`v0.1.32` released; F12 added and RESOLVED).
 
 **Front matter (VUE lens):**
 
@@ -92,7 +95,8 @@ The library is 33 SFCs plus the TS modules (`safe-href`, `truncate`, `explorer`,
 `internal/panel`) and two composables: about 3,700 lines including 10 test files. The first pass
 (2026-10-03, `v0.1.30`) recorded nine findings, none above Low. **All of them were fixed in 0.1.31
 (2026-10-08) and re-verified on 2026-10-09**; the re-verification added one further finding, fixed in
-the same release (F11, the real-browser contrast gate's own catches).
+the same release (F11, the real-browser contrast gate's own catches). A twelfth, found on 2026-10-19 by axe-core
+4.14 in a Dependabot update and fixed in 0.1.32, is F12 (Label in Name on the `AppFooter` docs link).
 
 **What holds (verified 2026-10-09):**
 
@@ -616,6 +620,27 @@ the panel's muted role; badge tints are 10%; the pending badge uses `--warning-t
 first pass could not have found them, and so that the gate is understood as a finding source, not
 only a check.
 
+### F12 — `AppFooter`'s developer-docs link overrode its visible text (Label in Name; added 2026-10-19)
+
+**Severity:** Low (accessibility across every app that passes `docsHref`)   **Disposition:** RESOLVED (0.1.32, `3794533`)
+**Where:** `src/components/AppFooter.vue` (the "Developer docs" link).
+
+**Issue:** the link carried `aria-label="Developer documentation"` over the visible text "Developer docs", so the
+accessible name did not contain the visible label (WCAG 2.5.3 *Label in Name*). axe-core 4.14 reports this as
+`label-content-name-mismatch`; the gate's earlier axe version (4.13) did not. Speech-input users who say the visible
+words ("click Developer docs") would not reliably activate the link.
+
+**Impact:** a real, small accessibility defect in the shared footer of every app that shows the link. It was surfaced
+by the real-browser gate (F2, F11) the moment the Dependabot npm group (#6: axe-core 4.14, Playwright 1.64.1,
+design-tokens 0.1.10, Vite 8.3.4, vitest 5.0.5, Vue 3.5.44, …) moved axe forward: that PR failed CI on this violation,
+which is the gate working as intended.
+
+**Remediation / evidence:** the `aria-label` was removed in `3794533` (CHANGELOG 0.1.32 *Fixed*): the visible text names
+the link and the surrounding `<nav>` is already labelled "Documentation". After the fix, #6 was merged and the 0.1.32
+publish run (39185227316) passed its "Real-browser accessibility (Playwright + axe, theme × season)" job. Published as
+`@meddleware/ui` 0.1.32 on 2026-10-19 (`npm view`: SLSA v1 attestation, 47 files). Recorded as a finding because it is
+a second case of the gate surfacing a defect that only a newer rule set could see.
+
 ---
 
 ## Section A — Invariant verification matrix
@@ -738,6 +763,7 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 
 - [x] links underlined (non-colour cue); `UiStepper` uses `--accent-contrast` — F2
 - [x] a11y tests cover all components; real-browser contrast run across theme × season in CI — F2, F11, S1
+- [x] accessible names contain the visible labels under axe-core 4.14 (Label in Name); `AppFooter` docs link fixed and released in 0.1.32 — F12
 - [x] `useColorMode` scope-independent — F4
 
 ### pre-mainnet
@@ -778,7 +804,7 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 2. MUST display chain identifiers with enough characters to resist look-alike addresses, and MUST
    render edge cases correctly — **holds** (F3; the default length is `OQ1`).
 3. MUST meet WCAG AA for link affordance and for text on role colours in every shipped theme —
-   **holds** (F2, F11; checked by the real-browser gate on every CI run and tag).
+   **holds** (F2, F11, F12; checked by the real-browser gate on every CI run and tag).
 4. MUST NOT report a health state it has not observed — **holds** (F5).
 5. MUST NOT ship third-party content without recorded provenance — **partly**: the PDF is out of the
    package and its checksum recorded, but its source and licence are unknown (`OQ2`).
@@ -882,7 +908,19 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 - 2026-10-18 — release status checked: no new release (`@meddleware/ui` 0.1.31 is still `latest`, SLSA v1 provenance present; tag
   `v0.1.31` = `19d0855`), consumers unchanged at `^0.1.31`. `main` carries one lint-only commit (`60e0a9d`, the Sui boundary rule
   of eslint-config 0.0.3; `CopyrightLine` binds through `safePath` / `safeHref`, no behaviour change) that ships with the next release.
-  design-tokens 0.1.10 is out and in range; ui's lockfile still resolves 0.1.9. No finding or Section D box changes.
+  design-tokens 0.1.10 is out and in range; ui's lockfile still resolved 0.1.9. No finding or Section D box changes.
+- 2026-10-19 — re-verification of release status: **`@meddleware/ui` 0.1.32 released** (tag `v0.1.32`, publish run
+  39185227316 including the "Real-browser accessibility (Playwright + axe, theme × season)" job; `npm view` shows 0.1.32 with an
+  SLSA v1 attestation, 47 files, 112,052 bytes unpacked). It contains the previously unreleased `60e0a9d` content (Sui boundary
+  lint rule, `CopyrightLine` through `safePath` / `safeHref`) and the `AppFooter` Label-in-Name fix.
+  - **Finding added:** **F12** (Low, RESOLVED in 0.1.32, `3794533`): the footer docs link's `aria-label` contradicted its visible
+    text. Surfaced by axe-core 4.14 in the Dependabot npm group (#6), which failed CI until the fix; #6 was then merged
+    (axe-core 4.14.0, Playwright 1.64.1, design-tokens 0.1.10, Vite 8.3.4, vitest 5.0.5, Vue 3.5.44 per `package-lock.json`).
+  - **Section D:** one box added and ticked (Label in Name). Totals now: 11 findings plus 1 Positive (F1–F9, F11, F12 RESOLVED; F6 split as
+    before). Pre-mainnet still open only for `OQ2` and external review.
+  - **Consumers:** all still `^0.1.31` (range admits 0.1.32); none re-released for it (checked in `repos/*/package.json`).
+  - Dependabot policy encoded in .github/dependabot.yml (majors declined); open PRs merged 2026-10-19
+  - **Not re-measured:** unit-test, coverage and Playwright counts in Section C (2026-10-09 values; the CI runs on 0.1.32 passed).
 
 ## Pre-save consistency checklist (this pass)
 
