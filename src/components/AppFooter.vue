@@ -45,7 +45,6 @@ const panel = computed(() => panelVars(props.variant, props.colors) as Record<st
         :href="safeHref(devUrl)"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Developer documentation"
       >Developer docs</a>
     </nav>
   </footer>

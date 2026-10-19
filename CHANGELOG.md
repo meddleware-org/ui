@@ -3,6 +3,24 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.32] - 2026-10-19
+
+Pre-v0.2: breaking changes are patch releases.
+
+### Fixed
+
+- **`AppFooter`: the developer-documentation link no longer overrides its visible text.** It had
+  `aria-label="Developer documentation"` over the visible "Developer docs", so the accessible name did not
+  contain the visible label (WCAG 2.5.3 *Label in Name*; reported by axe-core 4.14's
+  `label-content-name-mismatch`). The label added nothing — the visible text names the link and the
+  surrounding `<nav>` is labelled "Documentation" — so it is removed.
+
+### Changed
+
+- `CopyrightLine` binds its link through `safePath` / `safeHref` in the template (the value was already
+  sanitised in script), so the `@meddleware/eslint-config` boundary rule can accept it. No behaviour change.
+- The repository now applies `suiBoundary()` from `@meddleware/eslint-config` ^0.0.3 (lint only).
+
 ## [0.1.31] - 2026-10-08
 
 ### Security
