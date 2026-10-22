@@ -852,7 +852,7 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 
 1. **OQ1** F3: what truncation should be the default for 32-byte IDs, and which contexts (treasury,
    recipient, history) must show the full value? (Implemented 2026-10-08 as `[12, 10]` with the
-   treasury shown in full in dao-ui and treasury-ui; the maintainer has not confirmed the choice.)
+   treasury shown in full in dao-ui and treasury-ui. **Decided 2026-10-22: `[12, 10]` is the default truncation for 32-byte IDs, and the treasury address is always shown in full** (truncation hides the part a reader would compare; a treasury is the value people check, the rest are navigation aids with a copy control).)
 2. **OQ2** F6: where should the Kopimi PDF live, and what is its source and licence? (The PDF left
    the package in 0.1.31; the source is still unrecorded.)
 3. **OQ3** F2: underline links globally (with opt-outs), or rely on a ≥ 3:1 link/text contrast in
@@ -921,6 +921,7 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
   - **Consumers:** all still `^0.1.31` (range admits 0.1.32); none re-released for it (checked in `repos/*/package.json`).
   - Dependabot policy encoded in .github/dependabot.yml (majors declined); open PRs merged 2026-10-19
   - **Not re-measured:** unit-test, coverage and Playwright counts in Section C (2026-10-09 values; the CI runs on 0.1.32 passed).
+- 2026-10-22 (audit close-out) — OQ1 decided: `[12, 10]` truncation by default, the treasury address shown in full (the implementation of 2026-10-08 stands, no code change). Not re-run in this pass: the unit tests and the contrast gate. Counts unchanged.
 
 ## Pre-save consistency checklist (this pass)
 
