@@ -41,7 +41,7 @@ AUTH, OPS, IMG (no image; consumers host it), SITE.
   2026-10-19).
 - Consumers (every `^0.1.31` on 2026-10-19, verified in `repos/*/package.json`; the caret range already admits 0.1.32,
   and no consumer has been re-released for it): every Meddleware app — dashboard,
-  landing, status-page, walrus-ui, access-gate-ui, seal-ui, dao-ui, treasury-ui, token-deployer-ui, docs and dev —
+  landing, status-ui, walrus-storage-ui, access-gate-ui, sealed-storage-ui, dao-ui, treasury-ui, token-issuance-ui, docs and dev —
   plus walrus-relay and wallet-adapter (peer).
 
 **Review date:** 2026-10-03; re-verified 2026-10-09; release status 2026-10-19
@@ -369,7 +369,7 @@ underline on hover only); `src/components/UiStepper.vue:117-120` (`color: #fff` 
     `AccessMinted`/`Consumed` sender. They also show the treasury address (dao-ui Treasury,
     Overview and Governance tabs) and the connected account (dashboard, access-gate-ui).
   - Copying copies the full value of the row, but the *row choice* is made from the truncated text.
-  - Only walrus-ui raises it (`[8, 6]`, for blob IDs).
+  - Only walrus-storage-ui raises it (`[8, 6]`, for blob IDs).
 - **`chars: [n, 0]`.** `slice(-0)` returns the **whole** string, so the label prints the prefix,
   then `…`, then the full value (probe: `0xabab…0xabab…cd`).
 - **Short values.** A value shorter than `pre + suf` is duplicated (probe: `0x1…0x1`).
@@ -393,7 +393,7 @@ clamped to non-negative integers. `CopyableAddress` and `ExplorerLink` both use 
 `:truncate="false"` for contexts where a user chooses where funds go. Consumers: dao-ui and
 treasury-ui pass `:truncate="false"` for the treasury address (`GovernanceTab`, `OverviewTab`,
 `TreasuryTab`, `AccountsTab`); event-history senders (dao-ui `HistoryTab`, treasury-ui `ActivityTab`)
-and the dashboard account use the longer default; walrus-ui keeps its own `[8, 6]` for blob IDs
+and the dashboard account use the longer default; walrus-storage-ui keeps its own `[8, 6]` for blob IDs
 (not account addresses). Pinned by `truncate.test.ts` and `__tests__/truncation.test.ts`
 (default, `truncate=false`, short values, zero counts, `ExplorerLink` parity).
 `OQ1` stays open: the maintainer has not been asked which contexts must always show the full value.
@@ -419,7 +419,7 @@ and the dashboard account use the longer default; walrus-ui keeps its own `[8, 6
 
 - If an embedded tool view (for example one inside a kept-alive dashboard tab) ever becomes the
   first caller and is unmounted, theme switching silently stops applying and persisting.
-- Today, dashboard and token-deployer-ui call it in `main.ts`, and the others in `App.vue`.
+- Today, dashboard and token-issuance-ui call it in `main.ts`, and the others in `App.vue`.
 
 **Remediation / evidence:** create the watcher in a detached `effectScope(true)` at module
 initialisation, or watch outside any component. Add the probe as a test.
@@ -786,7 +786,7 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
   its own contrast gate; this repo's gallery gate (F2, F11) checks the tokens as components consume
   them, so the two gates together cover the theme × season matrix.
 - **Address display is a security surface.** dao-ui, treasury-ui, access-gate-ui, dashboard and
-  token-deployer-ui show addresses and IDs through `CopyableAddress`/`ExplorerLink`. F3's new default
+  token-issuance-ui show addresses and IDs through `CopyableAddress`/`ExplorerLink`. F3's new default
   reached them on their next `@meddleware/ui` bump; dao-ui and treasury-ui show the treasury in full.
 - **`safeHref` is the workspace's URL allowlist** (the shared ESLint config's template rule trusts it
   by name), so F1's tightening protects every app.

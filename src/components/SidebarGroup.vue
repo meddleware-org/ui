@@ -19,13 +19,13 @@
  * <SidebarGroup label="Blockchain" :level="1">
  *   <SidebarGroup label="Sui" :level="2">
  *     <SidebarItem label="DAO" icon="🏛" :active="isDao" @click="navigate" />
- *     <SidebarItem label="Token Deployer" icon="🪙" :active="isToken" @click="navigate" />
+ *     <SidebarItem label="Token Issuance" icon="🪙" :active="isToken" @click="navigate" />
  *   </SidebarGroup>
  * </SidebarGroup>
  * ```
  *
  * Screen-reader output for the above (abbreviated):
- * > "Blockchain, group; Sui, group; DAO, button, current page; Token Deployer, button"
+ * > "Blockchain, group; Sui, group; DAO, button, current page; Token Issuance, button"
  */
 withDefaults(
   defineProps<{

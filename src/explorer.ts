@@ -2,7 +2,7 @@
 // entities. `explorer.sui.io` was retired with no official replacement; the ecosystem standard is
 // SuiVision (by BlockVision). Swap the base here to change every ExplorerLink at once.
 //
-// Walrus blobs are NOT a Sui entity type and are handled by the consuming app (walrus-ui builds a
+// Walrus blobs are NOT a Sui entity type and are handled by the consuming app (walrus-storage-ui builds a
 // Walruscan URL); this module stays Sui-only so the UI library carries no Walrus specifics.
 
 /** Sui networks SuiVision serves. */
