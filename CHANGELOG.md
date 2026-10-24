@@ -3,6 +3,12 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.33] - 2026-10-24
+
+### Changed
+
+- Documentation and comments use the renamed package and service names (workspace naming convention, `docs/architecture/ADR-0003-naming.md`). No code change. Sidebar documentation examples say Token Issuance.
+
 ## [0.1.32] - 2026-10-19
 
 Pre-v0.2: breaking changes are patch releases.
