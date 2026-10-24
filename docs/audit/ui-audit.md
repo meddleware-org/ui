@@ -933,3 +933,4 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 - [x] Executive summary ↔ dispositions and ceiling (Medium; realised Low; nothing open).
 - [x] C.1 counts measured 2026-10-09.
 - [x] Re-verification log entry added.
+- 2026-10-24 — runtime endpoint config added (`src/runtime-config.ts`, workspace ADR-0005): only `VITE_INDEXER_URL`, `VITE_WALRUS_RELAY_TESTNET`, `VITE_WALRUS_RELAY_MAINNET` may be overridden; values must be https (local http in dev) without credentials, query or fragment; same-origin path only, `credentials: omit`, `redirect: error`, 3 s timeout, 16 KiB cap, JSON content type required; frozen result; 8 tests. No new finding.

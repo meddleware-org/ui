@@ -3,6 +3,12 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.34] - 2026-10-24
+
+### Added
+
+- Runtime endpoint configuration (ADR-0005): `loadRuntimeConfig` reads a same-origin `/runtime-config.json` and `withRuntimeEnv` applies its overrides on top of the build-time env. Only machine-zone endpoints can be overridden (`VITE_INDEXER_URL`, `VITE_WALRUS_RELAY_TESTNET`, `VITE_WALRUS_RELAY_MAINNET`), each an https URL (local http in development) without credentials, query or fragment; a missing, non-JSON (SPA fallback), oversize or invalid file leaves the build-time values in force.
+
 ## [0.1.33] - 2026-10-24
 
 ### Changed

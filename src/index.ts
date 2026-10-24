@@ -60,3 +60,14 @@ export { isStatusLevel, parseSnapshot } from './status.js'
 export { safeHref, safePath } from './safe-href.js'
 export { truncateMiddle, DEFAULT_TRUNCATE_CHARS } from './truncate.js'
 export type { StatusLevel, StatusComponent, StatusGroup, StatusSnapshot } from './status.js'
+export {
+  loadRuntimeConfig,
+  runtimeEndpoints,
+  withRuntimeEnv,
+  parseRuntimeConfig,
+  parseEndpoint,
+  resetRuntimeConfigForTesting,
+  RUNTIME_ENDPOINT_KEYS,
+  RUNTIME_CONFIG_PATH,
+} from './runtime-config.js'
+export type { RuntimeEndpointKey, RuntimeEndpoints } from './runtime-config.js'
