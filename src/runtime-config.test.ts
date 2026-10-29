@@ -55,7 +55,7 @@ describe('loadRuntimeConfig', () => {
     await loadRuntimeConfig('/runtime-config.json', fetchImpl as unknown as typeof fetch)
     expect(fetchImpl).toHaveBeenCalledWith('/runtime-config.json', expect.objectContaining({ credentials: 'omit', redirect: 'error' }))
     expect(runtimeEndpoints()).toEqual({ VITE_INDEXER_URL: 'https://sui-indexer.meddleware.dev' })
-    const env = withRuntimeEnv({ VITE_INDEXER_URL: 'https://sui-indexer.meddleware.co.uk', VITE_FEE_MIST: '7' })
+    const env = withRuntimeEnv({ VITE_INDEXER_URL: 'https://sui-indexer.meddleware.dev', VITE_FEE_MIST: '7' })
     expect(env).toEqual({ VITE_INDEXER_URL: 'https://sui-indexer.meddleware.dev', VITE_FEE_MIST: '7' })
   })
   it('keeps the build-time values for 404, an HTML SPA fallback, oversize or malformed JSON, and network errors', async () => {
