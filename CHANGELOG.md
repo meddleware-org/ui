@@ -3,6 +3,10 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.35] - 2026-10-30
+
+- Point links at the machine zone (ADR-0005); current design-tokens and eslint-config. No component change.
+
 ## [0.1.34] - 2026-10-24
 
 ### Added
