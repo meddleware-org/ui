@@ -1,21 +1,19 @@
 <script setup lang="ts">
-/** Styled native <select>. A single root element: attributes (id, aria-*, disabled…) fall
+/** Styled native <select>, labelled by the consuming context (UiFormField's label[for], or an aria-label passed as an attribute); this primitive carries no own label.
+ * A single root element: attributes (id, aria-*, disabled…) fall
  * through to the select itself, and the chevron is painted in its background with two
  * token-coloured gradient strokes (so it follows the theme without an overlay element). */
 const model = defineModel<string>()
 </script>
 
 <template>
-  <!-- Labelled by the consuming context (UiFormField's label[for], or an aria-label passed as an
-       attribute); this primitive carries no own label. -->
-  <!-- eslint-disable-next-line vuejs-accessibility/form-control-has-label -->
   <select v-model="model" class="mw-select"><slot /></select>
 </template>
 
 <style scoped>
 .mw-select {
   --_chevron-stroke: var(--muted);
-  --_chevron-arm: 6px;
+  --_chevron-arm: var(--space-2xs);
 
   appearance: none;
   width: 100%;
@@ -26,17 +24,17 @@ const model = defineModel<string>()
   background-image:
     linear-gradient(
       45deg,
-      transparent calc(50% - 0.75px),
-      var(--_chevron-stroke) calc(50% - 0.75px),
-      var(--_chevron-stroke) calc(50% + 0.75px),
-      transparent calc(50% + 0.75px)
+      transparent calc(50% - var(--space-4xs) / 2),
+      var(--_chevron-stroke) calc(50% - var(--space-4xs) / 2),
+      var(--_chevron-stroke) calc(50% + var(--space-4xs) / 2),
+      transparent calc(50% + var(--space-4xs) / 2)
     ),
     linear-gradient(
       -45deg,
-      transparent calc(50% - 0.75px),
-      var(--_chevron-stroke) calc(50% - 0.75px),
-      var(--_chevron-stroke) calc(50% + 0.75px),
-      transparent calc(50% + 0.75px)
+      transparent calc(50% - var(--space-4xs) / 2),
+      var(--_chevron-stroke) calc(50% - var(--space-4xs) / 2),
+      var(--_chevron-stroke) calc(50% + var(--space-4xs) / 2),
+      transparent calc(50% + var(--space-4xs) / 2)
     );
   background-position:
     right calc(var(--space-xs) + var(--_chevron-arm)) center,

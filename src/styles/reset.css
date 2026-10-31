@@ -1,7 +1,7 @@
 /*
- * @meddleware/ui base — minimal, opt-in element defaults built on the tokens.
- * Import AFTER '@meddleware/design-tokens/tokens.css'. Apps may skip this and
- * style their own body; the components themselves don't require it.
+ * @meddleware/ui reset — element defaults and utilities built on the tokens (REQUIRED once per app).
+ * Import AFTER '@meddleware/design-tokens/tokens.css'. Components assume it (box-sizing, the focus ring, the
+ * `.mw-visually-hidden` and `.mw-spinner` utilities).
  *
  * Philosophy: design recedes, content dominates. Type/spacing follow the sacred-
  * geometry scale (φ/Fibonacci) from design-tokens; focus is high-contrast and
@@ -56,6 +56,57 @@ body {
   border: 0;
 }
 
+/* Panel variants for the layout shell (AppHeader, AppSidebar, AppFooter). They use the theme-INDEPENDENT --mw-panel-* tokens, so a dark
+ * panel renders correctly on a light page and vice versa; light and dark panels also carry status colours legible on them, and the
+ * components re-scope --ok/--danger/--info to those. A transparent panel inherits the page's roles. Per-instance `colors` overrides
+ * are the only thing set inline. */
+.mw-panel--dark {
+  --_bg: var(--mw-panel-dark-bg);
+  --_surface: var(--mw-panel-dark-surface);
+  --_text: var(--mw-panel-dark-text);
+  --_muted: var(--mw-panel-dark-muted);
+  --_border: var(--mw-panel-dark-border);
+  --_ok: var(--mw-panel-dark-ok);
+  --_danger: var(--mw-panel-dark-danger);
+  --_info: var(--mw-panel-dark-info);
+  /* What sits on the panel (a ghost button, a bare button, a link) takes the panel's colours, not the page's: a dark panel on a light page
+     would otherwise draw the page's dark text on it. */
+  --text: var(--_text);
+  --muted: var(--_muted);
+  --border: var(--_border);
+  --bg: var(--_bg);
+  --surface: var(--_surface);
+  --lift: var(--_surface);
+  --mw-link: var(--_text);
+}
+.mw-panel--light {
+  --_bg: var(--mw-panel-light-bg);
+  --_surface: var(--mw-panel-light-surface);
+  --_text: var(--mw-panel-light-text);
+  --_muted: var(--mw-panel-light-muted);
+  --_border: var(--mw-panel-light-border);
+  --_ok: var(--mw-panel-light-ok);
+  --_danger: var(--mw-panel-light-danger);
+  --_info: var(--mw-panel-light-info);
+  --text: var(--_text);
+  --muted: var(--_muted);
+  --border: var(--_border);
+  --bg: var(--_bg);
+  --surface: var(--_surface);
+  --lift: var(--_surface);
+  --mw-link: var(--_text);
+}
+.mw-panel--transparent {
+  --_bg: transparent;
+  --_surface: transparent;
+  --_text: var(--text);
+  --_muted: var(--muted);
+  --_border: transparent;
+  --_ok: var(--ok);
+  --_danger: var(--danger);
+  --_info: var(--info);
+}
+
 /* Sensible media defaults. */
 :where(img, svg, video, canvas) {
   display: block;
@@ -75,8 +126,9 @@ body {
 
 /* Links are underlined: colour alone is not a sufficient cue (WCAG 1.4.1). Components that style their
  * own anchors (buttons, nav items, badges) set text-decoration themselves and win on specificity. */
+/* `--mw-link` lets a surface choose the link colour (a dark or light panel sets it to its own text colour); by default a link is the accent. */
 a {
-  color: var(--accent);
+  color: var(--mw-link, var(--accent));
   text-decoration: underline;
   text-decoration-thickness: 0.08em;
   text-underline-offset: 0.18em;
@@ -90,6 +142,25 @@ a:hover {
   font-family: inherit;
 }
 
+/* A bare <button> gets a base look from the tokens instead of the browser's (in a dark theme the browser's grey does not reach AAA
+ * contrast). Every component that styles its own button sets what it needs, and its (later) layer wins. */
+:where(button),
+:where(input[type='file'])::file-selector-button {
+  padding: var(--space-3xs) var(--space-xs);
+  color: var(--text);
+  background-color: var(--lift);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: inherit;
+  cursor: pointer;
+}
+:where(input[type='file'])::file-selector-button {
+  margin-inline-end: var(--space-xs);
+}
+:where(button:disabled) {
+  cursor: not-allowed;
+}
+
 /* High-contrast, visible focus using the dedicated focus role (slate or blue, never red —
  * it must not read as an error). Distinct from --accent so focus and destructive states don't blur. */
 :where(a, button, input, select, textarea):focus-visible {
@@ -99,6 +170,16 @@ a:hover {
 
 .mw-mono {
   font-family: var(--mw-font-mono);
+}
+
+/* Code in prose (an identifier, an address, a hash) wraps instead of widening the page; a block of code scrolls in its own <pre>. */
+:where(code, kbd, samp) {
+  font-family: var(--mw-font-mono);
+  overflow-wrap: anywhere;
+}
+
+:where(pre) :where(code, kbd, samp) {
+  overflow-wrap: normal;
 }
 
 /* ── Controlled-imperfection utilities (opt-in) ───────────────────────────────
@@ -112,7 +193,7 @@ a:hover {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: var(--z-below);
   background-image: var(--noise-overlay);
   background-repeat: repeat;
   opacity: var(--noise-opacity);
@@ -148,7 +229,10 @@ a:hover {
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
-    transition-duration: 0.001ms !important;
+    /* No transition at all, not a very short one: a 0.001ms transition still starts one on every property change, and for a frame
+       a script (or a screenshot) reads the old value. */
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
   }
   /* A settled spinner rather than a spinning one for reduced-motion users. */
   .mw-spinner {

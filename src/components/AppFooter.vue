@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { panelVars, type PanelVariant, type PanelColors } from '../internal/panel'
-import { safeHref } from '../safe-href.js'
+import { ref } from 'vue'
+import { usePanelOverrides, type PanelVariant, type PanelColors } from '../internal/panel'
+import { safeHref } from '@meddleware/web-utils'
 
 const props = withDefaults(
   defineProps<{
@@ -23,11 +23,13 @@ const props = withDefaults(
   { variant: 'transparent' },
 )
 
-const panel = computed(() => panelVars(props.variant, props.colors) as Record<string, string>)
+const root = ref<HTMLElement | null>(null)
+usePanelOverrides(root, () => props.colors)
+
 </script>
 
 <template>
-  <footer class="mw-footer" :class="`mw-footer--${variant}`">
+  <footer ref="root" class="mw-footer" :class="`mw-panel--${variant} mw-footer--${variant}`">
     <!-- Slots render directly (no layout wrappers); consumers style their own content. Only the
          component-owned documentation links are grouped, as a navigation block at the inline end. -->
     <slot name="start" />
@@ -52,15 +54,6 @@ const panel = computed(() => panelVars(props.variant, props.colors) as Record<st
 
 <style scoped>
 .mw-footer {
-  /* Panel colour variables (variant defaults or per-instance overrides), bound from script. */
-  --_bg: v-bind('panel["--_bg"]');
-  --_surface: v-bind('panel["--_surface"]');
-  --_text: v-bind('panel["--_text"]');
-  --_muted: v-bind('panel["--_muted"]');
-  --_border: v-bind('panel["--_border"]');
-  --_ok: v-bind('panel["--_ok"]');
-  --_danger: v-bind('panel["--_danger"]');
-  --_info: v-bind('panel["--_info"]');
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -84,7 +77,7 @@ const panel = computed(() => panelVars(props.variant, props.colors) as Record<st
 .mw-footer__docs a {
   color: inherit;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 0.18em;
 }
 .mw-footer__docs a:hover {
   text-decoration-thickness: 0.14em;

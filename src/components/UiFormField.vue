@@ -42,8 +42,8 @@ const slotAttrs = computed(() => ({
 }
 .mw-form-field__label {
   display: inline-block;
-  font-weight: 600;
-  margin: 0.9rem 0 0.3rem;
+  font-weight: var(--font-weight-semibold);
+  margin: var(--space-xs) 0 var(--space-3xs);
 }
 /* The control always starts on its own line below the label row. */
 .mw-form-field :slotted(:is(input, select, textarea)) {
@@ -52,12 +52,12 @@ const slotAttrs = computed(() => ({
 .mw-form-field__hint,
 .mw-form-field__error {
   display: block;
-  margin: 0.25rem 0 0;
-  font-size: var(--font-size-sm, 0.9rem);
+  margin: var(--space-3xs) 0 0;
+  font-size: var(--font-size-sm);
 }
 .mw-form-field__hint {
   color: var(--muted);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 .mw-form-field__error {
   color: var(--danger);

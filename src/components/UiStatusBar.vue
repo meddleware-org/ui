@@ -1,13 +1,14 @@
 <script setup lang="ts">
-// Desktop-console status bar: a list of status items (monospace, muted, sticky to the bottom of
-// its scroll container). Separators are decorative CSS, hidden from assistive technology.
+// Desktop-console status bar: a list of status items (monospace, muted, sticky to the bottom of its scroll container). Separators are
+// decorative CSS, hidden from assistive technology.
 //
 // The standard items render from props, each only when its prop is provided:
 //   network     — network name with a health dot (`healthy`, default true)
 //   epoch       — "Epoch N"; `null` shows a placeholder while it loads
-//   lastRefresh — "Refreshed Ns ago"; `null` shows "Loading…"
+//   lastRefresh — "Refreshed Ns ago", ticking on its own; `null` shows "Loading…"
 // Add further items as <li> elements in the default slot.
 import { computed } from 'vue'
+import { useNow } from '../composables/useNow'
 import UiStatusDot from './UiStatusDot.vue'
 
 const props = withDefaults(
@@ -20,12 +21,11 @@ const props = withDefaults(
   { healthy: true },
 )
 
-const networkLabel = computed(() =>
-  props.network ? props.network.charAt(0).toUpperCase() + props.network.slice(1) : '',
-)
+const now = useNow(1000)
+const networkLabel = computed(() => (props.network ? props.network.charAt(0).toUpperCase() + props.network.slice(1) : ''))
 
 function timeAgo(d: Date): string {
-  const s = Math.floor((Date.now() - d.getTime()) / 1000)
+  const s = Math.max(0, Math.floor((now.value - d.getTime()) / 1000))
   if (s < 5) return 'just now'
   if (s < 60) return `${s}s ago`
   return `${Math.floor(s / 60)}m ago`
@@ -54,12 +54,13 @@ function timeAgo(d: Date): string {
 <style scoped>
 .mw-statusbar {
   display: flex;
+  flex-wrap: wrap; /* at 200% text the items no longer fit one line */
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4xs) var(--space-sm);
   margin: 0;
-  padding: 3px 12px;
+  padding: var(--space-4xs) var(--space-xs);
   list-style: none;
-  font-size: 0.72rem;
+  font-size: var(--font-size-2xs);
   color: var(--muted);
   background: var(--surface);
   border-top: 1px solid var(--border);
@@ -67,19 +68,20 @@ function timeAgo(d: Date): string {
   font-family: var(--mw-font-mono);
   position: sticky;
   bottom: 0;
-  z-index: 1;
+  z-index: var(--z-raised);
 }
 .mw-statusbar > :deep(li) {
   display: flex;
   align-items: center;
+  gap: var(--space-3xs);
 }
 /* Decorative separator between items; the empty alt text keeps it out of the accessibility tree. */
 .mw-statusbar > :deep(li + li)::before {
   content: '│' / '';
-  margin-inline-end: 16px;
+  margin-inline-end: var(--space-xs);
   color: var(--border);
 }
-/* A pending value is set apart by style, not by dimming it (opacity takes the text below 4.5:1). */
+/* A pending value is set apart by style, not by dimming it (opacity takes the text below the contrast floor). */
 .mw-statusbar__pending {
   font-style: italic;
 }

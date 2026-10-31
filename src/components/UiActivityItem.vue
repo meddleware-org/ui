@@ -18,20 +18,20 @@ defineProps<{ type?: string; time?: string; datetime?: string }>()
 .mw-feed__item {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 4px 0;
+  gap: var(--space-2xs);
+  padding: var(--space-3xs) 0;
   border-bottom: 1px solid var(--border);
   color: var(--text);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
 }
 .mw-feed__item::before {
   content: '';
-  width: 6px;
-  height: 6px;
+  width: var(--space-2xs);
+  height: var(--space-2xs);
   border-radius: 50%;
   background: var(--accent);
-  margin-top: 4px;
+  margin-top: var(--space-3xs);
   flex-shrink: 0;
 }
 .mw-feed__item:last-child {
@@ -41,7 +41,7 @@ defineProps<{ type?: string; time?: string; datetime?: string }>()
   margin-left: auto;
   color: var(--muted);
   font-family: var(--mw-font-mono);
-  font-size: 0.72rem;
-  font-weight: 400;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-regular);
 }
 </style>

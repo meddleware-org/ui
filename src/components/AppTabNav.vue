@@ -28,8 +28,10 @@ const props = withDefaults(
     size?: 'md' | 'lg'
     /** Every tab's UiTabPanel is in the DOM (inactive ones hidden), not only the selected one. */
     allPanels?: boolean
+    /** Drop the bleed between the tab strip and the content (a strip that sits directly on a page edge rather than in a card). */
+    flush?: boolean
   }>(),
-  { variant: 'underline', size: 'md', allPanels: false },
+  { variant: 'underline', size: 'md', allPanels: false, flush: false },
 )
 
 const emit = defineEmits<{
@@ -64,7 +66,7 @@ function onKeydown(e: KeyboardEvent, index: number): void {
   <menu
     role="tablist"
     class="mw-tab-nav"
-    :class="{ 'mw-tab-nav--raised': variant === 'raised', 'mw-tab-nav--lg': size === 'lg' }"
+    :class="{ 'mw-tab-nav--raised': variant === 'raised', 'mw-tab-nav--lg': size === 'lg', 'mw-tab-nav--flush': flush }"
     :aria-label="ariaLabel"
   >
     <!-- role="presentation": a tablist may only own tabs, so the list item is transparent to
@@ -92,11 +94,13 @@ function onKeydown(e: KeyboardEvent, index: number): void {
 
 .mw-tab-nav {
   display: flex;
+  /* Tabs wrap onto a second row when they do not fit (a phone, a larger text size) instead of widening the page. */
+  flex-wrap: wrap;
   gap: var(--space-3xs);
   margin: 0;
   padding: 0;
   list-style: none;
-  border-bottom: 2px solid var(--border);
+  border-bottom: var(--space-4xs) solid var(--border);
 }
 
 /* The list items generate no box: the tab buttons stay the flex items, so every rule below
@@ -110,9 +114,9 @@ function onKeydown(e: KeyboardEvent, index: number): void {
   background: none;
   border: none;
   border-radius: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: var(--space-4xs) solid transparent;
   padding: var(--space-2xs) var(--space-sm);
-  margin-bottom: -2px;
+  margin-bottom: calc(-1 * var(--space-4xs));
   cursor: pointer;
   font-size: var(--font-size-base);
   color: var(--muted);
@@ -126,7 +130,7 @@ function onKeydown(e: KeyboardEvent, index: number): void {
 .mw-tab-nav__tab--active {
   border-bottom-color: var(--accent);
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* ── Raised variant ──────────────────────────────────────────────────── */
@@ -136,8 +140,8 @@ function onKeydown(e: KeyboardEvent, index: number): void {
   /* override default underline border */
   border-bottom: 1px solid var(--border);
   background: var(--surface);
-  padding: 4px 4px 0;
-  gap: 2px;
+  padding: var(--space-3xs) var(--space-3xs) 0;
+  gap: var(--space-4xs);
   overflow-x: auto;
   scrollbar-width: none;
   flex-shrink: 0;
@@ -151,15 +155,14 @@ function onKeydown(e: KeyboardEvent, index: number): void {
   /* reset underline defaults */
   border-bottom: 1px solid var(--border);
   margin-bottom: -1px; /* punch through the container's bottom border */
-  padding: 5px 14px 6px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: var(--space-3xs) var(--space-xs) var(--space-3xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   color: var(--muted);
   background: var(--lift);
-  border-top: 2px solid transparent;
+  border-top: var(--space-4xs) solid transparent;
   border-left: 1px solid transparent;
   border-right: 1px solid transparent;
-  letter-spacing: 0.01em;
   white-space: nowrap;
   transition: color var(--transition-base), background var(--transition-base),
     border-color var(--transition-base);
@@ -174,18 +177,23 @@ function onKeydown(e: KeyboardEvent, index: number): void {
   color: var(--text);
   background: var(--bg);
   border-color: var(--accent) var(--border) var(--bg) var(--border); /* erase — merges visually with content area */
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
-/* Large raised tabs — bigger padding + font so they stand out from body text (used on the
-   dashboard's Blockchain tools page). */
+/* Large raised tabs — bigger padding + font so they stand out from body text. */
 .mw-tab-nav--raised.mw-tab-nav--lg {
-  gap: 3px;
-  padding: 6px 6px 0;
+  gap: var(--space-4xs);
+  padding: var(--space-3xs) var(--space-3xs) 0;
 }
 .mw-tab-nav--raised.mw-tab-nav--lg .mw-tab-nav__tab {
-  padding: 9px 20px 10px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  padding: var(--space-2xs) var(--space-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Flush: the strip sits directly on a page edge, so it drops the surface band and the side padding. */
+.mw-tab-nav--flush {
+  padding-inline: 0;
+  background: transparent;
 }
 </style>

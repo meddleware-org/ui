@@ -42,15 +42,19 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Delivery contract (each component brings its own CSS; layers; reset)
+        run: npm run check:dist
+
       - name: Package contents (file list and size)
         run: |
           npm pack --dry-run --json > pack.json
           node -e "
-            const [p] = JSON.parse(require('fs').readFileSync('pack.json', 'utf8'))
+            const j = JSON.parse(require('fs').readFileSync('pack.json', 'utf8'))
+            const p = Array.isArray(j) ? j[0] : Object.values(j)[0] // npm 12 keys the report by package name
             const files = p.files.map((f) => f.path)
             const stray = files.filter((f) => !/^(dist\/|package\.json$|LICENSE$|README\.md$|CHANGELOG\.md$)/.test(f))
             if (stray.length) { console.error('unexpected files in the tarball:', stray); process.exit(1) }
-            if (!files.includes('dist/ui.js') || !files.includes('dist/base.css')) { console.error('dist/ui.js or dist/base.css missing'); process.exit(1) }
+            for (const f of ['dist/index.js', 'dist/index.d.ts', 'dist/reset.css', 'dist/base.css', 'dist/theme-init.js']) if (!files.includes(f)) { console.error(f + ' missing from the tarball'); process.exit(1) }
             if (p.unpackedSize > 1_000_000) { console.error('unpacked size', p.unpackedSize, 'exceeds 1 MB'); process.exit(1) }
             console.log('tarball:', files.length, 'files,', p.unpackedSize, 'bytes unpacked')
           "

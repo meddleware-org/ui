@@ -22,10 +22,12 @@ const props = withDefaults(
     dismissible?: boolean
     /** Accessible label for the header close button. */
     closeLabel?: string
-    /** CSS width of the dialog (default `min(420px, 90vw)`). */
+    /** CSS width of the dialog (default: the narrow content width, `--mw-content-narrow`, capped at 90vw). */
     width?: string
+    /** Heading rank (default 2), to fit the page's outline. */
+    level?: 2 | 3 | 4 | 5 | 6
   }>(),
-  { dismissible: true, closeLabel: 'Close' },
+  { dismissible: true, closeLabel: 'Close', level: 2 },
 )
 
 const emit = defineEmits<{
@@ -35,7 +37,7 @@ const emit = defineEmits<{
 
 const el = ref<HTMLDialogElement | null>(null)
 const titleId = useId()
-const dialogWidth = computed(() => props.width ?? 'min(420px, 90vw)')
+const dialogWidth = computed(() => props.width ?? 'min(var(--mw-content-narrow), 90vw)')
 
 const supportsClosedBy = typeof HTMLDialogElement !== 'undefined' && 'closedBy' in HTMLDialogElement.prototype
 
@@ -94,7 +96,7 @@ defineExpose({ close })
   >
     <article class="mw-dialog__content">
       <header class="mw-dialog__header">
-        <h2 :id="titleId" class="mw-dialog__title"><slot name="title">{{ title }}</slot></h2>
+        <component :is="`h${level}`" :id="titleId" class="mw-dialog__title"><slot name="title">{{ title }}</slot></component>
         <button
           v-if="dismissible"
           type="button"
@@ -115,17 +117,17 @@ defineExpose({ close })
 .mw-dialog {
   --_width: v-bind(dialogWidth);
   width: var(--_width);
-  max-height: 90vh;
+  max-height: 90dvh;
   padding: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
-  box-shadow: 0 1.25rem 3.75rem rgb(0 0 0 / 45%);
+  box-shadow: var(--shadow-3);
 }
 .mw-dialog::backdrop {
-  background: rgb(0 0 0 / 50%);
-  backdrop-filter: blur(2px);
+  background: var(--backdrop);
+  backdrop-filter: blur(var(--space-4xs));
 }
 .mw-dialog__content {
   display: flex;
@@ -142,7 +144,7 @@ defineExpose({ close })
 .mw-dialog__title {
   margin: 0;
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 .mw-dialog__close {
   padding: 0 var(--space-3xs);

@@ -1,5 +1,6 @@
-// The accessibility gate jsdom cannot be: a real browser computes the colours, so axe's `color-contrast`
-// rule runs. Every theme × season (and the modal dialog) must have no WCAG 2.2 AA violation.
+// The accessibility gate jsdom cannot be: a real browser computes the colours, so axe's `color-contrast` rule runs. Every theme × season
+// (and the modal dialog) must have no WCAG 2.2 AA violation AND no WCAG AAA one (enhanced contrast, 7:1): the library is where the
+// palette is applied, so it is held to the highest level.
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
@@ -18,7 +19,7 @@ for (const theme of THEMES) {
         // Let the status widget settle on its fixture instead of "checking".
         await page.waitForTimeout(150)
         const results = await new AxeBuilder({ page })
-          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'wcag2aaa', 'best-practice'])
           .disableRules(view === 'dialog' ? ['region'] : [])
           .analyze()
         const summary = results.violations.map((v) => ({

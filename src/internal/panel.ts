@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'vue'
+import { onBeforeUnmount, onMounted, watch, type Ref } from 'vue'
 
 /** Panel colour scheme: theme-independent `light`/`dark` panel tokens, or `transparent`. */
 export type PanelVariant = 'light' | 'dark' | 'transparent'
@@ -25,7 +25,7 @@ export interface PanelColors {
  * them for their content. Transparent panels keep the page's status roles.
  * Any supplied `colors` override the defaults — token values are the default.
  */
-export function panelVars(variant: PanelVariant, colors?: PanelColors): CSSProperties {
+export function panelVars(variant: PanelVariant, colors?: PanelColors): Record<string, string> {
   let base: Record<string, string>
   if (variant === 'transparent') {
     base = {
@@ -71,5 +71,31 @@ export function panelVars(variant: PanelVariant, colors?: PanelColors): CSSPrope
     if (colors.danger) base['--_danger'] = colors.danger
     if (colors.info) base['--_info'] = colors.info
   }
-  return base as CSSProperties
+  return base
+}
+
+const OVERRIDE_KEYS = ['bg', 'surface', 'text', 'muted', 'border', 'ok', 'danger', 'info'] as const
+
+/**
+ * Apply a panel's per-instance `colors` overrides to its root element. The variant's own colours are CLASSES (`mw-panel--dark` …, in the
+ * reset), so only an override is ever written, and it is written through the CSSOM (`style.setProperty`) rather than a `style` attribute
+ * in the template: nothing inline is rendered, and it needs no `'unsafe-inline'` in a strict `style-src`. Clearing `colors` clears it.
+ */
+export function usePanelOverrides(el: Ref<HTMLElement | null>, colors: () => PanelColors | undefined): void {
+  const apply = (): void => {
+    const root = el.value
+    if (!root) return
+    const c = colors()
+    for (const k of OVERRIDE_KEYS) {
+      const value = c?.[k]
+      if (value) root.style.setProperty(`--_${k}`, value)
+      else root.style.removeProperty(`--_${k}`)
+    }
+  }
+  onMounted(apply)
+  watch(colors, apply, { deep: true })
+  onBeforeUnmount(() => {
+    const root = el.value
+    if (root) for (const k of OVERRIDE_KEYS) root.style.removeProperty(`--_${k}`)
+  })
 }

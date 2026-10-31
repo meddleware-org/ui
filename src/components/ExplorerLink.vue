@@ -4,8 +4,7 @@
 // — when a value should be both a link and copyable. Build `href` with `suiExplorerUrl` (this
 // package) for Sui entities, or an app-specific helper (e.g. Walruscan) for other targets.
 import { computed } from 'vue'
-import { safeHref } from '../safe-href.js'
-import { DEFAULT_TRUNCATE_CHARS, truncateMiddle } from '../truncate.js'
+import { DEFAULT_TRUNCATE_CHARS, safeHref, truncateMiddle } from '@meddleware/web-utils'
 
 const props = withDefaults(
   defineProps<{
@@ -35,12 +34,15 @@ const label = computed(() => {
 
 <style scoped>
 .el-root {
-  font-family: monospace;
+  /* A 24px-high target (WCAG 2.5.8): a small address link beside the copy button is otherwise too close to it. Block-level inside so a long id still wraps by lines. */
+  display: inline-block;
+  min-block-size: calc(var(--space-sm) + var(--space-3xs));
+  font-family: var(--mw-font-mono);
   font-size: inherit;
-  color: var(--accent);
+  color: var(--mw-link, var(--accent));
   text-decoration: underline dotted;
-  text-underline-offset: 2px;
-  transition: color 0.15s;
+  text-underline-offset: 0.18em;
+  transition: color var(--duration-base);
 }
 .el-root:hover {
   color: var(--text);

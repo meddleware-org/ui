@@ -11,6 +11,6 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--font-size-sm);
 }
 </style>

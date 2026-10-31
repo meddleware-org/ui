@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { safeHref } from '../safe-href.js'
-import { parseSnapshot } from '../status.js'
-import type { StatusLevel } from '../status.js'
+// A compact link showing the platform's overall status, polled from the status API. Nothing is claimed until the first answer: it starts
+// in "checking" (also what SSR renders). The state is written in words; the dot is decoration.
+import { computed } from 'vue'
+import { safeHref, STATUS_HEADLINE, type StatusLevel } from '@meddleware/web-utils'
+import { useStatusSnapshot } from '../composables/useStatusSnapshot'
+import UiStatusDot from './UiStatusDot.vue'
 
 const props = withDefaults(defineProps<{
   /** URL of the `GET /api/status` endpoint to poll. */
@@ -19,9 +21,6 @@ const props = withDefaults(defineProps<{
 
 type WidgetState = 'checking' | 'ok' | 'degraded' | 'error'
 
-/** The shortest interval honoured, so a tiny `pollInterval` cannot hammer the status endpoint. */
-const MIN_POLL_MS = 15_000
-
 const STATE_MAP: Record<StatusLevel, WidgetState> = {
   operational: 'ok',
   degraded: 'degraded',
@@ -29,47 +28,11 @@ const STATE_MAP: Record<StatusLevel, WidgetState> = {
   unknown: 'degraded',
 }
 
-const LABEL: Record<StatusLevel, string> = {
-  operational: 'All systems operational',
-  degraded: 'Degraded',
-  down: 'Major outage',
-  unknown: 'Status unknown',
-}
+const { snapshot, error } = useStatusSnapshot({ url: props.apiUrl, intervalMs: props.pollInterval })
 
-// Nothing is claimed until the first answer: the widget starts in "checking" (also what SSR renders).
-const state = ref<WidgetState>('checking')
-const label = ref('Checking status…')
-let timer: ReturnType<typeof setInterval> | null = null
-
-async function poll(): Promise<void> {
-  try {
-    // Bounded so a hung request cannot stall polling (the next poll retries).
-    const res = await fetch(props.apiUrl, { signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const snap = parseSnapshot(await res.json())
-    if (!snap) throw new Error('unexpected response shape')
-    state.value = STATE_MAP[snap.overall]
-    label.value = LABEL[snap.overall]
-  } catch {
-    state.value = 'error'
-    label.value = 'Status unavailable'
-  }
-}
-
-/** Poll unless the tab is hidden; a hidden tab catches up when it becomes visible again. */
-function pollIfVisible(): void {
-  if (!document.hidden) void poll()
-}
-
-onMounted(() => {
-  void poll()
-  timer = setInterval(pollIfVisible, Math.max(props.pollInterval, MIN_POLL_MS))
-  document.addEventListener('visibilitychange', pollIfVisible)
-})
-onUnmounted(() => {
-  if (timer !== null) clearInterval(timer)
-  document.removeEventListener('visibilitychange', pollIfVisible)
-})
+const state = computed<WidgetState>(() => (error.value ? 'error' : snapshot.value ? STATE_MAP[snapshot.value.overall] : 'checking'))
+const label = computed(() => (error.value ? 'Status unavailable' : snapshot.value ? STATUS_HEADLINE[snapshot.value.overall] : 'Checking status…'))
+const dot = computed<StatusLevel>(() => (state.value === 'ok' ? 'operational' : state.value === 'degraded' ? 'degraded' : state.value === 'error' ? 'down' : 'unknown'))
 </script>
 
 <template>
@@ -80,7 +43,7 @@ onUnmounted(() => {
     class="status-widget"
     :class="`status-widget--${state}`"
     :title="`Platform status: ${label}`"
-  >{{ label }}</a>
+  ><UiStatusDot :status="dot" />{{ label }}</a>
 </template>
 
 <style scoped>
@@ -91,23 +54,8 @@ onUnmounted(() => {
   text-decoration: none;
   color: inherit;
   font-size: var(--font-size-sm);
-  opacity: 0.85;
-  transition: opacity var(--transition-base);
 }
-.status-widget:hover { opacity: 1; }
-
-/* Decorative status dot (the label text carries the meaning). */
-.status-widget::before {
-  content: '';
-  width: var(--space-2xs);
-  height: var(--space-2xs);
-  border-radius: 50%;
-  flex-shrink: 0;
+.status-widget:hover {
+  text-decoration: underline;
 }
-
-/* Status dots use the role tokens (degraded → --warning, a functional yellow, not gold). */
-.status-widget--checking::before { background: var(--muted); }
-.status-widget--ok::before       { background: var(--ok); }
-.status-widget--degraded::before { background: var(--warning); }
-.status-widget--error::before    { background: var(--danger); }
 </style>

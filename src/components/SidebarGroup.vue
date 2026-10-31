@@ -75,7 +75,7 @@ withDefaults(
   width: 100%;
   padding: var(--space-3xs) var(--space-xs);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   /* Inside a light/dark panel the panel's own muted colour; on the page, the page role. */
   color: var(--_muted, var(--muted));
   user-select: none;
@@ -98,6 +98,6 @@ withDefaults(
 }
 .sidebar-group--l2 > .sidebar-group__label {
   padding-inline-start: var(--space-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 </style>

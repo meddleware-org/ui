@@ -5,7 +5,7 @@
 import { createApp } from 'vue'
 import '@meddleware/design-tokens/tokens.css'
 import '@meddleware/design-tokens/seasons.css'
-import '../src/styles/base.css'
+import '../src/styles/reset.css'
 import ComponentGallery from './ComponentGallery.vue'
 
 const params = new URLSearchParams(location.search)
@@ -20,4 +20,4 @@ window.fetch = (async () =>
     { headers: { 'Content-Type': 'application/json' } },
   )) as typeof fetch
 
-createApp(ComponentGallery, { view: params.get('view') ?? 'all' }).mount('#app')
+createApp(ComponentGallery, { view: params.get('view') ?? 'all', theme: params.get('theme') === 'dark' ? 'dark' : 'light' }).mount('#app')

@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { panelVars, type PanelVariant, type PanelColors } from '../internal/panel'
+// The primary navigation column. On wide screens it sits beside the content; below 45em it becomes a drawer built on the Popover API:
+// the `<aside>` is a `popover`, opened by a menu button (`AppHeader`'s `sidebar-id`, or any `popovertarget`), dismissed by Escape or a
+// click outside, and closed when an item inside is chosen. Give it an `id` (it falls through to the `<aside>`) so the button can find it.
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { usePanelOverrides, type PanelVariant, type PanelColors } from '../internal/panel'
 
 const props = withDefaults(
   defineProps<{
@@ -10,20 +13,34 @@ const props = withDefaults(
     colors?: PanelColors
     /** Sidebar width (CSS length, e.g. '280px'). Defaults to `--mw-sidebar-width` (240px). */
     width?: string
+    /** Accessible name of the navigation landmark. */
+    navLabel?: string
   }>(),
-  { variant: 'dark' },
+  { variant: 'dark', navLabel: 'Primary' },
 )
 
-const panel = computed(() => panelVars(props.variant, props.colors) as Record<string, string>)
-const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width, 240px)')
+const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width)')
+
+const aside = ref<HTMLElement | null>(null)
+usePanelOverrides(aside, () => props.colors)
+
+/** Choosing an item inside the open drawer closes it. */
+function onClick(e: MouseEvent): void {
+  const el = aside.value
+  if (!el || !(e.target instanceof Element) || !e.target.closest('button, a[href]')) return
+  if (typeof el.hidePopover === 'function' && el.matches(':popover-open')) el.hidePopover()
+}
+onMounted(() => aside.value?.addEventListener('click', onClick))
+onBeforeUnmount(() => aside.value?.removeEventListener('click', onClick))
+
+// Only the navigation block is component-owned. head/body/foot slot content renders directly and styles itself; the nav grows to fill, so
+// body/foot content settles at the bottom.
 </script>
 
 <template>
-  <!-- Only the navigation block is component-owned. head/body/foot slot content renders directly
-       and styles itself; the nav grows to fill, so body/foot content settles at the bottom. -->
-  <aside class="mw-sidebar" :class="`mw-sidebar--${variant}`">
+  <aside ref="aside" class="mw-sidebar" :class="`mw-panel--${variant} mw-sidebar--${variant}`" popover="auto">
     <slot name="head" />
-    <nav class="mw-sidebar__nav" aria-label="Primary"><slot /></nav>
+    <nav class="mw-sidebar__nav" :aria-label="navLabel"><slot /></nav>
     <slot name="body" />
     <slot name="foot" />
   </aside>
@@ -31,24 +48,23 @@ const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width, 240p
 
 <style scoped>
 .mw-sidebar {
-  /* Panel colour variables (variant defaults or per-instance overrides), bound from script. */
-  --_bg: v-bind('panel["--_bg"]');
-  --_surface: v-bind('panel["--_surface"]');
-  --_text: v-bind('panel["--_text"]');
-  --_muted: v-bind('panel["--_muted"]');
-  --_border: v-bind('panel["--_border"]');
-  --_ok: v-bind('panel["--_ok"]');
-  --_danger: v-bind('panel["--_danger"]');
-  --_info: v-bind('panel["--_info"]');
+  --_width: v-bind(sidebarWidth);
+  /* A popover is `display: none` and positioned by the user agent; on wide screens it is just a column. */
+  margin: 0;
+  padding: 0;
+  border: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
-  --_width: v-bind(sidebarWidth);
   width: var(--_width);
   background: var(--_bg);
   color: var(--_text);
   border-right: 1px solid var(--_border);
   font-family: var(--mw-font-sans);
+  /* Not clipped: the drawer behaves as a column here. */
+  overflow: visible;
+  inset: auto;
+  position: static;
 }
 .mw-sidebar__nav {
   display: flex;
@@ -59,6 +75,23 @@ const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width, 240p
   padding: var(--space-xs) 0;
   flex: 1 1 auto;
   overflow-y: auto;
+}
+
+/* Below 45em: the drawer. Fixed to the inline start, over the page, in the top layer while open. */
+@media (width < 45em) {
+  .mw-sidebar:not(:popover-open) {
+    display: none;
+  }
+  .mw-sidebar:popover-open {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(var(--_width), 85vw);
+    height: 100dvh;
+    box-shadow: var(--shadow-3);
+  }
+  .mw-sidebar::backdrop {
+    background: var(--backdrop);
+  }
 }
 
 /* Links the host slots into the sidebar take the sidebar's own text colour, not the page accent. */

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-// Displays a value (an address, blob id, tx digest, …) with a dedicated copy ICON that copies the
-// full value to the clipboard. The value itself is NOT the copy trigger — only the icon is — so the
-// value slot can hold a link (nest an <ExplorerLink> in the default slot) while the icon still
-// copies. With no slot it shows the truncated `address`.
-import { computed, ref } from 'vue'
-import { DEFAULT_TRUNCATE_CHARS, truncateMiddle } from '../truncate.js'
+// Displays a value (an address, blob id, tx digest, …) with a dedicated copy ICON that copies the full value to the clipboard. The value
+// itself is NOT the copy trigger — only the icon is — so the value slot can hold a link (nest an <ExplorerLink> in the default slot)
+// while the icon still copies. With no slot it shows the truncated `address`.
+import { computed } from 'vue'
+import { DEFAULT_TRUNCATE_CHARS, truncateMiddle } from '@meddleware/web-utils'
+import UiCopyButton from './UiCopyButton.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -24,70 +24,13 @@ const props = withDefaults(
   { truncate: true, chars: () => [...DEFAULT_TRUNCATE_CHARS], label: 'Copy' },
 )
 
-const copied = ref(false)
-
-const display = computed(() => {
-  return props.truncate ? truncateMiddle(props.address, props.chars) : props.address
-})
-
-async function copy(): Promise<void> {
-  try {
-    await navigator.clipboard.writeText(props.address)
-  } catch {
-    // Clipboard unavailable or denied (insecure context, permissions): nothing was copied.
-    return
-  }
-  copied.value = true
-  setTimeout(() => {
-    copied.value = false
-  }, 1500)
-}
+const display = computed(() => (props.truncate ? truncateMiddle(props.address, props.chars) : props.address))
 </script>
 
 <template>
   <span class="ca-root">
     <span class="ca-value" :title="address"><slot>{{ display }}</slot></span>
-    <button
-      type="button"
-      class="ca-copy"
-      :class="{ 'ca-copy--copied': copied }"
-      :title="copied ? 'Copied!' : label"
-      :aria-label="copied ? 'Copied' : label"
-      @click="copy"
-    >
-      <!-- check when copied, copy glyph otherwise -->
-      <svg
-        v-if="copied"
-        class="ca-icon"
-        viewBox="0 0 24 24"
-        width="1em"
-        height="1em"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-      <svg
-        v-else
-        class="ca-icon"
-        viewBox="0 0 24 24"
-        width="1em"
-        height="1em"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-      </svg>
-    </button>
+    <UiCopyButton :value="address" :label="label" />
   </span>
 </template>
 
@@ -97,30 +40,15 @@ async function copy(): Promise<void> {
   align-items: center;
   /* font-relative gap (em) — scales with the address text by design. */
   gap: 0.35em;
+  /* A value shown whole (a 64-character address) wraps instead of widening the page. */
+  max-width: 100%;
 }
 .ca-value {
-  font-family: var(--mw-font-mono, monospace);
+  font-family: var(--mw-font-mono);
   font-size: inherit;
-}
-.ca-copy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--muted);
-  cursor: pointer;
-  line-height: 1;
-  transition: color var(--transition-base);
-}
-.ca-copy:hover {
-  color: var(--text);
-}
-.ca-copy--copied {
-  color: var(--accent);
-}
-.ca-icon {
-  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  /* A header's actions do not wrap their text, but an address may (at 200% text it is wider than a phone). */
+  white-space: normal;
 }
 </style>

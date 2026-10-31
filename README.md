@@ -20,12 +20,24 @@ Import the CSS once at your application entry point:
 // src/main.ts (or equivalent)
 import '@meddleware/design-tokens/tokens.css'  // required — registers CSS custom properties
 import '@meddleware/design-tokens/seasons.css' // optional — enables data-season theming
-import '@meddleware/ui/base.css'               // optional — element defaults + scale + utilities
+import '@meddleware/ui/reset.css'              // required once — element defaults, focus ring, utilities
 import { createApp } from 'vue'
 import App from './App.vue'
 
 createApp(App).mount('#app')
 ```
+
+Each component brings **its own CSS** when you import it, so a bundler keeps only the styles of the components an app uses (the package
+declares `*.css` as a side effect, and each component's import lives in its own module). `@meddleware/ui/base.css` is the old single
+file (reset + every component) for consumers that want it.
+
+**Cascade layers.** The reset is `@layer mw.reset` and every component's CSS is `@layer mw.components`. Layered CSS always loses to your
+unlayered CSS, so you override a component with an ordinary selector and never have to out-specify its internals.
+
+**No flash of the wrong theme.** Load `@meddleware/ui/theme-init.js` as a plain script at the top of `<head>`
+(`<script src="/theme-init.js" data-default="dark"></script>`, copied from the package into your public folder). It applies the saved
+colour mode (or `data-default`: `light`, `dark` or `system`) and the season to `<html>` before first paint, with the same rules as
+`useColorMode` and `useSeason`. It is a same-origin file, so it needs no CSP hash.
 
 ## Styling, scales & utilities
 
@@ -35,7 +47,7 @@ colour-named or magic-number values. Focus states use the dedicated `--focus-rin
 always visible and never read as an error. Component **props and accessibility are unchanged** by the
 theming system — only the styling tokens they resolve to.
 
-`base.css` also ships opt-in utilities (respecting `prefers-reduced-motion`):
+`reset.css` also ships utilities (respecting `prefers-reduced-motion`) and gives a bare `<button>` a base look from the tokens:
 
 | Utility | Purpose |
 | --- | --- |
@@ -54,11 +66,11 @@ Seasonal theming is entirely in `@meddleware/design-tokens` (import `seasons.css
 
 | Component | Description |
 | --- | --- |
-| `AppHeader` | Top bar (`<header>`). Slots `brand`, default and `actions` render **directly** in the header — no wrapper elements. The brand slot's single element comes first and takes the brand typography, pushing everything after it to the inline end; default-slot content that should fill the gap sets its own `flex: 1`. |
-| `AppSidebar` | Side panel (`<aside>`) around a component-owned `<nav aria-label="Primary">` (default slot). The `head`, `body` and `foot` slots render directly and style themselves; the nav grows, so body/foot content settles at the bottom. |
+| `AppHeader` | Top bar (`<header>`). `sidebarId` shows a menu button below 45em that opens that sidebar as a drawer. Slots `brand`, default and `actions` render **directly** in the header — no wrapper elements. The brand slot's single element comes first and takes the brand typography, pushing everything after it to the inline end; default-slot content that should fill the gap sets its own `flex: 1`. |
+| `AppSidebar` | Side panel (`<aside>`) around a component-owned `<nav>` (default slot; `navLabel`, default "Primary"). Below 45em it becomes a **drawer** on the Popover API, opened by `AppHeader`'s menu button (give the sidebar an `id`, pass it as `sidebar-id`), closed by Escape, a click outside, or choosing an item. The `head`, `body` and `foot` slots render directly and style themselves; the nav grows, so body/foot content settles at the bottom. |
 | `AppFooter` | Page footer (`<footer>`). Slots `start`, default and `end` render directly; `docsUrl` / `devUrl` render a component-owned `<nav aria-label="Documentation">` at the inline end. |
 
-All three accept a `variant` prop:
+All three accept a `variant` prop (a CSS class, `mw-panel--dark` and so on, defined in the reset; `colors` overrides are written to the element through the CSSOM, never as an inline `style` attribute, so they work under a strict CSP):
 
 | Variant | Behaviour |
 | --- | --- |
@@ -70,14 +82,14 @@ All three accept a `variant` prop:
 
 | Component | Description |
 | --- | --- |
-| `UiButton` | Styled button. |
-| `UiCard` | Card `<section>`: optional `<header>` (title), body content directly inside, optional `<footer>`. |
+| `UiButton` | Styled button, or a link that looks like one (`href`, checked with `safeHref`). `variant` primary / secondary / ghost / danger / link; `size` md / sm; `busy` shows a spinner, sets `aria-busy` and blocks interaction without losing the label. Hover is an inner ring in the label colour, so the label keeps its contrast. |
+| `UiCard` | Card: optional `<header>` (title), body content directly inside, optional `<footer>`. `as` section / article / li, `level` 2–6 for the heading, `plain` drops the header band, `href` makes the whole card a link through its title (one tab stop). Inside a list item the band and footer are plain elements (a `<header>` there would become a page-level landmark). |
 | `UiSelect` | Styled native `<select>` (single root; attributes fall through; chevron painted in CSS). Label it with `UiFormField` or an `aria-label`. |
 | `UiFormField` | A labelled field as a `<p>`: `<label for>` + `label-suffix` slot (e.g. `UiFieldHint`, kept outside the label) + control slot (receives `attrs` with `id` / `aria-*`) + hint/error `<small>`. Slot content must be phrasing content. |
-| `UiNotice` | Notice / alert banner. |
-| `UiDialog` | Modal on the native `<dialog>`: `<article>` › `<header>` (h2 title + close) · body slot · `<footer>` (`actions` slot, scoped `close(value)`). `v-model:open`, `title`, `dismissible` (Escape/backdrop/close button via native `closedby`), `width`; emits `close(returnValue)`. |
+| `UiNotice` | Notice / alert banner. `type` info / warning / error / ok (roles: `alert` for error, `status` for ok and warning), `message` prop or slot, `as` p / div for block content. The text keeps body colour; the tone is the border and tint. |
+| `UiDialog` | Modal on the native `<dialog>`: `<article>` › `<header>` (title heading, `level` default 2, + close) · body slot · `<footer>` (`actions` slot, scoped `close(value)`). `v-model:open`, `title`, `dismissible` (Escape/backdrop/close button via native `closedby`), `width`; emits `close(returnValue)`. |
 | `AppTabNav` / `UiTabPanel` | WAI-ARIA tabs: `AppTabNav` is the `tablist` (arrow keys, Home/End, roving tabindex); wrap each view's content in `UiTabPanel` with the same `idPrefix` and the shown `tab` id. Only the selected tab gets `aria-controls` (one panel rendered); pass `all-panels` when every tab's panel stays mounted. `tabIds(prefix, id)` returns the linked ids. |
-| `SidebarItem` | Navigation button for use inside `AppSidebar`. Accepts `label`, `icon`, `active`, and `disabled` props. |
+| `SidebarItem` | Sidebar entry: a button by default, a real `<a>` with `href` (checked with `safePath` / `safeHref`). `label`, `icon`, `active` (`aria-current="page"`), `disabled`. |
 | `SidebarGroup` | Labelled group of sidebar items: a `<fieldset>` whose visible `<legend>` names the group. |
 | `CopyableAddress` | Shows a value (address/blob id/tx digest) with a dedicated **copy icon** (the value text is not the copy trigger). Put a link in the default slot to make it both linkable and copyable. Props: `address`, `truncate`, `chars`, `label`. |
 | `ExplorerLink` | External block-explorer link with a truncated label (or slot). Chain-agnostic — pass `href` (build it with `suiExplorerUrl`, or an app helper such as a Walruscan URL). Nest inside `CopyableAddress` for link + copy. |
@@ -97,10 +109,34 @@ icon copies:
 | --- | --- |
 | `UiPanel` | Titled surface: `<section>` + heading (`title` prop/slot; `level` 2–6, default 2) + body content directly inside. |
 | `UiStatGrid` / `UiStatRow` | Key/value readout as a description list (`<dl>` with `<dt>`/`<dd>` pairs). |
-| `UiToolbar` | Toolbar as `<menu>` (a list of commands). Props: `actions: ToolbarAction[]` (`{ id, label, disabled? }`); emits `action(id)`. |
+| `UiToolbar` | A WAI-ARIA toolbar (`role="toolbar"`, one tab stop, Left/Right/Home/End between enabled buttons). Props: `actions: ToolbarAction[]` (`{ id, label, disabled? }`), `label`; emits `action(id)`. |
 | `UiToolbarButton` | Compact console button; also usable standalone (refresh, pagination). |
-| `UiStatusBar` | Status bar as a list. Standard items from optional props `network` (+ `healthy`), `epoch`, `lastRefresh`; extra `<li>` items in the default slot. |
-| `UiDataTable`, `UiBadge`, `UiStatusDot`, `UiActivityFeed` / `UiActivityItem` | Scrollable table; status pill; health dot; activity list (`UiActivityItem` takes `type`, `time`, optional `datetime` to render a `<time>`). |
+| `UiStatusBar` | Status bar as a list. Standard items from optional props `network` (+ `healthy`), `epoch`, `lastRefresh` (the relative time ticks on its own); extra `<li>` items in the default slot. |
+| `UiDataTable` | Table. `head` slot: `<th>` cells **only** (never a `<tr>`; the component wraps them, and a dev check warns); default slot: rows; `rows` (0 shows `empty`), `caption` (visually hidden accessible name). When wider than its box the scroll area becomes a focusable, labelled region and says so. A `th scope="row"` reads as the row title, not a column header. |
+| `UiBadge` | Status or tag as words + symbol + border: `tone` ok / warn / danger / info / accent / neutral, `symbol` (own glyph, `false`, or the tone's default). The label keeps body colour. (`variant` is the old API.) |
+| `UiStatusDot` | Decorative health dot: `status` operational / degraded / down / unknown (or ok / warn / error), `size` sm / md. Put the state in words beside it. |
+| `UiActivityFeed` / `UiActivityItem` | Activity list (`UiActivityItem` takes `type`, `time`, optional `datetime` to render a `<time>`). |
+| `UiSegmentedControl` | Radio-group choice: `label` names the group (a `<legend>`, visually hidden unless `label-hidden` is false), the chosen option carries a ✓, `layout` inline / wrap / grid. |
+| `UiStepper` | Steps: a wizard (`v-model` index) or a progress list (`status` per step: done / busy / error / pending; `orientation="vertical"`), with the state in words for assistive technology. |
+| `UiMeter` | Labelled native `<meter>` with the state in words (within / close to / over). |
+| `UiPager` + `usePager` | Previous / next for a keyset-paginated list; `usePager(load)` keeps the cursors seen and drops out-of-order answers. |
+
+### Forms and small primitives
+
+| Component | Description |
+| --- | --- |
+| `UiInput`, `UiTextarea` | Styled native controls (single root; attributes fall through; `v-model`). Label them with `UiFormField` or an `aria-label`. |
+| `UiFileField` | `UiFormField` around a native file input: `id`, `label`, `hint`, `error`, `accept`, `disabled`, `required`; emits `select` with the chosen `File` (or `null`). |
+| `UiTextField` | `UiFormField` + `UiInput` (or `UiTextarea` with `rows`), association done: `id`, `label`, `hint`, `error`; other attributes go to the control. |
+| `UiSelectField`, `UiCheckField`, `UiDateTimeField` | A labelled select (`[value, label]` options, optional placeholder); a checkbox wrapped in its label (`label` slot for rich text); a date-time that edits wall time in a `zone` and exchanges UTC. |
+| `UiLiveStatus` | A polite live region that is always mounted, so changes are announced. |
+| `UiEmptyState`, `UiCodeBlock`, `UiCopyButton`, `UiAmount`, `UiSkipLink`, `UiAppShell` | "Nothing here yet" with an action slot; a focusable `<figure>`/`<pre>`; a copy icon that announces the result; an exact SUI/WAL amount in a `<data>` element; "Skip to content"; the page frame (skip link, `<main>`, header/sidebar/footer slots). |
+
+### Helpers
+
+The framework-free helpers live in [`@meddleware/web-utils`](https://www.npmjs.com/package/@meddleware/web-utils) and are re-exported here
+(`suiExplorerUrl`, `walruscanBlobUrl`, `safeHref`, `safePath`, `truncateMiddle`, the status parser and its `STATUS_LABEL` /
+`STATUS_HEADLINE`). Composables: `useColorMode`, `useSeason`, `useNow`, `useStatusSnapshot`, `usePager`.
 
 ### Explorer helper
 

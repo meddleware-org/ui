@@ -7,6 +7,7 @@ import { mount } from '@vue/test-utils'
 import { installDialogShim } from './dialog-shim'
 import AppTabNav from '../components/AppTabNav.vue'
 import UiDialog from '../components/UiDialog.vue'
+import CopyrightLine from '../components/CopyrightLine.vue'
 
 beforeAll(installDialogShim)
 
@@ -126,5 +127,19 @@ describe('UiDialog', () => {
     await w.find('dialog').trigger('click')
     expect(w.emitted('close')).toEqual([['']])
     w.unmount()
+  })
+})
+
+describe('CopyrightLine text', () => {
+  const text = (props: Record<string, unknown>) => mount(CopyrightLine, { props: { organisationName: 'Org', year: 2026, ...props } }).text()
+
+  it('separates the organisation from the rights statement with a space (a template condense must not eat it)', () => {
+    expect(text({ rightsStatement: 'all' })).toContain('2026 Org. All rights reserved.')
+    expect(text({ rightsStatement: 'jam' })).toContain('2026 Org. All jams preserved.')
+    expect(text({ rightsStatement: 'none' })).toContain('2026 Org. No rights reserved.')
+  })
+
+  it('has no trailing separator when there is no statement', () => {
+    expect(text({ rightsStatement: '' }).endsWith('Org.')).toBe(true)
   })
 })
