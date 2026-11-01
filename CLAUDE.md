@@ -38,6 +38,7 @@ The gallery e2e fails on any WCAG AA **or AAA** violation (`color-contrast-enhan
 
 - **Tinted backgrounds.** Text drawn in a tone colour over a tint of that tone (`color-mix`) loses contrast. Keep the text in `--text` and let the border and the tint carry the tone (UiNotice, UiBadge).
 - **`opacity` on text.** It silently takes the label below the floor. Use `--muted` (which is AAA) or `--text`, never `opacity`, to dim text. A disabled control is exempt from contrast, so `filter: grayscale()` is how it is dimmed.
+- **A control identified by its edge.** A text field, textarea or select is found by its border, so that border must reach 3:1 (WCAG 1.4.11): use `--control-border`, never `--border` (a divider, 1.3–1.4:1). A button is identified by its label and keeps `--border`. axe cannot see this; `field-boundary.test.ts` and the token contrast gate hold it.
 - **Browser defaults.** A bare `<button>` in a dark theme gets the browser's grey (5.3:1); the reset gives it a token-based base style.
 - **Forced colours (Windows High Contrast)** drop backgrounds and shadows. A state drawn with a background alone (the chosen colour mode, the current sidebar item) needs an edge of its own in `@media (forced-colors: active)`; `e2e/forced-colors.spec.ts` checks it.
 - **Hover must not change a fill under a label.** UiButton's hover is an inner ring in the label colour, not a `filter`.

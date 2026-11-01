@@ -8,7 +8,7 @@ const snapshot = (overall: string) => ({
   overall,
   groups: [{ name: 'Platform', status: overall, components: [{ name: 'Web', status: overall }] }],
 })
-const respond = (body: unknown, ok = true) => vi.fn(async () => ({ ok, status: ok ? 200 : 500, json: async () => body }))
+const respond = (body: unknown, ok = true) => vi.fn(async () => new Response(JSON.stringify(body), { status: ok ? 200 : 500, headers: { 'content-type': 'application/json' } }))
 
 describe('StatusWidget', () => {
   beforeEach(() => vi.useFakeTimers())

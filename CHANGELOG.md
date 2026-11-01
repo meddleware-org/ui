@@ -3,6 +3,17 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.38] - 2026-11-01
+
+### Fixed
+
+- **Text fields, textareas and selects draw their edge in `--control-border`** (3:1 on every canvas in every theme × season, WCAG 1.4.11) instead of `--border`, a divider colour at 1.3–1.4:1. Requires `@meddleware/design-tokens` ^0.1.13. A test fails if a field goes back to the divider colour.
+- The status widget's tests answer with a real `Response`, so the bounded read path in `@meddleware/web-utils` ^0.0.2 (size cap by default) is the one under test.
+
+### Changed
+
+- The drawer test asserts that focus returns to the menu button after Escape and after choosing an item (all five browser projects).
+
 ## [0.1.37] - 2026-11-01
 
 - Header, footer, legend and mode control hold at large text sizes

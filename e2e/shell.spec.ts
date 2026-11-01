@@ -18,6 +18,8 @@ test.describe('narrow screen', () => {
 
     await page.keyboard.press('Escape')
     await expect(nav).toBeHidden()
+    // The Popover API hands focus back to the button that opened the drawer, so a keyboard user is not dropped at the top of the page.
+    await expect(menu).toBeFocused()
   })
 
   test('choosing an item closes the drawer, and the menu button works from the keyboard', async ({ page }) => {
@@ -28,6 +30,7 @@ test.describe('narrow screen', () => {
     await expect(nav).toBeVisible()
     await page.getByRole('button', { name: 'Treasury' }).click()
     await expect(nav).toBeHidden()
+    await expect(page.getByRole('button', { name: 'Menu' })).toBeFocused()
   })
 
   test('the drawer fits the screen and does not scroll the page sideways', async ({ page }) => {

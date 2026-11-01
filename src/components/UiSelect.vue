@@ -42,7 +42,7 @@ const model = defineModel<string>()
   background-size: var(--_chevron-arm) var(--_chevron-arm);
   background-repeat: no-repeat;
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   font: inherit;
 }

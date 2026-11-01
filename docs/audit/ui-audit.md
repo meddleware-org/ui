@@ -18,15 +18,17 @@
 **Project type:** Vue 3 component library (Vite library build → `dist/`).
 **Template:**
 
-- AUDIT_TEMPLATE.md (2026-10-08)
-- AUDIT_TEMPLATE_VUE.md (2026-10-08) — mandatory; names `ui`
-- AUDIT_TEMPLATE_TS.md (2026-10-08)
+- AUDIT_TEMPLATE.md (2026-11-01)
+- AUDIT_TEMPLATE_VUE.md (2026-11-01) — mandatory; names `ui`
+- AUDIT_TEMPLATE_TS.md (2026-11-01)
+- AUDIT_TEMPLATE_A11Y.md (2026-11-01)
 
 Not triggered: SUI, SUI_CLIENT (no chain access; `suiExplorerUrl` only builds links), SEAL, WALRUS,
 AUTH, OPS, IMG (no image; consumers host it), SITE.
 
 **Deployment status:**
 
+- **Update 2026-11-01:** npm `@meddleware/ui` **0.1.37** is `latest` (released 2026-11-01: per-component CSS in cascade layers, the new field and status components, large-text fixes); `dist/` only, 219 files, 247 kB unpacked. **0.1.38 is prepared** with F13 (field edges use `--control-border`) and F14, requiring `@meddleware/design-tokens` ^0.1.13 and `@meddleware/web-utils` ^0.0.2. The 0.1.32 bullets below are history.
 - npm `@meddleware/ui` **0.1.32** (released 2026-10-19; tag `v0.1.32`, publish run 39185227316, whose release
   gate included "Real-browser accessibility (Playwright + axe, theme × season)"), published by trusted publishing
   (OIDC) with an SLSA v1 provenance attestation; 47 files, 112,052 bytes unpacked (`npm view` 2026-10-19).
@@ -44,7 +46,7 @@ AUTH, OPS, IMG (no image; consumers host it), SITE.
   landing, status-ui, walrus-storage-ui, access-gate-ui, sealed-storage-ui, dao-ui, treasury-ui, token-issuance-ui, docs and dev —
   plus walrus-relay and wallet-adapter (peer).
 
-**Review date:** 2026-10-03; re-verified 2026-10-09; release status 2026-10-19; 0.1.35 re-verified 2026-10-30 (Point links at the machine zone (ADR-0005); current design-tokens and eslint-config); 0.1.36 re-verified 2026-10-31 (Per-component CSS layers, new field and status components, AAA contrast); 0.1.37 re-verified 2026-11-01 (Header, footer, legend and mode control hold at large text sizes)
+**Review date:** 2026-10-03; re-verified 2026-10-09; release status 2026-10-19; 0.1.35 released 2026-10-30 (Point links at the machine zone (ADR-0005); current design-tokens and eslint-config); 0.1.36 released 2026-10-31 (Per-component CSS layers, new field and status components, AAA contrast); 0.1.37 released 2026-11-01 (Header, footer, legend and mode control hold at large text sizes); frontend-wave delta review 2026-11-01 (real review of the 2026-10-19 → 2026-11-01 changes; see the delta section)
 **Reviewer:** Internal review
 **Severity ceiling:** Medium.
 
@@ -153,6 +155,8 @@ the same release (F11, the real-browser contrast gate's own catches). A twelfth,
   default (`OQ1`) and external review before mainnet.
 
 ---
+
+**2026-11-01 update.** Between 0.1.32 and 0.1.37 the library was rebuilt (per-component CSS in layers, many new components, runtime endpoint config, the Popover drawer, helpers moved to web-utils). This review found one conformance defect — text fields drew their edge at 1.3–1.4:1 (WCAG 1.4.11), fixed in 0.1.38 with design-tokens' new `--control-border` (F13) — and a test that mocked away the real fetch path (F14); everything else reviewed holds (F15–F18, Positive). No new finding is left open.
 
 ## Threat model / trust boundaries
 
@@ -643,6 +647,50 @@ a second case of the gate surfacing a defect that only a newer rule set could se
 
 ---
 
+### Frontend wave delta review (2026-11-01) — 0.1.33 to 0.1.37 reviewed, 0.1.38 prepared
+
+Scope: everything since the 2026-10-19 review (`0.1.32`): 97 files, about +4 000 / −1 300 lines — the runtime endpoint configuration (0.1.34), the per-component CSS in cascade layers and the many new components (0.1.36), the large-text fixes (0.1.37), and the move of `safeHref`, `safePath`, `safeIcon`, `suiExplorerUrl`, `walruscanBlobUrl`, `truncateMiddle` and the status parser into `@meddleware/web-utils` (ui re-exports them, so its API is unchanged — `exports.test.ts`). Read: `runtime-config.ts`, `theme-init.js`, `CopyrightLine`, `ExplorerLink`, `UiCopyButton`, `CopyableAddress`, `useStatusSnapshot`/`StatusWidget`, `AppSidebar`/`AppHeader` (the Popover drawer), the form components, `vite/css-delivery.ts`, `scripts/check-dist.mjs`, the workflows and the tests. Ran: `npm ci`, the audit gate (0 high/critical, allowlist empty), `vue-tsc`, `npm run lint` (stylelint, eslint, html-validate), `vitest` (12 files, 157 tests; 154 before the changes below), `npm run build`, `check:dist` (46 component stylesheets, `reset.css`, `base.css`, `theme-init.js`), `npm pack --dry-run` (219 files, 247 kB, `dist/` only — no tests, gallery, e2e or audit files), and the gallery e2e on Chromium, Firefox, WebKit and the two mobile projects with the CI font (DejaVu Sans via fontconfig): **186 passed**.
+
+### F13 — `UiInput`, `UiTextarea` and `UiSelect` drew their edge with the divider colour
+**Severity:** Medium   **Disposition:** RESOLVED
+**Where:** `src/components/UiInput.vue`, `UiTextarea.vue`, `UiSelect.vue` (`border: 1px solid var(--border)`).
+**Issue:** WCAG 2.2 SC 1.4.11 needs the edge that identifies a text field to reach 3:1; `--border` is 1.31:1 (light) / 1.41:1 (dark) on the page (design-tokens F13). No sweep measures it: axe has no rule for it. Buttons are identified by their label and keep `--border`.
+**Impact:** every form in every tool; the declared AA hard gate (D100) was not met for fields.
+**Remediation / evidence:** the three components use the new `--control-border` role (design-tokens 0.1.13: 3:1 or more on `--bg`, `--surface` and `--lift` in every theme × season, gated). Regression test `src/__tests__/field-boundary.test.ts` (3 cases) fails if a field goes back to `--border`. Gallery e2e on five browsers passes with the darker edge, including forced colours. Requires `@meddleware/design-tokens` ^0.1.13. 0.1.38.
+
+### F14 — `StatusWidget` tests mocked `fetch` with a bare object, not a `Response`
+**Severity:** Low   **Disposition:** RESOLVED
+**Where:** `src/__tests__/status-widget.test.ts` (`respond` returned `{ ok, status, json }`).
+**Issue:** the real read path (`fetchJson` → `readBoundedJson` → `res.body.getReader()`) was never exercised: the mock hid it. Found when `@meddleware/web-utils` 0.0.2 made the size cap the default (web-utils F2): two tests failed.
+**Impact:** none in production (a real `Response` works); it was a test that proved less than it claimed.
+**Remediation / evidence:** `respond` builds a real `Response` (`new Response(JSON.stringify(body), { status, headers })`). 157 tests pass. The same pattern was checked in the other consumers of `fetchJson` (roadmap-site, listed in its audit).
+
+### F15 — Positive: runtime endpoint configuration is narrow and fails to the build-time values
+**Severity:** Positive
+**Where:** `src/runtime-config.ts` (0.1.34), `src/runtime-config.test.ts` (84 lines).
+**Evidence:** only three keys can be overridden (`VITE_INDEXER_URL`, `VITE_WALRUS_RELAY_TESTNET`, `VITE_WALRUS_RELAY_MAINNET` — machine-zone endpoints; never ids, fees or addresses); a value must be `https:` (or loopback `http:`), 2 048 characters at most, without credentials, query, fragment, control characters, spaces or backslashes; the file is fetched same-origin only (`path` must start with a single `/`), `credentials: 'omit'`, `redirect: 'error'`, 3 s timeout, 16 KiB cap, JSON content type required; unknown keys are dropped and reported; the loader never throws. The page's CSP `connect-src` still bounds where an accepted endpoint can lead. Trust: whoever controls the served file (the operator's ConfigMap) controls those three endpoints — ADR-0005.
+
+### F16 — Positive: the Popover-API drawer
+**Severity:** Positive
+**Where:** `AppSidebar.vue` (`popover="auto"`, closes on choosing an item), `AppHeader.vue` (`popovertarget`), `e2e/shell.spec.ts`.
+**Evidence:** native semantics only — no focus-trap script and no ARIA state to drift: Escape and light dismiss are the platform's; the menu button works from the keyboard; the drawer fits 85% of the screen and does not scroll the page sideways; on wide screens it is a plain column with no menu button. As of this pass the spec also asserts that **focus returns to the menu button** after Escape and after choosing an item; passes on Chromium, Firefox, WebKit, Pixel 7 and iPhone 14 projects. Browser floor: the Popover API is in the support promise (Chrome 114, Safari 17, Firefox 125); older engines would see a column, not a drawer, and `eslint-plugin-compat` / the stylelint compat rule gate it.
+
+### F17 — Positive: `theme-init.js` is a same-origin file and agrees with the composables
+**Severity:** Positive
+**Where:** `src/theme-init.js`, `src/__tests__/theme-init.test.ts`.
+**Evidence:** a plain render-blocking script (no inline script, so no CSP hash and no `'unsafe-inline'`); it reads `mw-color-mode` from storage inside try/catch, validates it against `light|dark|system`, takes the first-visit default from `data-default`, and sets `data-theme` and `data-season` exactly as `useColorMode` and `useSeason` do (the test runs the source against both); it never throws. Published verbatim (`dist/theme-init.js`) and served by `themeInit()` from `@meddleware/frontend-config`.
+
+### F18 — Positive: legal links leave the origin safely
+**Severity:** Positive
+**Where:** `CopyrightLine.vue`, `src/__tests__/safety.test.ts`.
+**Evidence:** the default `legalBase` is `https://meddleware.co.uk/legal/` (D103); the link is bound through `safePath` (root-relative) or `safeHref` in the template, opens in a new tab with `rel="noopener noreferrer"`, and a hostile `symbolHref` (credentials, `javascript:`, `/<TAB>/host`) falls back to the default. `ExplorerLink` likewise (`safeHref`, `target="_blank"`, `rel="noopener noreferrer"`).
+
+### Delta notes (A11Y lens, `AUDIT_TEMPLATE_A11Y.md`)
+- **Gate inventory:** axe AA and AAA (7:1 text, 3:1 non-text) in all ten theme × season looks over the component gallery, the modal dialog and the non-default shell panels; forced colours (controls keep a visible edge; the chosen state is not carried by a background alone); reduced motion (no transitions, immediate colour-mode change); drawer behaviour; jsdom axe over every component for structure and ARIA (`a11y.test.ts`, `a11y-primitives.test.ts`); five browser projects in CI; 186 e2e tests. The gallery has no sticky chrome, so *focus not obscured* is exercised by the consumers' sweeps (shared `expectKeyboardFocusVisible`).
+- **Known exceptions:** none disabled. Not automatable and reviewed from screenshots: the 44 px enhanced target size, link purpose, reading order, screen-reader announcements of the always-mounted `output`/`role="status"` regions (`UiLiveStatus`, `UiCopyButton`).
+- **Support promise:** one browserslist (shared config), compat lint on.
+- **Supply chain:** `dependencies` are only `@meddleware/design-tokens` and `@meddleware/web-utils` (both first-party, exact `^0.x.y`); dev tooling includes `@meddleware/frontend-config` (see its audit, F5).
+
 ## Section A — Invariant verification matrix
 
 | # | Invariant (source) | Enforced at | Proven by | Status |
@@ -922,6 +970,7 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
   - Dependabot policy encoded in .github/dependabot.yml (majors declined); open PRs merged 2026-10-19
   - **Not re-measured:** unit-test, coverage and Playwright counts in Section C (2026-10-09 values; the CI runs on 0.1.32 passed).
 - 2026-10-22 (audit close-out) — OQ1 decided: `[12, 10]` truncation by default, the treasury address shown in full (the implementation of 2026-10-08 stands, no code change). Not re-run in this pass: the unit tests and the contrast gate. Counts unchanged.
+- 2026-11-01 — frontend-wave delta review of 0.1.33–0.1.37 (and 0.1.38 prepared). Read the runtime-config, theme-init, link/clipboard, status, Popover-drawer and form components and the delivery tooling; ran the audit gate, type-check, lint, 157 unit tests, build, check:dist, pack contents and the five-browser gallery e2e with the CI font (186 passed). Found and fixed F13 (field edges below WCAG 1.4.11 — new `--control-border`) and F14 (non-Response fetch mock); F15–F18 recorded as Positive; drawer focus-return now asserted. Release-tool marks for 0.1.35–0.1.37 reworded to "released". `**Template:**` dates reconciled to the 2026-11-01 registry (TS/VUE changes add rows; VUE's colour row moved to A11Y, applied here in full) with no disposition change.
 
 ## Pre-save consistency checklist (this pass)
 

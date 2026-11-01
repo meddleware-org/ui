@@ -14,7 +14,7 @@ const model = defineModel<string | number>()
   padding: var(--space-2xs) var(--space-xs);
   background: var(--surface);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   font: inherit;
 }
