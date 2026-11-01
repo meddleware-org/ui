@@ -20,6 +20,12 @@ body {
   padding: 0;
 }
 
+/* A sticky header must not cover what scrolling or focus brings into view (WCAG 2.4.11): leave room for it, and for a second row when
+ * its actions wrap on a narrow screen or at a large text size. */
+html {
+  scroll-padding-block-start: calc(var(--mw-header-height) * 2);
+}
+
 body {
   min-height: 100vh;
   background: var(--bg);
@@ -122,6 +128,9 @@ body {
 }
 :where(legend) {
   padding: 0;
+  /* A long legend wraps at a large text size instead of pushing the page sideways (WebKit does not wrap it by default). */
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* Links are underlined: colour alone is not a sufficient cue (WCAG 1.4.1). Components that style their
@@ -141,6 +150,7 @@ a:hover {
 :where(button, input, select, textarea) {
   font-family: inherit;
 }
+
 
 /* A bare <button> gets a base look from the tokens instead of the browser's (in a dark theme the browser's grey does not reach AAA
  * contrast). Every component that styles its own button sets what it needs, and its (later) layer wins. */

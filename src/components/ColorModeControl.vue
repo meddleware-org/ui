@@ -66,7 +66,11 @@ const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system:
 .mw-mode__btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-3xs);
+  /* A target of at least 24 CSS pixels even when only the glyph shows (WCAG 2.5.8). */
+  min-block-size: 1.5rem;
+  min-inline-size: 1.5rem;
   padding: var(--space-3xs) var(--space-2xs);
   border: 0;
   border-radius: var(--radius-sm);

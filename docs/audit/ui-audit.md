@@ -44,7 +44,7 @@ AUTH, OPS, IMG (no image; consumers host it), SITE.
   landing, status-ui, walrus-storage-ui, access-gate-ui, sealed-storage-ui, dao-ui, treasury-ui, token-issuance-ui, docs and dev —
   plus walrus-relay and wallet-adapter (peer).
 
-**Review date:** 2026-10-03; re-verified 2026-10-09; release status 2026-10-19; 0.1.35 re-verified 2026-10-30 (Point links at the machine zone (ADR-0005); current design-tokens and eslint-config); 0.1.36 re-verified 2026-10-31 (Per-component CSS layers, new field and status components, AAA contrast)
+**Review date:** 2026-10-03; re-verified 2026-10-09; release status 2026-10-19; 0.1.35 re-verified 2026-10-30 (Point links at the machine zone (ADR-0005); current design-tokens and eslint-config); 0.1.36 re-verified 2026-10-31 (Per-component CSS layers, new field and status components, AAA contrast); 0.1.37 re-verified 2026-11-01 (Header, footer, legend and mode control hold at large text sizes)
 **Reviewer:** Internal review
 **Severity ceiling:** Medium.
 

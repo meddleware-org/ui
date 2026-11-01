@@ -3,6 +3,10 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.37] - 2026-11-01
+
+- Header, footer, legend and mode control hold at large text sizes
+
 ## [0.1.36] - 2026-10-31
 
 - Per-component CSS layers, new field and status components, AAA contrast

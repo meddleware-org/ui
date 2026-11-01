@@ -70,9 +70,11 @@ usePanelOverrides(root, () => props.colors)
 }
 .mw-footer__docs {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-2xs) var(--space-sm);
   margin-inline-start: auto;
+  max-inline-size: 100%;
 }
 .mw-footer__docs a {
   color: inherit;

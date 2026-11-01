@@ -108,7 +108,9 @@ onBeforeUnmount(() => {
   margin-inline-end: auto;
   font-weight: var(--font-weight-brand);
   letter-spacing: var(--tracking-wide);
-  white-space: nowrap;
+  min-inline-size: 0;
+  /* A long name wraps at a large text size rather than pushing the page sideways. */
+  overflow-wrap: anywhere;
   text-decoration: none;
 }
 /* Links the host slots into the header take the header's own text colour, not the page accent: a light
