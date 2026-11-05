@@ -65,6 +65,7 @@ function timeAgo(d: Date): string {
   background: var(--surface);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  max-inline-size: 100%;
   font-family: var(--mw-font-mono);
   position: sticky;
   bottom: 0;

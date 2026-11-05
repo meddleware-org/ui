@@ -39,6 +39,10 @@ const slotAttrs = computed(() => ({
 <style scoped>
 .mw-form-field {
   margin: 0;
+  /* In a flex or grid parent a field would otherwise keep the intrinsic width of its control (a file chooser, a date-time input) and
+     push the page sideways on a narrow screen or at a large text size (WCAG 1.4.10). */
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 .mw-form-field__label {
   display: inline-block;

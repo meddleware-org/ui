@@ -41,7 +41,9 @@ function onChange(event: Event): void {
 
 <style scoped>
 .mw-file {
-  max-width: 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   color: var(--text);
   font: inherit;
 }

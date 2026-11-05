@@ -156,7 +156,7 @@ the same release (F11, the real-browser contrast gate's own catches). A twelfth,
 
 ---
 
-**2026-11-01 update.** Between 0.1.32 and 0.1.37 the library was rebuilt (per-component CSS in layers, many new components, runtime endpoint config, the Popover drawer, helpers moved to web-utils). This review found one conformance defect — text fields drew their edge at 1.3–1.4:1 (WCAG 1.4.11), fixed in 0.1.38 with design-tokens' new `--control-border` (F13) — and a test that mocked away the real fetch path (F14); everything else reviewed holds (F15–F18, Positive). No new finding is left open.
+**2026-11-01 update.** Between 0.1.32 and 0.1.37 the library was rebuilt (per-component CSS in layers, many new components, runtime endpoint config, the Popover drawer, helpers moved to web-utils). This review found conformance defects at both ends of the library: text fields drew their edge at 1.3–1.4:1 (WCAG 1.4.11; F13, new `--control-border`), and — once the library's own gate ran the same reflow, text-size and keyboard sweep as the apps (F23) — a badge that never wrapped, a progress dialog that scrolls with nothing keyboard-focusable, several components that kept their intrinsic width in a flex parent, and a sticky status bar that could cover focus (F19–F22). All are fixed in 0.1.38; a test that mocked away the real fetch path was fixed too (F14). The runtime config, drawer, theme-init and link handling hold (F15–F18, Positive). No new finding is left open.
 
 ## Threat model / trust boundaries
 
@@ -649,7 +649,7 @@ a second case of the gate surfacing a defect that only a newer rule set could se
 
 ### Frontend wave delta review (2026-11-01) — 0.1.33 to 0.1.37 reviewed, 0.1.38 prepared
 
-Scope: everything since the 2026-10-19 review (`0.1.32`): 97 files, about +4 000 / −1 300 lines — the runtime endpoint configuration (0.1.34), the per-component CSS in cascade layers and the many new components (0.1.36), the large-text fixes (0.1.37), and the move of `safeHref`, `safePath`, `safeIcon`, `suiExplorerUrl`, `walruscanBlobUrl`, `truncateMiddle` and the status parser into `@meddleware/web-utils` (ui re-exports them, so its API is unchanged — `exports.test.ts`). Read: `runtime-config.ts`, `theme-init.js`, `CopyrightLine`, `ExplorerLink`, `UiCopyButton`, `CopyableAddress`, `useStatusSnapshot`/`StatusWidget`, `AppSidebar`/`AppHeader` (the Popover drawer), the form components, `vite/css-delivery.ts`, `scripts/check-dist.mjs`, the workflows and the tests. Ran: `npm ci`, the audit gate (0 high/critical, allowlist empty), `vue-tsc`, `npm run lint` (stylelint, eslint, html-validate), `vitest` (12 files, 157 tests; 154 before the changes below), `npm run build`, `check:dist` (46 component stylesheets, `reset.css`, `base.css`, `theme-init.js`), `npm pack --dry-run` (219 files, 247 kB, `dist/` only — no tests, gallery, e2e or audit files), and the gallery e2e on Chromium, Firefox, WebKit and the two mobile projects with the CI font (DejaVu Sans via fontconfig): **186 passed**.
+Scope: everything since the 2026-10-19 review (`0.1.32`): 97 files, about +4 000 / −1 300 lines — the runtime endpoint configuration (0.1.34), the per-component CSS in cascade layers and the many new components (0.1.36), the large-text fixes (0.1.37), and the move of `safeHref`, `safePath`, `safeIcon`, `suiExplorerUrl`, `walruscanBlobUrl`, `truncateMiddle` and the status parser into `@meddleware/web-utils` (ui re-exports them, so its API is unchanged — `exports.test.ts`). Read: `runtime-config.ts`, `theme-init.js`, `CopyrightLine`, `ExplorerLink`, `UiCopyButton`, `CopyableAddress`, `useStatusSnapshot`/`StatusWidget`, `AppSidebar`/`AppHeader` (the Popover drawer), the form components, `vite/css-delivery.ts`, `scripts/check-dist.mjs`, the workflows and the tests. Ran: `npm ci`, the audit gate (0 high/critical, allowlist empty), `vue-tsc`, `npm run lint` (stylelint, eslint, html-validate), `vitest` (12 files, 157 tests; 154 before the changes below), `npm run build`, `check:dist` (46 component stylesheets, `reset.css`, `base.css`, `theme-init.js`), `npm pack --dry-run` (219 files, 247 kB, `dist/` only — no tests, gallery, e2e or audit files), and the gallery e2e on Chromium, Firefox, WebKit and the two mobile projects with the CI font (DejaVu Sans via fontconfig): **186 passed** with the axe-only spec this repository had; **261 passed** with the shared sweep that replaced it (F23), after the fixes F19–F22.
 
 ### F13 — `UiInput`, `UiTextarea` and `UiSelect` drew their edge with the divider colour
 **Severity:** Medium   **Disposition:** RESOLVED
@@ -685,8 +685,43 @@ Scope: everything since the 2026-10-19 review (`0.1.32`): 97 files, about +4 000
 **Where:** `CopyrightLine.vue`, `src/__tests__/safety.test.ts`.
 **Evidence:** the default `legalBase` is `https://meddleware.co.uk/legal/` (D103); the link is bound through `safePath` (root-relative) or `safeHref` in the template, opens in a new tab with `rel="noopener noreferrer"`, and a hostile `symbolHref` (credentials, `javascript:`, `/<TAB>/host`) falls back to the default. `ExplorerLink` likewise (`safeHref`, `target="_blank"`, `rel="noopener noreferrer"`).
 
+### F19 — `UiBadge` never wrapped, so a sentence-long badge pushed the page sideways
+**Severity:** Low   **Disposition:** RESOLVED
+**Where:** `src/components/UiBadge.vue` (`white-space: nowrap`).
+**Issue:** a badge is a status as words; consumers put sentences in it (`TipConfigBadge`: "Relay online · tip above the limit"). At 200% text on a 412 px phone it was 459–510 px wide and the page scrolled sideways by 98–120 px (WCAG 1.4.4 and 1.4.10).
+**Impact:** the relay status of every upload widget on a phone at a large text size. Found by the first walrus-storage-kit run of the shared sweep on the mobile projects.
+**Remediation / evidence:** the badge may wrap (`max-inline-size: 100%`, `overflow-wrap: anywhere`). Passes the 320 px and 200% sweeps on five browsers. 0.1.38.
+
+### F20 — A dialog with no control became a scrollable region the keyboard could not reach
+**Severity:** Medium   **Disposition:** RESOLVED
+**Where:** `src/components/UiDialog.vue`.
+**Issue:** a modal progress dialog (non-dismissible, no buttons) overflows the viewport at a large text size; the browser makes the dialog a scrollable region, and with nothing focusable inside, keyboard users cannot scroll it (WCAG 2.1.1; axe `scrollable-region-focusable`, serious).
+**Impact:** the blocking "Uploading to Walrus" dialog of the upload widget on a phone at 200% text: the explanatory text below the fold unreachable without a pointer.
+**Remediation / evidence:** the dialog takes a tab stop of its own (`tabindex="0"`) only while it holds no focusable control, re-evaluated when its content changes; with a control inside (a close button, an action), that control is the way in and the dialog stays out of the tab order. Verified on five browsers by the kit's `upload: progress dialog` state. 0.1.38.
+
+### F21 — Several components kept their intrinsic width inside a flex or grid parent
+**Severity:** Low   **Disposition:** RESOLVED
+**Where:** `UiFormField` (so `UiFileField`, `UiDateTimeField`), `UiFileField`, `UiCodeBlock`, `UiPager`, `UiStatusBar`.
+**Issue:** a native file chooser (about 350 px) or a date-time input keeps its intrinsic width, a code block keeps the width of its longest line, a pager and a status bar did not wrap, and the status bar was `flex-shrink: 0`. Placed in a flex row (as the gallery does, and as an app may), each exceeded a 320 px viewport by 21–47 px and, at 200% text on a phone, by up to 321 px.
+**Impact:** horizontal scrolling at the two reflow sizes (WCAG 1.4.4, 1.4.10) wherever those components sit in a flex or grid layout.
+**Remediation / evidence:** `min-inline-size: 0; max-inline-size: 100%` on the form field and code block; the file chooser fills and may shrink; the pager wraps; the status bar is capped at its container. The 320 px and 200% sweeps pass on all five projects. 0.1.38.
+
+### F22 — The sticky status bar could cover a focused control
+**Severity:** Low   **Disposition:** RESOLVED
+**Where:** `src/styles/reset.css` (`scroll-padding-block-start` only), `UiStatusBar.vue` (`position: sticky; bottom: 0`).
+**Issue:** the reset left room for a sticky header (WCAG 2.4.11 *focus not obscured*) but not for the status bar that sticks to the bottom. Tabbing backwards on iOS Safari put `input#name` behind it (found by the new focus check in the shared keyboard pass).
+**Impact:** keyboard and magnifier users lose the focused field behind the bar on a short screen.
+**Remediation / evidence:** `scroll-padding-block-end` mirrors the start rule. The keyboard pass, forwards and backwards, now passes on all five projects including iPhone 14. 0.1.38.
+
+### F23 — The library's own real-browser gate was axe-only
+**Severity:** Low   **Disposition:** RESOLVED
+**Where:** `e2e/contrast.spec.ts` (replaced by `e2e/a11y.spec.ts`).
+**Issue:** the gallery spec ran axe at AA and AAA in every theme × season, plus forced-colours, reduced-motion and drawer specs, but not reflow at 320 px, 200% text or the keyboard pass — the checks that found F19–F22 as soon as a consumer ran them.
+**Impact:** a layout or focus regression in a component would pass this repository's CI and surface (if at all) in an app.
+**Remediation / evidence:** `e2e/a11y.spec.ts` runs the shared `defineA11ySuite` (AAA `gate`) over the `all`, `panels` and `dialog` views (the dialog view with `region` disabled: a lone dialog has no page landmarks). The forced-colours, motion and shell specs stay. 261 tests on five projects.
+
 ### Delta notes (A11Y lens, `AUDIT_TEMPLATE_A11Y.md`)
-- **Gate inventory:** axe AA and AAA (7:1 text, 3:1 non-text) in all ten theme × season looks over the component gallery, the modal dialog and the non-default shell panels; forced colours (controls keep a visible edge; the chosen state is not carried by a background alone); reduced motion (no transitions, immediate colour-mode change); drawer behaviour; jsdom axe over every component for structure and ARIA (`a11y.test.ts`, `a11y-primitives.test.ts`); five browser projects in CI; 186 e2e tests. The gallery has no sticky chrome, so *focus not obscured* is exercised by the consumers' sweeps (shared `expectKeyboardFocusVisible`).
+- **Gate inventory:** the shared sweep over the gallery's `all`, `panels` and `dialog` views (axe AA and AAA — 7:1 text, 3:1 non-text — in all ten theme × season looks; reflow at 320 px; 200% text; forced colours; reduced motion; the keyboard pass incl. focus not obscured); in addition forced colours (controls keep a visible edge; the chosen state is not carried by a background alone), reduced motion (no transitions, immediate colour-mode change) and drawer behaviour (incl. focus return); jsdom axe over every component for structure and ARIA (`a11y.test.ts`, `a11y-primitives.test.ts`); five browser projects in CI; 261 e2e tests.
 - **Known exceptions:** none disabled. Not automatable and reviewed from screenshots: the 44 px enhanced target size, link purpose, reading order, screen-reader announcements of the always-mounted `output`/`role="status"` regions (`UiLiveStatus`, `UiCopyButton`).
 - **Support promise:** one browserslist (shared config), compat lint on.
 - **Supply chain:** `dependencies` are only `@meddleware/design-tokens` and `@meddleware/web-utils` (both first-party, exact `^0.x.y`); dev tooling includes `@meddleware/frontend-config` (see its audit, F5).
@@ -970,7 +1005,7 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
   - Dependabot policy encoded in .github/dependabot.yml (majors declined); open PRs merged 2026-10-19
   - **Not re-measured:** unit-test, coverage and Playwright counts in Section C (2026-10-09 values; the CI runs on 0.1.32 passed).
 - 2026-10-22 (audit close-out) — OQ1 decided: `[12, 10]` truncation by default, the treasury address shown in full (the implementation of 2026-10-08 stands, no code change). Not re-run in this pass: the unit tests and the contrast gate. Counts unchanged.
-- 2026-11-01 — frontend-wave delta review of 0.1.33–0.1.37 (and 0.1.38 prepared). Read the runtime-config, theme-init, link/clipboard, status, Popover-drawer and form components and the delivery tooling; ran the audit gate, type-check, lint, 157 unit tests, build, check:dist, pack contents and the five-browser gallery e2e with the CI font (186 passed). Found and fixed F13 (field edges below WCAG 1.4.11 — new `--control-border`) and F14 (non-Response fetch mock); F15–F18 recorded as Positive; drawer focus-return now asserted. Release-tool marks for 0.1.35–0.1.37 reworded to "released". `**Template:**` dates reconciled to the 2026-11-01 registry (TS/VUE changes add rows; VUE's colour row moved to A11Y, applied here in full) with no disposition change.
+- 2026-11-01 — frontend-wave delta review of 0.1.33–0.1.37 (and 0.1.38 prepared). Read the runtime-config, theme-init, link/clipboard, status, Popover-drawer and form components and the delivery tooling; ran the audit gate, type-check, lint, 157 unit tests, build, check:dist, pack contents and the five-browser gallery e2e with the CI font (186 passed). Found and fixed F13 (field edges below WCAG 1.4.11 — new `--control-border`), F14 (non-Response fetch mock) and, once the library's gate became the shared sweep (F23), F19–F22 (badge wrapping, a keyboard-unreachable scroll region in the progress dialog, flex-parent overflow, the sticky status bar covering focus); F15–F18 recorded as Positive; drawer focus-return now asserted (261 e2e tests on five browsers, CI font). Release-tool marks for 0.1.35–0.1.37 reworded to "released". `**Template:**` dates reconciled to the 2026-11-01 registry (TS/VUE changes add rows; VUE's colour row moved to A11Y, applied here in full) with no disposition change.
 
 ## Pre-save consistency checklist (this pass)
 

@@ -1,5 +1,5 @@
 // A real-browser component gallery: every component in representative states, loaded with the design
-// tokens and the seasons. Playwright + axe (e2e/contrast.spec.ts) drive it across theme × season, which
+// tokens and the seasons. The shared sweep (e2e/a11y.spec.ts) drives it across theme × season, which
 // is what jsdom cannot do (it has no layout and no computed colours, so axe's colour-contrast rule never
 // runs there). Not published: `files` ships `dist/` only.
 import { createApp } from 'vue'

@@ -10,8 +10,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); version
 - **Text fields, textareas and selects draw their edge in `--control-border`** (3:1 on every canvas in every theme × season, WCAG 1.4.11) instead of `--border`, a divider colour at 1.3–1.4:1. Requires `@meddleware/design-tokens` ^0.1.13. A test fails if a field goes back to the divider colour.
 - The status widget's tests answer with a real `Response`, so the bounded read path in `@meddleware/web-utils` ^0.0.2 (size cap by default) is the one under test.
 
+- **`UiBadge` wraps** (`max-inline-size: 100%`, `overflow-wrap: anywhere`) instead of pushing the page sideways at a large text size.
+- **`UiDialog` is keyboard-reachable when it holds no control** (a progress report that overflows at a large text size): it takes `tabindex="0"` only then.
+- `UiFormField`, `UiCodeBlock`, `UiFileField`, `UiPager` and `UiStatusBar` reflow in a flex or grid parent (min size, wrapping, capped width).
+- `reset.css` leaves `scroll-padding-block-end` for the sticky status bar, as it does at the start for the header (WCAG 2.4.11).
+
 ### Changed
 
+- The real-browser gate is the shared sweep (`defineA11ySuite`: AA and AAA, 320 px reflow, 200% text, forced colours, reduced motion, keyboard) over the gallery's `all`, `panels` and `dialog` views.
 - The drawer test asserts that focus returns to the menu button after Escape and after choosing an item (all five browser projects).
 
 ## [0.1.37] - 2026-11-01

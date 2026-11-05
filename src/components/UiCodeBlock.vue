@@ -14,6 +14,9 @@ withDefaults(defineProps<{ code?: string; label?: string; wrap?: boolean }>(), {
 <style scoped>
 .mw-code {
   margin: 0;
+  /* The block scrolls inside itself (`pre` overflow); it must not widen a flex or grid parent to fit its longest line. */
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 .mw-code__pre {
   margin: 0;

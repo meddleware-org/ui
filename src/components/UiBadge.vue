@@ -47,7 +47,10 @@ const shown = computed(() => {
   background: color-mix(in srgb, var(--_tone) 12%, var(--bg));
   color: var(--text);
   font-size: var(--font-size-sm);
-  white-space: nowrap;
+  /* A badge can hold a sentence ("Relay online · tip above the limit"): at a large text size or a narrow width it wraps instead of
+     pushing the page sideways (WCAG 1.4.4, 1.4.10). */
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
 }
 .mw-badge--ok {
   --_tone: var(--ok);

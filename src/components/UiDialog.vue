@@ -10,7 +10,7 @@
 // Dismissal (Escape + backdrop click) uses the native `closedby` attribute, with a script-attached
 // backdrop listener as a fallback where it is unsupported — so no interactive handler sits on the
 // non-interactive <dialog> element itself.
-import { computed, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useId, watch } from 'vue'
 
 const open = defineModel<boolean>('open', { default: false })
 
@@ -52,6 +52,20 @@ function sync(isOpen: boolean): void {
   else if (!isOpen && d.open) d.close()
 }
 
+const FOCUSABLE = 'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+
+/**
+ * A dialog that holds no control (a progress report) can still overflow at a large text size, and a scrollable region must be reachable
+ * from the keyboard (WCAG 2.1.1; axe `scrollable-region-focusable`). With no control inside, the dialog itself takes a tab stop, so the
+ * arrow keys scroll it; with one, that control is the way in and the dialog stays out of the tab order.
+ */
+function syncFocusable(): void {
+  const d = el.value
+  if (!d) return
+  if (d.querySelector(FOCUSABLE)) d.removeAttribute('tabindex')
+  else d.setAttribute('tabindex', '0')
+}
+
 function applyClosedBy(): void {
   // Not yet in Vue's DialogHTMLAttributes typings, so set it directly.
   el.value?.setAttribute('closedby', props.dismissible ? 'any' : 'none')
@@ -74,9 +88,11 @@ function onClose(): void {
 
 onMounted(() => {
   applyClosedBy()
+  syncFocusable()
   if (!supportsClosedBy) el.value?.addEventListener('click', onBackdropClick)
   sync(open.value)
 })
+onUpdated(syncFocusable)
 onBeforeUnmount(() => {
   el.value?.removeEventListener('click', onBackdropClick)
 })

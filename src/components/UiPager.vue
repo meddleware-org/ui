@@ -29,6 +29,7 @@ defineEmits<{ prev: []; next: [] }>()
 <style scoped>
 .mw-pager {
   display: flex;
+  flex-wrap: wrap; /* at 200% text the buttons and the page label no longer fit one line */
   gap: var(--space-sm);
   align-items: center;
   justify-content: flex-end;

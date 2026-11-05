@@ -24,6 +24,8 @@ body {
  * its actions wrap on a narrow screen or at a large text size. */
 html {
   scroll-padding-block-start: calc(var(--mw-header-height) * 2);
+  /* ...and a sticky status bar at the foot (UiStatusBar) must not cover it from below. */
+  scroll-padding-block-end: calc(var(--mw-header-height) * 2);
 }
 
 body {
