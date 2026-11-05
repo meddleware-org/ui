@@ -23,9 +23,8 @@ body {
 /* A sticky header must not cover what scrolling or focus brings into view (WCAG 2.4.11): leave room for it, and for a second row when
  * its actions wrap on a narrow screen or at a large text size. */
 html {
-  scroll-padding-block-start: calc(var(--mw-header-height) * 2);
-  /* ...and a sticky status bar at the foot (UiStatusBar) must not cover it from below. */
-  scroll-padding-block-end: calc(var(--mw-header-height) * 2);
+  /* ...and the same at the foot, for the sticky status bar (UiStatusBar). */
+  scroll-padding-block: calc(var(--mw-header-height) * 2);
 }
 
 body {
