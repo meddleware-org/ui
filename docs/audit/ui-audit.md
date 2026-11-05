@@ -711,7 +711,7 @@ Scope: everything since the 2026-10-19 review (`0.1.32`): 97 files, about +4 000
 **Where:** `src/styles/reset.css` (`scroll-padding-block-start` only), `UiStatusBar.vue` (`position: sticky; bottom: 0`).
 **Issue:** the reset left room for a sticky header (WCAG 2.4.11 *focus not obscured*) but not for the status bar that sticks to the bottom. Tabbing backwards on iOS Safari put `input#name` behind it (found by the new focus check in the shared keyboard pass).
 **Impact:** keyboard and magnifier users lose the focused field behind the bar on a short screen.
-**Remediation / evidence:** `scroll-padding-block-end` mirrors the start rule. The keyboard pass, forwards and backwards, now passes on all five projects including iPhone 14. 0.1.38.
+**Remediation / evidence:** `scroll-padding-block` now sets both ends. The keyboard pass, forwards and backwards, now passes on all five projects including iPhone 14. 0.1.38.
 
 ### F23 — The library's own real-browser gate was axe-only
 **Severity:** Low   **Disposition:** RESOLVED
