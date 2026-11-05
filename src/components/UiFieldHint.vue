@@ -1,19 +1,66 @@
 <script setup lang="ts">
+// A "?" button whose tip opens on hover and on focus. WCAG 1.4.13 (content on hover or focus): the tip can be dismissed without moving the
+// pointer or the focus (Escape), the pointer can move onto the tip without it closing, and it stays until dismissed or no longer hovered or
+// focused. A dismissed tip stays closed until the pointer has left and focus has gone, so it cannot reopen over what the person is reading.
+// The listeners are attached from script, so the wrapper stays a plain element with no handler in the template.
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+
 defineProps<{ fieldId: string }>()
 
-function onKeyDown(e: KeyboardEvent) {
-  if (e.key === 'Escape') (e.currentTarget as HTMLElement).blur()
+const root = ref<HTMLElement | null>(null)
+const dismissed = ref(false)
+let hovered = false
+let focused = false
+
+function onKey(e: KeyboardEvent): void {
+  if (e.key === 'Escape') dismissed.value = true
 }
+function settle(): void {
+  if (hovered || focused) return
+  document.removeEventListener('keydown', onKey)
+  dismissed.value = false
+}
+function enter(): void {
+  hovered = true
+  document.addEventListener('keydown', onKey)
+}
+function leave(): void {
+  hovered = false
+  settle()
+}
+function focusIn(): void {
+  focused = true
+  document.addEventListener('keydown', onKey)
+}
+function focusOut(): void {
+  focused = false
+  settle()
+}
+
+onMounted(() => {
+  const el = root.value
+  el?.addEventListener('mouseenter', enter)
+  el?.addEventListener('mouseleave', leave)
+  el?.addEventListener('focusin', focusIn)
+  el?.addEventListener('focusout', focusOut)
+})
+onBeforeUnmount(() => {
+  const el = root.value
+  el?.removeEventListener('mouseenter', enter)
+  el?.removeEventListener('mouseleave', leave)
+  el?.removeEventListener('focusin', focusIn)
+  el?.removeEventListener('focusout', focusOut)
+  document.removeEventListener('keydown', onKey)
+})
 </script>
 
 <template>
-  <span class="mw-field-hint">
+  <span ref="root" class="mw-field-hint" :class="{ 'mw-field-hint--dismissed': dismissed }">
     <button
       type="button"
       class="mw-field-hint__btn"
       :aria-describedby="`${fieldId}-hint`"
       aria-label="Help"
-      @keydown="onKeyDown"
     >?</button>
     <span :id="`${fieldId}-hint`" role="tooltip" class="mw-field-hint__tip">
       <slot />
@@ -75,8 +122,8 @@ function onKeyDown(e: KeyboardEvent) {
   display: none;
 }
 
-.mw-field-hint:hover .mw-field-hint__tip,
-.mw-field-hint:focus-within .mw-field-hint__tip {
+.mw-field-hint:not(.mw-field-hint--dismissed):hover .mw-field-hint__tip,
+.mw-field-hint:not(.mw-field-hint--dismissed):focus-within .mw-field-hint__tip {
   display: block;
 }
 </style>
