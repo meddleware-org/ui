@@ -80,6 +80,7 @@ export { useNow } from './composables/useNow.js'
 export { useStatusSnapshot, MIN_STATUS_POLL_MS } from './composables/useStatusSnapshot.js'
 export type { UseStatusSnapshotOptions, StatusSnapshotState } from './composables/useStatusSnapshot.js'
 export { usePager } from './composables/usePager.js'
+export { useStickyOffset } from './composables/useStickyOffset.js'
 export type { Pager, PageOf } from './composables/usePager.js'
 export type { PanelVariant, PanelColors } from './internal/panel.js'
 

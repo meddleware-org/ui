@@ -13,7 +13,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); version
 - **`UiBadge` wraps** (`max-inline-size: 100%`, `overflow-wrap: anywhere`) instead of pushing the page sideways at a large text size.
 - **`UiDialog` is keyboard-reachable when it holds no control** (a progress report that overflows at a large text size): it takes `tabindex="0"` only then.
 - `UiFormField`, `UiCodeBlock`, `UiFileField`, `UiPager` and `UiStatusBar` reflow in a flex or grid parent (min size, wrapping, capped width).
-- **A sticky `AppHeader` publishes its real height** (`--mw-header-offset` on `<html>`) and the reset's scroll padding uses it: a header that wraps to three rows on a phone no longer covers a focused field (WCAG 2.4.11).
+- **`useStickyOffset(element, property)`** publishes a sticky element's real height on `<html>`; a sticky `AppHeader` publishes `--mw-header-offset` with it and the reset's scroll padding uses it (plus `--mw-sticky-extra` for a second sticky layer): a header that wraps to three rows on a phone no longer covers a focused field (WCAG 2.4.11). It measures with the observer's own size, never layout, and writes on the next frame.
 - **`UiFieldHint` is dismissible with Escape** while hovered or focused, without moving either (WCAG 1.4.13); the listeners are attached from script.
 - `reset.css` leaves `scroll-padding-block-end` for the sticky status bar, as it does at the start for the header (WCAG 2.4.11).
 

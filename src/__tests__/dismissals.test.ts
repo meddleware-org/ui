@@ -3,9 +3,10 @@
 // (WCAG 1.4.13), and a sticky header publishes its real height for the scroll padding (WCAG 2.4.11).
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { nextTick } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import AppHeader from '../components/AppHeader.vue'
 import UiFieldHint from '../components/UiFieldHint.vue'
+import { useStickyOffset } from '../composables/useStickyOffset'
 
 describe('UiFieldHint', () => {
   const press = (key: string) => document.dispatchEvent(new KeyboardEvent('keydown', { key }))
@@ -54,8 +55,8 @@ describe('UiFieldHint', () => {
   })
 })
 
-describe('AppHeader height', () => {
-  let callback: (() => void) | null = null
+describe('sticky offsets', () => {
+  let callback: ((entries: unknown[]) => void) | null = null
   let disconnected = 0
   beforeEach(() => {
     callback = null
@@ -63,7 +64,7 @@ describe('AppHeader height', () => {
     vi.stubGlobal(
       'ResizeObserver',
       class {
-        constructor(cb: () => void) {
+        constructor(cb: (entries: unknown[]) => void) {
           callback = cb
         }
         observe(): void {}
@@ -72,24 +73,38 @@ describe('AppHeader height', () => {
         }
       },
     )
+    // A frame, run at once: the write happens outside the observer callback, as in a browser, but the test need not wait.
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      cb(0)
+      return 0
+    })
   })
   afterEach(() => {
     vi.unstubAllGlobals()
     document.documentElement.style.removeProperty('--mw-header-offset')
+    document.documentElement.style.removeProperty('--mw-sticky-extra')
   })
+  /** What the observer delivers when the element's border box is `h` tall. */
+  const resize = (h: number) => callback!([{ borderBoxSize: [{ blockSize: h }], contentRect: { height: h - 8 } }])
 
-  it('publishes its measured height on <html> while sticky, follows a change, and removes it when it goes', () => {
+  it('a sticky AppHeader publishes its measured height on <html>, follows a change, and removes it when it goes', () => {
     const w = mount(AppHeader, { props: { sticky: true }, attachTo: document.body })
-    const header = w.element as HTMLElement
-    header.getBoundingClientRect = () => ({ height: 130.4 }) as DOMRect
-    callback!()
+    resize(130.4)
     expect(document.documentElement.style.getPropertyValue('--mw-header-offset')).toBe('131px')
-    header.getBoundingClientRect = () => ({ height: 56 }) as DOMRect
-    callback!()
+    resize(56)
     expect(document.documentElement.style.getPropertyValue('--mw-header-offset')).toBe('56px')
     w.unmount()
     expect(disconnected).toBe(1)
     expect(document.documentElement.style.getPropertyValue('--mw-header-offset')).toBe('')
+  })
+
+  it('ignores a first notification of zero (not laid out yet) and keeps the reset fallback', () => {
+    const w = mount(AppHeader, { props: { sticky: true }, attachTo: document.body })
+    resize(0)
+    expect(document.documentElement.style.getPropertyValue('--mw-header-offset')).toBe('')
+    resize(56)
+    expect(document.documentElement.style.getPropertyValue('--mw-header-offset')).toBe('56px')
+    w.unmount()
   })
 
   it('publishes nothing for a header that does not stick', () => {
@@ -97,5 +112,45 @@ describe('AppHeader height', () => {
     expect(callback).toBeNull()
     w.unmount()
     expect(document.documentElement.style.getPropertyValue('--mw-header-offset')).toBe('')
+  })
+
+  it('falls back to the content box where the border box is not reported, and never measures layout itself', () => {
+    const w = mount(AppHeader, { props: { sticky: true }, attachTo: document.body })
+    const measured = vi.fn(() => ({ height: 999 }) as DOMRect)
+    ;(w.element as HTMLElement).getBoundingClientRect = measured
+    callback!([{ contentRect: { height: 52.2 } }])
+    expect(document.documentElement.style.getPropertyValue('--mw-header-offset')).toBe('53px')
+    expect(measured).not.toHaveBeenCalled()
+    w.unmount()
+  })
+
+  it('writes only when the height changed, and never from inside the observer callback', () => {
+    const writes: number[] = []
+    const set = document.documentElement.style.setProperty.bind(document.documentElement.style)
+    vi.spyOn(document.documentElement.style, 'setProperty').mockImplementation((p, v) => {
+      writes.push(1)
+      set(p, v)
+    })
+    const w = mount(AppHeader, { props: { sticky: true }, attachTo: document.body })
+    resize(60)
+    resize(60) // unchanged: no second write
+    expect(writes).toHaveLength(1)
+    w.unmount()
+  })
+
+  it('useStickyOffset publishes any element under a name of its own (a second sticky layer), and takes a component instance', async () => {
+    const Strip = defineComponent({ render: () => h('nav', { class: 'strip' }, 'tabs') })
+    const Host = defineComponent({
+      setup() {
+        const strip = ref<{ $el?: unknown } | null>(null)
+        useStickyOffset(strip, '--mw-sticky-extra')
+        return () => h(Strip, { ref: strip })
+      },
+    })
+    const w = mount(Host, { attachTo: document.body })
+    resize(48)
+    expect(document.documentElement.style.getPropertyValue('--mw-sticky-extra')).toBe('48px')
+    w.unmount()
+    expect(document.documentElement.style.getPropertyValue('--mw-sticky-extra')).toBe('')
   })
 })

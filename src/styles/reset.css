@@ -24,8 +24,9 @@ body {
  * its actions wrap on a narrow screen or at a large text size. */
 html {
   /* At the start: the sticky header's real height (AppHeader publishes it; a wrapped header is taller than its minimum), or room for two
-     rows until it has. At the foot: the same room for the sticky status bar (UiStatusBar). */
-  scroll-padding-block: var(--mw-header-offset, calc(var(--mw-header-height) * 2)) calc(var(--mw-header-height) * 2);
+     rows until it has, plus a second sticky layer under it when one publishes its height (`useStickyOffset`, `--mw-sticky-extra`). At the
+     foot: the same room for the sticky status bar (UiStatusBar). */
+  scroll-padding-block: calc(var(--mw-header-offset, calc(var(--mw-header-height) * 2)) + var(--mw-sticky-extra, 0px)) calc(var(--mw-header-height) * 2);
 }
 
 body {

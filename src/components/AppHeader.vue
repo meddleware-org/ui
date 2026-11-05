@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { usePanelOverrides, type PanelVariant, type PanelColors } from '../internal/panel'
+import { useStickyOffset } from '../composables/useStickyOffset'
 
 const props = withDefaults(
   defineProps<{
@@ -31,23 +32,9 @@ const props = withDefaults(
 const root = ref<HTMLElement | null>(null)
 usePanelOverrides(root, () => props.colors)
 
-// A sticky header must not cover what focus or scrolling brings into view (WCAG 2.4.11). Its height is not fixed: the actions wrap onto
-// more rows on a phone or at a large text size (131 px on an iPhone-sized screen). So it publishes its real height for the scroll padding
-// in reset.css (`--mw-header-offset` on <html>, through the CSSOM so no inline style is rendered), and removes it when it goes away.
-let heightObserver: ResizeObserver | null = null
-onMounted(() => {
-  const el = root.value
-  if (!props.sticky || !el || typeof ResizeObserver === 'undefined') return
-  heightObserver = new ResizeObserver(() => {
-    document.documentElement.style.setProperty('--mw-header-offset', `${Math.ceil(el.getBoundingClientRect().height)}px`)
-  })
-  heightObserver.observe(el)
-})
-onBeforeUnmount(() => {
-  if (!heightObserver) return
-  heightObserver.disconnect()
-  document.documentElement.style.removeProperty('--mw-header-offset')
-})
+// A sticky header must not cover what focus or scrolling brings into view (WCAG 2.4.11): it publishes its real height, which grows when the
+// actions wrap (131 px on an iPhone-sized screen), as `--mw-header-offset` for the scroll padding in reset.css.
+if (props.sticky) useStickyOffset(root, '--mw-header-offset')
 
 // Track scroll position only when solidify-on-scroll is requested.
 const scrolled = ref(false)

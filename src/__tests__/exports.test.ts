@@ -19,6 +19,6 @@ describe('public exports', () => {
   })
 
   it('exports the composables', () => {
-    for (const name of ['useColorMode', 'useSeason', 'useNow', 'useStatusSnapshot', 'usePager', 'tabIds']) expect(name in ui, name).toBe(true)
+    for (const name of ['useColorMode', 'useSeason', 'useNow', 'useStatusSnapshot', 'usePager', 'useStickyOffset', 'tabIds']) expect(name in ui, name).toBe(true)
   })
 })
