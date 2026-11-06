@@ -28,6 +28,8 @@ AUTH, OPS, IMG (no image; consumers host it), SITE.
 
 **Deployment status:**
 
+- **Latest (2026-11-06): `0.1.39` is released to npm** (CI green, trusted publishing with provenance): the tab list items use `role="none"` and the dev tools of the merged Dependabot groups moved; the apps take it in their 2026-11-06 releases. The bullets below are earlier history.
+
 - **Update 2026-11-01:** npm `@meddleware/ui` **0.1.37** is `latest` (released 2026-11-01: per-component CSS in cascade layers, the new field and status components, large-text fixes); `dist/` only, 219 files, 247 kB unpacked. **0.1.38 is prepared** with F13 (field edges use `--control-border`) and F14, requiring `@meddleware/design-tokens` ^0.1.13 and `@meddleware/web-utils` ^0.0.2. The 0.1.32 bullets below are history.
 - npm `@meddleware/ui` **0.1.32** (released 2026-10-19; tag `v0.1.32`, publish run 39185227316, whose release
   gate included "Real-browser accessibility (Playwright + axe, theme × season)"), published by trusted publishing
