@@ -3,10 +3,11 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.1.39] - 2026-11-06
 
 ### Changed
 
+- Dev tools of the Dependabot groups merged on 2026-11-06 (`vitest` 5.1, `html-validate` 11.18, `eslint` 10.14, `postcss`, `vue-tsc` 3.3.14); no change to what is published except the next line.
 - `AppTabNav`'s list items use `role="none"` (the same semantics as `role="presentation"`; html-validate 11.18 asks for it).
 
 ## [0.1.38] - 2026-11-01
