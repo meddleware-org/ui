@@ -3,6 +3,12 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- `AppTabNav`'s list items use `role="none"` (the same semantics as `role="presentation"`; html-validate 11.18 asks for it).
+
 ## [0.1.38] - 2026-11-01
 
 ### Fixed

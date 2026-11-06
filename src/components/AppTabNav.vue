@@ -69,9 +69,9 @@ function onKeydown(e: KeyboardEvent, index: number): void {
     :class="{ 'mw-tab-nav--raised': variant === 'raised', 'mw-tab-nav--lg': size === 'lg', 'mw-tab-nav--flush': flush }"
     :aria-label="ariaLabel"
   >
-    <!-- role="presentation": a tablist may only own tabs, so the list item is transparent to
+    <!-- role="none": a tablist may only own tabs, so the list item is transparent to
          assistive technology (and display: contents keeps it out of layout). -->
-    <li v-for="(tab, i) in tabs" :key="tab.id" role="presentation" class="mw-tab-nav__item">
+    <li v-for="(tab, i) in tabs" :key="tab.id" role="none" class="mw-tab-nav__item">
       <button
         :id="tabIds(idPrefix, tab.id).tab"
         :ref="(el) => { buttons[i] = el as HTMLButtonElement }"
