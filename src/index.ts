@@ -8,6 +8,7 @@
 export { default as AppHeader } from './components/AppHeader.vue'
 export { default as AppSidebar } from './components/AppSidebar.vue'
 export { default as AppFooter } from './components/AppFooter.vue'
+export { default as AppToolShell } from './components/AppToolShell.vue'
 export { default as ColorModeControl } from './components/ColorModeControl.vue'
 export { default as UiButton } from './components/UiButton.vue'
 export { default as UiCard } from './components/UiCard.vue'

@@ -3,6 +3,13 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.40] - 2026-11-07
+
+### Added
+
+- `AppToolShell`: the frame the standalone tool apps shared (page shell, dark header with the tool's name and actions, hidden page heading, footer with docs/developer links and the copyright line).
+- `UiDataTable` warns in development when a header cell has no `scope`.
+
 ## [0.1.39] - 2026-11-06
 
 ### Changed

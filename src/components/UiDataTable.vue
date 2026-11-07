@@ -30,11 +30,16 @@ function measure(): void {
 
 const isDev = (import.meta as { env?: { DEV?: boolean } }).env?.DEV === true
 let warned = false
+let warnedScope = false
 function checkHead(): void {
   if (!isDev || warned) return
   if (wrap.value?.querySelector('thead tr tr')) {
     warned = true
     console.warn('UiDataTable: the head slot must contain only <th> cells; the component already wraps them in a <tr>.')
+  }
+  if (!warnedScope && wrap.value?.querySelector('thead th:not([scope])')) {
+    warnedScope = true
+    console.warn('UiDataTable: every <th> in the head slot needs scope="col" so assistive technology can tie a cell to its column.')
   }
 }
 
