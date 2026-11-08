@@ -9,7 +9,7 @@
 //   4. writes `reset.css` (element defaults and utilities, required once per app) and `base.css` (reset + every component: the old
 //      single-file entry point, kept so existing imports still work).
 // Rolldown does not allow renaming files through the `bundle` object, which is why the names are decided in `assetFileNames`.
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Plugin } from 'vite'
 
@@ -53,6 +53,9 @@ export function cssDelivery(): Plugin {
         if (file.startsWith('components/')) parts.push(strip(css))
       }
       this.emitFile({ type: 'asset', fileName: 'theme-init.js', source: readFileSync(join(import.meta.dirname, '../src/theme-init.js'), 'utf8') })
+      // The brand files (favicon set), published as `@meddleware/ui/brand/*`.
+      const brandDir = join(import.meta.dirname, '../src/brand/files')
+      for (const name of readdirSync(brandDir)) this.emitFile({ type: 'asset', fileName: `brand/${name}`, source: readFileSync(join(brandDir, name)) })
       this.emitFile({ type: 'asset', fileName: 'base.css', source: parts.filter(Boolean).join('\n') + '\n' })
     },
   }

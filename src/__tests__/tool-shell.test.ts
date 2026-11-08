@@ -31,6 +31,20 @@ describe('AppToolShell', () => {
     expect(hrefs(mountShell({ docsUrl: 'https://docs.example.test/x/' }))).toContain('https://docs.example.test/x/')
   })
 
+  it('leaves a documentation link out when its URL is false, and the whole footer nav when both are', () => {
+    const hrefs = (w: ReturnType<typeof mountShell>) => w.findAll('footer nav a').map((a) => a.attributes('href'))
+    expect(hrefs(mountShell({ docsUrl: false }))).toEqual(['https://meddleware.dev/sui/access-gate/'])
+    expect(hrefs(mountShell({ devUrl: false }))).toEqual(['https://docs.meddleware.co.uk/blockchain/sui/access-gate/'])
+    expect(mountShell({ docsUrl: false, devUrl: false }).find('footer nav').exists()).toBe(false)
+  })
+
+  it('adds no page heading when the page brings its own, and shows the brand mark with the title', () => {
+    expect(mountShell({ pageHeading: false }).findAll('h1')).toHaveLength(0)
+    const w = mountShell()
+    expect(w.get('header svg.mw-brand-mark').attributes('aria-hidden')).toBe('true')
+    expect(w.get('header').text()).toContain('Access Gate')
+  })
+
   it('has the copyright line with the kopimi mark in the footer', () => {
     expect(mountShell().get('footer').text()).toContain('Meddleware')
   })

@@ -9,10 +9,12 @@
 //   </AppToolShell>
 //
 // `slug` names the tool's pages on the docs site and the developer site; `docsUrl` / `devUrl` override either (an app passes its
-// `VITE_DOCS_URL` / `VITE_DEV_URL` build values).
+// `VITE_DOCS_URL` / `VITE_DEV_URL` build values) and `false` leaves that link out (a page with no such documentation). A page that has its own
+// visible `h1` sets `:page-heading="false"`, so the shell does not add a second one.
 import { computed } from 'vue'
 import AppFooter from './AppFooter.vue'
 import AppHeader from './AppHeader.vue'
+import BrandMark from './BrandMark.vue'
 import ColorModeControl from './ColorModeControl.vue'
 import CopyrightLine from './CopyrightLine.vue'
 import UiAppShell from './UiAppShell.vue'
@@ -24,24 +26,28 @@ const props = withDefaults(
     title: string
     /** The tool's page name on the docs and developer sites (`access-gate` → `…/blockchain/sui/access-gate/`, `…/sui/access-gate/`). */
     slug: string
-    docsUrl?: string
-    devUrl?: string
+    /** The documentation link: a URL, or `false` for none (default: the tool's page on the docs site). */
+    docsUrl?: string | false
+    /** The developer-documentation link: a URL, or `false` for none (default: the tool's page on the developer site). */
+    devUrl?: string | false
+    /** Whether the shell adds the (visually hidden) page heading. Default true; false when the page brings its own `h1`. */
+    pageHeading?: boolean
     /** The colour mode a first visit gets; a saved choice always wins. */
     defaultMode?: 'light' | 'dark' | 'system'
   }>(),
-  { docsUrl: undefined, devUrl: undefined, defaultMode: 'dark' },
+  { docsUrl: undefined, devUrl: undefined, pageHeading: true, defaultMode: 'dark' },
 )
 
 const { mode, set } = useColorMode(props.defaultMode)
-const docs = computed(() => props.docsUrl || `https://docs.meddleware.co.uk/blockchain/sui/${props.slug}/`)
-const dev = computed(() => props.devUrl || `https://meddleware.dev/sui/${props.slug}/`)
+const docs = computed(() => (props.docsUrl === false ? undefined : props.docsUrl || `https://docs.meddleware.co.uk/blockchain/sui/${props.slug}/`))
+const dev = computed(() => (props.devUrl === false ? undefined : props.devUrl || `https://meddleware.dev/sui/${props.slug}/`))
 </script>
 
 <template>
   <UiAppShell contained>
     <template #header>
       <AppHeader variant="dark">
-        <template #brand><slot name="brand">{{ title }}</slot></template>
+        <template #brand><slot name="brand"><BrandMark /> {{ title }}</slot></template>
         <template #actions>
           <slot name="actions" />
           <ColorModeControl :model-value="mode" @update:model-value="set" />
@@ -49,7 +55,7 @@ const dev = computed(() => props.devUrl || `https://meddleware.dev/sui/${props.s
       </AppHeader>
     </template>
 
-    <h1 class="mw-visually-hidden">{{ title }}</h1>
+    <h1 v-if="pageHeading" class="mw-visually-hidden">{{ title }}</h1>
     <slot />
 
     <template #footer>

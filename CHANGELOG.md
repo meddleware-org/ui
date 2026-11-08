@@ -3,6 +3,13 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.41] - 2026-11-08
+
+### Added
+
+- `BrandMark` and the brand files: the company mark is the Kopimi "K" (public domain, vendored unchanged from Wikimedia Commons with its source, licence and hash recorded; `src/brand/README.md`). `BrandMark` draws it in `currentColor`; the favicon set (`favicon.svg` following the colour mode, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`) is published as `@meddleware/ui/brand/*`. `npm run build:brand` derives the files; `npm test` checks they are current.
+- `AppToolShell`: `docsUrl` / `devUrl` accept `false` to leave a footer link out, `pageHeading` false for a page with its own `h1`, and the header shows the mark beside the title.
+
 ## [0.1.40] - 2026-11-07
 
 ### Added

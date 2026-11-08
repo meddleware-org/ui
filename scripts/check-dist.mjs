@@ -5,6 +5,7 @@
 //   • stylesheets carry component names, never Vite's hashed `…_scoped_…_lang.css` names, and none is orphaned;
 //   • every stylesheet declares the layer order and puts its rules in a layer (reset: mw.reset; components: mw.components);
 //   • `reset.css` (global) and `base.css` (reset + every component) exist, and the barrel imports no CSS (the reset is opt-in);
+//   • the brand files (`brand/favicon.svg` …) are in the package;
 //   • `theme-init.js` is a plain script, not a module; no entry stubs or hashed files were left behind.
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -31,7 +32,7 @@ for (const f of list('components').filter((x) => x.endsWith('.js') && !x.include
   if (imports.length > 1 || (imports.length === 1 && imports[0] !== f.replace(/\.js$/, '.css'))) fail(`components/${f} imports ${imports.join(', ')}: only its own stylesheet is allowed`)
 }
 
-for (const f of ['reset.css', 'base.css', 'theme-init.js', 'index.js', 'index.d.ts']) if (!existsSync(join(dist, f))) fail(`${f} is missing`)
+for (const f of ['reset.css', 'base.css', 'theme-init.js', 'index.js', 'index.d.ts', 'brand/favicon.svg', 'brand/favicon.ico', 'brand/apple-touch-icon.png', 'brand/icon-192.png', 'brand/icon-512.png']) if (!existsSync(join(dist, f))) fail(`${f} is missing`)
 if (existsSync(join(dist, 'reset.css')) && !/@layer mw\.reset\s*\{/.test(read('reset.css'))) fail('reset.css: rules are not in the mw.reset layer')
 if (existsSync(join(dist, 'base.css'))) {
   const base = read('base.css')

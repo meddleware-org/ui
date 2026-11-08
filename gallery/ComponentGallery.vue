@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  AppFooter, AppHeader, AppSidebar, AppTabNav, ColorModeControl, CopyableAddress, CopyrightLine, ExplorerLink,
+  AppFooter, AppHeader, AppSidebar, AppTabNav, BrandMark, ColorModeControl, CopyableAddress, CopyrightLine, ExplorerLink,
   SidebarGroup, SidebarItem, StatusWidget, UiActivityFeed, UiActivityItem, UiAmount, UiAppShell, UiBadge, UiButton, UiCard,
   UiCheckField, UiCodeBlock, UiCopyButton, UiDataTable, UiDateTimeField, UiDialog, UiEmptyState, UiFieldHint, UiFormField,
   UiLiveStatus, UiMeter, UiNotice, UiPager, UiPanel, UiSegmentedControl, UiSelect, UiSelectField, UiStatGrid, UiStatRow,
@@ -39,7 +39,7 @@ const symbol = ref('')
   <UiAppShell v-else-if="view === 'panels'" contained>
     <template #header>
       <AppHeader variant="light" sidebar-id="gallery-nav">
-        <template #brand><a href="/">Meddleware</a></template>
+        <template #brand><a href="/"><BrandMark /> Meddleware</a></template>
         <template #actions><UiButton variant="ghost">Connect wallet</UiButton><button type="button">Connect</button></template>
       </AppHeader>
     </template>
@@ -62,7 +62,7 @@ const symbol = ref('')
 
   <template v-else>
     <AppHeader variant="dark">
-      <template #brand><a href="/">Meddleware</a></template>
+      <template #brand><a href="/"><BrandMark /> Meddleware</a></template>
       <template #actions><CopyableAddress :address="address"><ExplorerLink href="https://suiscan.xyz/mainnet/account/0x1" :value="address" /></CopyableAddress><UiButton variant="ghost">Connect wallet</UiButton><UiButton variant="secondary">Connect</UiButton></template>
     </AppHeader>
 
