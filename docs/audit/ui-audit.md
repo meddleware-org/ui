@@ -879,7 +879,7 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 - [x] lint and pack checks in publish verify — F7
 - [x] docs corrected (SECURITY.md first) — F9
 - [ ] source and licence of the Kopimi PDF recorded — `OQ2` (maintainer; the repo-only copy carries a stated unverified-provenance note)
-- [ ] external review — maintainer item (pre-mainnet, see `OPERATOR_TASKS.md` and the launch checklist)
+- [ ] external review (ADR-0009 gate G4: not a launch gate; covered by redeploy and the audit pass) — maintainer item (pre-mainnet, see `OPERATOR_TASKS.md` and the launch checklist)
 
 ---
 
