@@ -3,6 +3,12 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.42] - 2026-11-12
+
+### Changed
+
+- Takes `@meddleware/web-utils` ^0.0.4 (so an app installs one copy).
+
 ## [0.1.41] - 2026-11-08
 
 ### Added
