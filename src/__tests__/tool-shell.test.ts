@@ -45,6 +45,21 @@ describe('AppToolShell', () => {
     expect(w.get('header').text()).toContain('Access Gate')
   })
 
+  it('limits the page to the tool width by default and not when contained is false', () => {
+    expect(mountShell().get('main').classes()).toContain('mw-shell__main--contained')
+    expect(mountShell({ contained: false }).get('main').classes()).not.toContain('mw-shell__main--contained')
+  })
+
+  it('shows a footer-note slot in the footer, after the copyright line', () => {
+    const w = mount(AppToolShell, {
+      props: { title: 'Status', slug: 'status' },
+      slots: { default: '<p>x</p>', 'footer-note': '<small id="note">Checked every minute.</small>' },
+    })
+    const footer = w.get('footer')
+    expect(footer.get('#note').text()).toBe('Checked every minute.')
+    expect(footer.text().indexOf('Meddleware')).toBeLessThan(footer.text().indexOf('Checked every'))
+  })
+
   it('has the copyright line with the kopimi mark in the footer', () => {
     expect(mountShell().get('footer').text()).toContain('Meddleware')
   })

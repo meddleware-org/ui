@@ -3,6 +3,10 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.43] - 2026-11-12
+
+AppToolShell: contained (false for a full-width page) and a footer-note slot.
+
 ## [0.1.42] - 2026-11-12
 
 ### Changed

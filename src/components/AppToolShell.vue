@@ -10,7 +10,9 @@
 //
 // `slug` names the tool's pages on the docs site and the developer site; `docsUrl` / `devUrl` override either (an app passes its
 // `VITE_DOCS_URL` / `VITE_DEV_URL` build values) and `false` leaves that link out (a page with no such documentation). A page that has its own
-// visible `h1` sets `:page-heading="false"`, so the shell does not add a second one.
+// visible `h1` sets `:page-heading="false"`, so the shell does not add a second one. `:contained="false"` lets the page use the full
+// width (a wide console with tables); the default keeps it to the tool width. A `footer-note` slot adds a sentence of the page's own
+// to the footer, after the copyright line.
 import { computed } from 'vue'
 import AppFooter from './AppFooter.vue'
 import AppHeader from './AppHeader.vue'
@@ -32,10 +34,12 @@ const props = withDefaults(
     devUrl?: string | false
     /** Whether the shell adds the (visually hidden) page heading. Default true; false when the page brings its own `h1`. */
     pageHeading?: boolean
+    /** Limit the page to the tool width (default). False for a full-width console. */
+    contained?: boolean
     /** The colour mode a first visit gets; a saved choice always wins. */
     defaultMode?: 'light' | 'dark' | 'system'
   }>(),
-  { docsUrl: undefined, devUrl: undefined, pageHeading: true, defaultMode: 'dark' },
+  { docsUrl: undefined, devUrl: undefined, pageHeading: true, contained: true, defaultMode: 'dark' },
 )
 
 const { mode, set } = useColorMode(props.defaultMode)
@@ -44,7 +48,7 @@ const dev = computed(() => (props.devUrl === false ? undefined : props.devUrl ||
 </script>
 
 <template>
-  <UiAppShell contained>
+  <UiAppShell :contained="contained">
     <template #header>
       <AppHeader variant="dark">
         <template #brand><slot name="brand"><BrandMark /> {{ title }}</slot></template>
@@ -63,6 +67,7 @@ const dev = computed(() => (props.devUrl === false ? undefined : props.devUrl ||
         <template #start>
           <CopyrightLine symbol-variant="kopimi" organisation-name="Meddleware" rights-statement="jam" />
         </template>
+        <slot name="footer-note" />
       </AppFooter>
     </template>
   </UiAppShell>
