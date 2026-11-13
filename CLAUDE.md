@@ -30,7 +30,7 @@ There IS a build step. The package ships `dist/` to npm consumers. Run `npm run 
 2. Export it from `src/index.ts`.
 3. Add it to `gallery/ComponentGallery.vue` (the browser contrast gate audits it in all 10 theme × season looks, at AA **and AAA**), a behaviour test in `src/__tests__/components.test.ts` and an axe case in `a11y-primitives.test.ts`.
 4. Run `npm run build` to verify it compiles cleanly and `npm run lint` (css, js and html).
-5. Add a row to the exports table in `README.md`.
+5. Add a row to the exports table in `README.md` (the authoritative export list; `src/index.ts` is the code truth).
 
 ## Contrast: AAA is the bar
 
@@ -202,3 +202,10 @@ BSD Zero Clause License (`0BSD`). See `LICENSE`.
 ## Relationship with `@meddleware/design-tokens`
 
 This package depends on `@meddleware/design-tokens` for CSS custom properties. A design-tokens release is not required to bump this package, but if a token is renamed or removed, update all references in `src/` before releasing.
+
+## What to avoid
+
+- Do not add business logic or state beyond what a reusable component library needs.
+- Do not bundle Vue; it is a peer dependency.
+- Do not publish without running `npm run build` first: `dist/` is what consumers receive.
+- Do not use hardcoded hex colours in component styles; reference the role tokens from `@meddleware/design-tokens`.
