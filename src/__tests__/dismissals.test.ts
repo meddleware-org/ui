@@ -11,18 +11,41 @@ import { useStickyOffset } from '../composables/useStickyOffset'
 describe('UiFieldHint', () => {
   const press = (key: string) => document.dispatchEvent(new KeyboardEvent('keydown', { key }))
   const mountHint = () => mount(UiFieldHint, { props: { fieldId: 'f1' }, slots: { default: 'Explains the field.' }, attachTo: document.body })
-  afterEach(() => document.body.replaceChildren())
+  /** The pointer leaving closes the text after a short delay (so it can cross the gap to the text), so a test waits that long. */
+  const leaveAndWait = async (root: { trigger: (e: string) => Promise<void> }) => {
+    await root.trigger('mouseleave')
+    vi.advanceTimersByTime(200)
+  }
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => {
+    vi.useRealTimers()
+    document.body.replaceChildren()
+  })
+
+  it('draws its text as a <small> popover that the button describes (valid inside a <p>, a table heading or a label row)', () => {
+    const w = mountHint()
+    const tip = w.find('#f1-hint')
+    expect(tip.element.tagName).toBe('SMALL')
+    expect(tip.attributes('popover')).toBe('manual')
+    expect(tip.attributes('role')).toBeUndefined()
+    expect(w.find('button').attributes('aria-describedby')).toBe('f1-hint')
+    expect(tip.text()).toBe('Explains the field.')
+    w.unmount()
+  })
 
   it('Escape closes a tip opened by hover, and it stays closed until the pointer has left', async () => {
     const w = mountHint()
     const root = w.find('.mw-field-hint')
     await root.trigger('mouseenter')
+    expect(root.classes()).toContain('mw-field-hint--open')
     press('Escape')
     await nextTick()
     expect(root.classes()).toContain('mw-field-hint--dismissed')
+    expect(root.classes()).not.toContain('mw-field-hint--open')
     press('a')
     expect(root.classes()).toContain('mw-field-hint--dismissed')
-    await root.trigger('mouseleave')
+    await leaveAndWait(root)
+    await nextTick()
     expect(root.classes()).not.toContain('mw-field-hint--dismissed')
     w.unmount()
   })
@@ -38,10 +61,71 @@ describe('UiFieldHint', () => {
     expect(root.classes()).not.toContain('mw-field-hint--dismissed')
     await root.trigger('focusin')
     expect(root.classes()).not.toContain('mw-field-hint--dismissed')
+    expect(root.classes()).toContain('mw-field-hint--open')
     w.unmount()
   })
 
-  it('listens for Escape only while it is hovered or focused, and not after it is gone', async () => {
+  it('stays open while the pointer crosses the gap to the text, and closes once it has really left', async () => {
+    const w = mountHint()
+    const root = w.find('.mw-field-hint')
+    await root.trigger('mouseenter')
+    await root.trigger('mouseleave')
+    vi.advanceTimersByTime(50)
+    await nextTick()
+    expect(root.classes()).toContain('mw-field-hint--open')
+    await root.trigger('mouseenter') // back onto the text (a descendant of the root) before the delay ends
+    vi.advanceTimersByTime(500)
+    await nextTick()
+    expect(root.classes()).toContain('mw-field-hint--open')
+    await leaveAndWait(root)
+    await nextTick()
+    expect(root.classes()).not.toContain('mw-field-hint--open')
+    w.unmount()
+  })
+
+  it('pressing the button toggles the text, which is how a touch screen opens it, and a press elsewhere closes it', async () => {
+    const w = mountHint()
+    const root = w.find('.mw-field-hint')
+    await w.find('button').trigger('click')
+    expect(root.classes()).toContain('mw-field-hint--open')
+    // Pinned: it stays when nothing is hovered or focused.
+    await root.trigger('mouseleave')
+    vi.advanceTimersByTime(500)
+    await nextTick()
+    expect(root.classes()).toContain('mw-field-hint--open')
+    // A press somewhere else closes it.
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+    await nextTick()
+    expect(root.classes()).not.toContain('mw-field-hint--open')
+    // The button toggles: press to open, press again to close.
+    await w.find('button').trigger('click')
+    expect(root.classes()).toContain('mw-field-hint--open')
+    await w.find('button').trigger('click')
+    expect(root.classes()).not.toContain('mw-field-hint--open')
+    w.unmount()
+  })
+
+  it('a tap on a touch screen (hover events first, then the click) leaves the text open, not closed', async () => {
+    const w = mountHint()
+    const root = w.find('.mw-field-hint')
+    await root.trigger('mouseenter') // what a browser sends on a tap, before the click
+    await w.find('button').trigger('click')
+    expect(root.classes()).toContain('mw-field-hint--open')
+    await w.find('button').trigger('click')
+    expect(root.classes()).not.toContain('mw-field-hint--open')
+    w.unmount()
+  })
+
+  it('a press inside the hint does not count as a press elsewhere', async () => {
+    const w = mountHint()
+    const root = w.find('.mw-field-hint')
+    await w.find('button').trigger('click')
+    await w.find('#f1-hint').trigger('pointerdown')
+    expect(root.classes()).toContain('mw-field-hint--open')
+    w.unmount()
+  })
+
+  it('listens for Escape only while it is hovered, focused or pinned, and not after it is gone', async () => {
     const add = vi.spyOn(document, 'addEventListener')
     const remove = vi.spyOn(document, 'removeEventListener')
     const w = mountHint()
@@ -52,6 +136,14 @@ describe('UiFieldHint', () => {
     expect(remove.mock.calls.filter((c) => c[0] === 'keydown').length).toBeGreaterThan(0)
     add.mockRestore()
     remove.mockRestore()
+  })
+
+  it('warns in development when the text holds a block element', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const w = mount(UiFieldHint, { props: { fieldId: 'f2' }, slots: { default: '<ul><li>one</li></ul>' }, attachTo: document.body })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('phrasing content only'))
+    w.unmount()
+    warn.mockRestore()
   })
 })
 

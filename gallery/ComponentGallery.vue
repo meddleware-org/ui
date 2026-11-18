@@ -34,6 +34,37 @@ const symbol = ref('')
     </template>
   </UiDialog>
 
+  <!-- A hint inside a modal dialog: its text must be drawn above the dialog (the top layer), not behind it. -->
+  <UiDialog v-else-if="view === 'hints-dialog'" open title="Token settings" dismissible>
+    <UiFormField id="dlg-name" label="Package name">
+      <template #label-suffix><UiFieldHint field-id="dlg-name">The on-chain package name, in snake_case. It cannot change after deployment.</UiFieldHint></template>
+      <template #default="{ attrs }"><input v-bind="attrs" type="text" value="my_token"></template>
+    </UiFormField>
+  </UiDialog>
+
+  <!-- Field hints where they used to go wrong: in the headings of an EMPTY table in a narrow column (the text is longer than the table), at
+       the right edge of the screen, and at the bottom of it. -->
+  <main v-else-if="view === 'hints'" class="hints">
+    <h1>Field hints</h1>
+    <div class="narrow">
+      <UiDataTable caption="Activity" :rows="0" empty="No activity yet">
+        <template #head>
+          <th scope="col">Type</th>
+          <th scope="col">
+            Address
+            <UiFieldHint field-id="h-address">The buyer of a sold pass, or the holder who used one. Click to view in explorer; click the copy icon to copy the full address.</UiFieldHint>
+          </th>
+          <th scope="col">
+            Checkpoint
+            <UiFieldHint field-id="h-block">A checkpoint is a batch of Sui transactions the network has finalised, numbered in order, so a higher number is more recent.</UiFieldHint>
+          </th>
+        </template>
+      </UiDataTable>
+    </div>
+    <p class="edge-right">Right edge <UiFieldHint field-id="h-right">A hint at the right edge of the screen: it slides left to stay on screen.</UiFieldHint></p>
+    <p class="edge-bottom">Bottom edge <UiFieldHint field-id="h-bottom">A hint at the bottom of the screen: it opens above the button.</UiFieldHint></p>
+  </main>
+
   <!-- The shell panels in the variants the main view does not use, over the page theme. The header's menu button and the sidebar drawer
        appear below 45em. -->
   <UiAppShell v-else-if="view === 'panels'" contained>
@@ -200,4 +231,9 @@ section { margin-block: var(--space-sm); display: flex; flex-wrap: wrap; gap: va
 section > h2 { flex-basis: 100%; }
 .wide { flex-basis: 100%; }
 .cards { display: grid; gap: var(--space-xs); margin: 0; padding: 0; list-style: none; }
+/* The hints view: a column narrower than a hint's text, then a hint pushed to the right edge and one pushed to the bottom of the screen. */
+.hints { padding: var(--space-sm); background: var(--bg); color: var(--text); min-block-size: 100dvh; display: flex; flex-direction: column; }
+.narrow { max-inline-size: 18rem; }
+.edge-right { text-align: end; }
+.edge-bottom { margin-block-start: auto; }
 </style>

@@ -3,6 +3,13 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [0.1.44] - 2026-11-18
+
+### Fixed
+
+- `UiFieldHint`: the help text is drawn in the browser's top layer (a `<small popover>`), beside its button, instead of inside the table or form around it. It no longer inherits a table heading's nowrap, uppercase and letter spacing, so its background contains the text; it no longer widens an empty table or adds a horizontal scrollbar; it is drawn above an open dialog; and it moves to the side of the button where it fits on screen (below, above, right, left), or, when none fits, below, so that the page scrolls to hold it. A press on the button (a tap on a touch screen) opens it and pins it, and pressing again closes it. The text takes phrasing content only. A new internal `placeTip` does the placement.
+- `AppHeader`: a sticky `transparent` header is frosted from the first pixel instead of after 8 px of scroll, which showed as a jolt. **Breaking:** the `solidifyOnScroll` prop and its scroll listener are removed; the landing page was its only user.
+
 ## [0.1.43] - 2026-11-12
 
 AppToolShell: contained (false for a full-width page) and a footer-note slot.

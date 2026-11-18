@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { ref } from 'vue'
 import { usePanelOverrides, type PanelVariant, type PanelColors } from '../internal/panel'
 import { useStickyOffset } from '../composables/useStickyOffset'
 
@@ -9,14 +9,11 @@ const props = withDefaults(
     variant?: PanelVariant
     /** Per-instance colour overrides; token values are used by default. */
     colors?: PanelColors
-    /** Stick to the top of the viewport (full-width shells). */
-    sticky?: boolean
     /**
-     * Solidify a transparent header on scroll: while at the top the header stays
-     * see-through (e.g. over a hero); once the page scrolls it fades in a frosted
-     * background so the brand/nav stay legible. No-op unless the header scrolls.
+     * Stick to the top of the viewport (full-width shells). A sticky `transparent` header is painted frosted from the first pixel,
+     * so it looks the same at every scroll position (it used to turn solid after 8 px of scroll, which read as a jolt).
      */
-    solidifyOnScroll?: boolean
+    sticky?: boolean
     /**
      * The `id` of an AppSidebar. When set, a menu button appears on narrow screens (below 45em) that opens the sidebar as a drawer;
      * on wide screens the sidebar is always visible and the button is hidden.
@@ -25,9 +22,8 @@ const props = withDefaults(
     /** Accessible name of the menu button. */
     menuLabel?: string
   }>(),
-  { variant: 'dark', sticky: true, solidifyOnScroll: false, menuLabel: 'Menu' },
+  { variant: 'dark', sticky: true, menuLabel: 'Menu' },
 )
-
 
 const root = ref<HTMLElement | null>(null)
 usePanelOverrides(root, () => props.colors)
@@ -35,21 +31,6 @@ usePanelOverrides(root, () => props.colors)
 // A sticky header must not cover what focus or scrolling brings into view (WCAG 2.4.11): it publishes its real height, which grows when the
 // actions wrap (131 px on an iPhone-sized screen), as `--mw-header-offset` for the scroll padding in reset.css.
 if (props.sticky) useStickyOffset(root, '--mw-header-offset')
-
-// Track scroll position only when solidify-on-scroll is requested.
-const scrolled = ref(false)
-let onScroll: (() => void) | null = null
-onMounted(() => {
-  if (!props.solidifyOnScroll || typeof window === 'undefined') return
-  onScroll = () => {
-    scrolled.value = window.scrollY > 8
-  }
-  onScroll()
-  window.addEventListener('scroll', onScroll, { passive: true })
-})
-onBeforeUnmount(() => {
-  if (onScroll) window.removeEventListener('scroll', onScroll)
-})
 </script>
 
 <template>
@@ -59,9 +40,8 @@ onBeforeUnmount(() => {
     :class="[
       `mw-panel--${variant}`,
       `mw-header--${variant}`,
-      { 'mw-header--sticky': sticky, 'mw-header--scrolled': solidifyOnScroll && scrolled },
+      { 'mw-header--sticky': sticky },
     ]"
-   
   >
     <!-- The default and actions slots render directly (no layout wrappers). The brand slot sits in one element, whatever it holds
          (plain text or a link): it takes the brand typography and pushes everything after it to the inline end. Default-slot content that
@@ -98,9 +78,9 @@ onBeforeUnmount(() => {
   top: 0;
   z-index: var(--z-header);
 }
-/* Frosted, legible background once scrolled — keeps the whole header (background
-   included) visually "stuck" while remaining light over a hero at the top. */
-.mw-header--scrolled {
+/* A sticky transparent header has content scrolling under it, so it is frosted at every scroll position, not only after the page has moved:
+   a paint that changed at some scroll offset showed as a jolt, and the brand and navigation need a legible backdrop from the first pixel. */
+.mw-header--sticky.mw-header--transparent {
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(var(--space-2xs));
   border-bottom-color: var(--border);
