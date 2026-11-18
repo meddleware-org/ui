@@ -7,6 +7,14 @@
 //   - hover, focus, a press and Escape open and close it.
 import { test, expect, type Locator, type Page } from '@playwright/test'
 
+/** How far the table's own scroll area overflows sideways. The table's natural width depends on the font (CI's fallback is wider than the one
+ *  on a developer's machine), so the tests compare this with and without the text open, never with zero. */
+const tableOverflow = (page: Page) =>
+  page.evaluate(() => {
+    const wrap = document.querySelector('.mw-data-table-wrap') as HTMLElement
+    return wrap.scrollWidth - wrap.clientWidth
+  })
+
 /** The tip's box and whether its text is fully inside its own background. */
 async function inspect(page: Page, tip: Locator) {
   return tip.evaluate((el) => {
@@ -28,19 +36,16 @@ test.describe('hints in an empty table, in a narrow column', () => {
       await page.goto('/?view=hints')
       const buttons = page.locator('.narrow').getByRole('button', { name: 'Help' })
       expect(await buttons.count()).toBe(2)
+      const baseline = await tableOverflow(page)
       for (let i = 0; i < 2; i++) {
         await buttons.nth(i).hover()
         const tip = page.locator('.narrow small[popover]:popover-open')
         await expect(tip).toBeVisible()
         const box = await inspect(page, tip)
         // The table's own scroll area is untouched (this was the bug: the text widened it, so it scrolled sideways), and so is the page.
-        const metrics = await page.evaluate(() => {
-          const wrap = document.querySelector('.mw-data-table-wrap') as HTMLElement
-          const doc = document.documentElement
-          return { wrapOverflow: wrap.scrollWidth - wrap.clientWidth, pageOverflow: doc.scrollWidth - doc.clientWidth }
-        })
-        expect(metrics.wrapOverflow).toBeLessThanOrEqual(0)
-        expect(metrics.pageOverflow).toBeLessThanOrEqual(0)
+        const pageOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(await tableOverflow(page), 'the text changed how far the table scrolls sideways').toBe(baseline)
+        expect(pageOverflow).toBeLessThanOrEqual(0)
         // Wrapped, normal case: the background contains the text.
         expect(box.textFits).toBe(true)
         expect(box.whiteSpace).toBe('normal')
@@ -86,6 +91,7 @@ test('when no side fits, the page itself grows and scrolls to show all of the te
   await page.setViewportSize({ width: 320, height: 150 })
   await page.goto('/?view=hints')
   const button = page.locator('.narrow').getByRole('button', { name: 'Help' }).first()
+  const baseline = await tableOverflow(page)
   await button.hover()
   const tip = page.locator('.narrow small[popover]:popover-open')
   await expect(tip).toBeVisible()
@@ -96,11 +102,7 @@ test('when no side fits, the page itself grows and scrolls to show all of the te
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
   const after = await inspect(page, tip)
   expect(after.bottom).toBeLessThanOrEqual(150 + 1)
-  const wrapOverflow = await page.evaluate(() => {
-    const wrap = document.querySelector('.mw-data-table-wrap') as HTMLElement
-    return wrap.scrollWidth - wrap.clientWidth
-  })
-  expect(wrapOverflow).toBeLessThanOrEqual(0)
+  expect(await tableOverflow(page), 'the text changed how far the table scrolls sideways').toBe(baseline)
 })
 
 test('the text is drawn above an open modal dialog', async ({ page }) => {
