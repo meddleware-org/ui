@@ -3,6 +3,15 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- **Colour mode is stored only when asked (PECR Sch. A1 para 6).** `useColorMode` gains `remember` / `setRemember`: a choice
+  applies for the visit and is written to `localStorage` only while the person ticks **Remember on this device**; unticking removes
+  it. `ColorModeControl` shows that box when `v-model:remember` is bound (unbound: no storage at all); `AppToolShell` binds it. A
+  value stored earlier still loads, with the box ticked. Apps that bind `ColorModeControl` themselves should bind `remember` too.
+
 ## [0.1.44] - 2026-11-18
 
 ### Fixed

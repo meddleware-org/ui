@@ -12,11 +12,17 @@ withDefaults(
     modelValue: ColorMode
     /** Which modes to offer (default all three). */
     modes?: ColorMode[]
+    /**
+     * Whether the choice is kept on this device (`v-model:remember`, e.g. `useColorMode().remember`). When bound, a
+     * "Remember on this device" box is shown beside the modes, unticked unless the person ticked it before; unticking forgets the
+     * stored choice. Leave it unbound and the control offers no storage at all (docs/legal STORAGE_LEDGER B2).
+     */
+    remember?: boolean
   }>(),
-  { modes: () => ['light', 'dark', 'system'] },
+  { modes: () => ['light', 'dark', 'system'], remember: undefined },
 )
 
-defineEmits<{ 'update:modelValue': [ColorMode] }>()
+defineEmits<{ 'update:modelValue': [ColorMode]; 'update:remember': [boolean] }>()
 
 const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system: 'System' }
 
@@ -50,12 +56,23 @@ const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system:
       </svg>
       <span class="mw-mode__label">{{ LABEL[m] }}</span>
     </button>
+    <!-- The box is the information and the means of objecting in one place, next to the choice it keeps (PECR Sch. A1 para 6). -->
+    <label v-if="remember !== undefined" class="mw-mode__remember">
+      <input
+        type="checkbox"
+        :checked="remember"
+        @change="$emit('update:remember', ($event.target as HTMLInputElement).checked)"
+      />
+      Remember on this device
+    </label>
   </fieldset>
 </template>
 
 <style scoped>
 .mw-mode {
   display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
   margin: 0;
   min-inline-size: 0;
   gap: var(--space-4xs);
@@ -91,6 +108,22 @@ const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system:
 .mw-mode__btn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
+}
+/* The remember box: small text beside the modes, wrapping under them when space runs out (it is never hidden: it is the
+   information the person needs before anything is kept). */
+.mw-mode__remember {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  min-block-size: 1.5rem;
+  padding-inline: var(--space-2xs);
+  color: var(--_muted, var(--muted));
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+.mw-mode__remember input {
+  margin: 0;
+  accent-color: var(--_text, var(--text));
 }
 /* Forced colours (Windows High Contrast) drop backgrounds, so the chosen mode needs an edge of its own. */
 @media (forced-colors: active) {

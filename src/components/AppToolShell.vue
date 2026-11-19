@@ -42,7 +42,7 @@ const props = withDefaults(
   { docsUrl: undefined, devUrl: undefined, pageHeading: true, contained: true, defaultMode: 'dark' },
 )
 
-const { mode, set } = useColorMode(props.defaultMode)
+const { mode, set, remember, setRemember } = useColorMode(props.defaultMode)
 const docs = computed(() => (props.docsUrl === false ? undefined : props.docsUrl || `https://docs.meddleware.co.uk/blockchain/sui/${props.slug}/`))
 const dev = computed(() => (props.devUrl === false ? undefined : props.devUrl || `https://meddleware.dev/sui/${props.slug}/`))
 </script>
@@ -54,7 +54,7 @@ const dev = computed(() => (props.devUrl === false ? undefined : props.devUrl ||
         <template #brand><slot name="brand"><BrandMark /> {{ title }}</slot></template>
         <template #actions>
           <slot name="actions" />
-          <ColorModeControl :model-value="mode" @update:model-value="set" />
+          <ColorModeControl :model-value="mode" :remember="remember" @update:model-value="set" @update:remember="setRemember" />
         </template>
       </AppHeader>
     </template>

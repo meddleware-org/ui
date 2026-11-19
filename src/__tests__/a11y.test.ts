@@ -121,6 +121,17 @@ describe('accessibility (axe)', () => {
     await expectNoViolations(wrapper.html())
   })
 
+  it('ColorModeControl offers storage only when bound, as a labelled, unticked box (L-PECR-2)', async () => {
+    expect(mount(ColorModeControl, { props: { modelValue: 'dark' } }).find('input[type="checkbox"]').exists()).toBe(false)
+    const wrapper = mount(ColorModeControl, { props: { modelValue: 'dark', remember: false } })
+    const box = wrapper.get('input[type="checkbox"]')
+    expect((box.element as HTMLInputElement).checked).toBe(false)
+    expect(box.element.closest('label')?.textContent?.trim()).toBe('Remember on this device')
+    await box.setValue(true)
+    expect(wrapper.emitted('update:remember')).toEqual([[true]])
+    await expectNoViolations(wrapper.html())
+  })
+
   it('UiDialog (open) has no violations', async () => {
     const wrapper = mount(UiDialog, {
       props: { open: true, title: 'Before you deploy' },
