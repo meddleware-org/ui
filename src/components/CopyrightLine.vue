@@ -16,6 +16,8 @@
 </template>
 
 <script setup lang="ts">
+// The same notice is drawn by the Link in Bio page renderer (repos/link-in-bio-service crates/core/src/render.rs, `rights_notice`),
+// with a test that pins the Kopimi path: change the marks or the wording in both (workspace docs/legal L-IP-1).
 import { computed } from 'vue'
 import { safeHref, safePath } from '@meddleware/web-utils'
 
