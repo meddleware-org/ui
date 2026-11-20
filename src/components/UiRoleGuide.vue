@@ -101,6 +101,8 @@ onMounted(() => {
 <style scoped>
 .mw-role-guide {
   display: grid;
+  /* minmax(0, …): the column may shrink below its content's minimum, so the choices reflow at 200% text instead of widening the page. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-md);
 }
 
@@ -109,6 +111,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
   gap: var(--space-xs);
+  inline-size: 100%;
   margin: 0;
   padding: 0;
   border: 0;
@@ -159,6 +162,7 @@ onMounted(() => {
 /* The panels: every one shows where :has() is not supported (or without CSS); where it is, only the chosen one. */
 .mw-role-guide__panels {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-md);
 }
 @supports selector(:has(*)) {
@@ -175,6 +179,8 @@ onMounted(() => {
   }
 }
 .mw-role-guide__panel {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
   padding: var(--space-md);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -217,7 +223,7 @@ onMounted(() => {
 
 .mw-role-guide__facts {
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: var(--space-3xs) var(--space-sm);
   margin: 0 0 var(--space-sm);
 }

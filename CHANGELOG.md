@@ -5,6 +5,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); version
 
 ## [0.1.46] - 2026-11-20
 
+- `UiRoleGuide` reflows at 200% text on a phone: its grids may shrink below their content's minimum (`minmax(0, 1fr)`), found by the
+  release's five-browser sweep before 0.1.46 was published.
+
 ### Added
 
 - `UiRoleGuide` (and the `RoleGuideRole` type): "I'm here to…", a native radio group of paths, each with a numbered path of steps, what
