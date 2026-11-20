@@ -4,7 +4,7 @@ import {
   AppFooter, AppHeader, AppSidebar, AppTabNav, BrandMark, ColorModeControl, CopyableAddress, CopyrightLine, ExplorerLink,
   SidebarGroup, SidebarItem, StatusWidget, UiActivityFeed, UiActivityItem, UiAmount, UiAppShell, UiBadge, UiButton, UiCard,
   UiCheckField, UiCodeBlock, UiCopyButton, UiDataTable, UiDateTimeField, UiDialog, UiEmptyState, UiFieldHint, UiFormField,
-  UiLiveStatus, UiMeter, UiNotice, UiPager, UiPanel, UiSegmentedControl, UiSelect, UiSelectField, UiStatGrid, UiStatRow,
+  UiLiveStatus, UiMeter, UiNotice, UiPager, UiPanel, UiRoleGuide, UiSegmentedControl, UiSelect, UiSelectField, UiStatGrid, UiStatRow,
   UiFileField, UiStatusBar, UiStatusDot, UiStepper, UiTabPanel, UiTextField, UiToolIntro, UiToolbar, UiToolbarButton, useColorMode,
 } from '../src/index'
 
@@ -16,6 +16,11 @@ const tab = ref('a')
 // from the query is its starting mode.
 const { mode, set: setMode } = useColorMode(props.theme)
 const segment = ref('x')
+const guideRoles = [
+  { id: 'use', title: 'Use the tools', summary: 'Get things done without being kept.', steps: ['Pick a tool.', 'Use it in your browser.', 'Take your data with you.'], need: 'Only what the tool says', get: 'The tool, without the lock-in', links: [{ text: 'Available now', href: '#tools' }] },
+  { id: 'build', title: 'Build with them', summary: 'Connect your work to open tools and APIs.', steps: ['Read the open APIs.', 'Build on the same standards.'], links: [{ text: 'Developer guide ↗', href: 'https://meddleware.dev/' }] },
+  { id: 'run', title: 'Run my own', summary: 'Host the tools under your own name.', steps: ['Choose the tools.', 'Host them.', 'Run them as yours.'] },
+]
 const step = ref(1)
 const name = ref('Sample token')
 const network = ref('testnet')
@@ -170,6 +175,11 @@ const symbol = ref('')
           <ColorModeControl :model-value="mode" @update:model-value="setMode" />
           <UiStepper v-model="step" class="wide" :steps="[{ id: 'a', label: 'Details' }, { id: 'b', label: 'Review' }, { id: 'c', label: 'Deploy' }]" />
           <UiStepper orientation="vertical" :steps="[{ id: 'a', label: 'Publish', status: 'done' }, { id: 'b', label: 'Verify', status: 'busy' }, { id: 'c', label: 'Share', status: 'error' }, { id: 'd', label: 'Archive', status: 'pending' }]" />
+        </section>
+
+        <section>
+          <h2>Role guide</h2>
+          <UiRoleGuide name="gallery-guide" :roles="guideRoles" />
         </section>
 
         <section>

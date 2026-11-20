@@ -3,6 +3,15 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- `UiRoleGuide` (and the `RoleGuideRole` type): "I'm here to…", a native radio group of paths, each with a numbered path of steps, what
+  the reader needs and gets, and links onward. CSS shows the chosen panel (`:has(:checked)`), so it works without JavaScript when
+  prerendered and shows every panel where `:has()` is unsupported; the choice is mirrored in the address (`#for-<id>`), never stored.
+  In the gallery and its five-browser sweep.
+
 ## [0.1.45] - 2026-11-19
 
 ### Changed
