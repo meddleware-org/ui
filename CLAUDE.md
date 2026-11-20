@@ -209,3 +209,7 @@ This package depends on `@meddleware/design-tokens` for CSS custom properties. A
 - Do not bundle Vue; it is a peer dependency.
 - Do not publish without running `npm run build` first: `dist/` is what consumers receive.
 - Do not use hardcoded hex colours in component styles; reference the role tokens from `@meddleware/design-tokens`.
+
+## Interoperability
+
+- [docs/INTEROP.md](docs/INTEROP.md): the standards this project speaks, what is planned, where to extend it, and what proves each claim.
