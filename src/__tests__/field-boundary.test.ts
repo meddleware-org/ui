@@ -1,3 +1,5 @@
+// Source-level checks that the three text controls draw their edge in the 3:1 token (WCAG 1.4.11). axe cannot see this (it measures text), and
+// the design-tokens contrast gate holds `--control-border`'s ratio, so the only thing left to prove is that each control actually uses it.
 import { describe, expect, it } from 'vitest'
 import input from '../components/UiInput.vue?raw'
 import select from '../components/UiSelect.vue?raw'

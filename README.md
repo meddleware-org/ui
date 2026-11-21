@@ -70,6 +70,7 @@ Seasonal theming is entirely in `@meddleware/design-tokens` (import `seasons.css
 | `AppSidebar` | Side panel (`<aside>`) around a component-owned `<nav>` (default slot; `navLabel`, default "Primary"). Below 45em it becomes a **drawer** on the Popover API, opened by `AppHeader`'s menu button (give the sidebar an `id`, pass it as `sidebar-id`), closed by Escape, a click outside, or choosing an item. The `head`, `body` and `foot` slots render directly and style themselves; the nav grows, so body/foot content settles at the bottom. |
 | `BrandMark` | The company mark, the Kopimi "K" (public domain, vendored; `src/brand/README.md`), drawn in `currentColor` so it takes the accent in either colour mode. Decorative unless given `label`. The favicon set (`favicon.svg` with a dark-mode colour, `favicon.ico`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`) is published as `@meddleware/ui/brand/*`; apps get it through `@meddleware/frontend-config`'s `brandIcons`. |
 | `AppToolShell` | The frame of a standalone tool app: header with the mark and the tool's name, `actions` slot, colour-mode control, footer with the documentation links and the copyright line. `docsUrl` / `devUrl` take a URL or `false` (no link); `pageHeading` false when the page has its own `h1`; `contained` false lets the page use the full width; a `footer-note` slot adds a sentence to the footer. |
+| `CopyrightLine` | The rights notice: a symbol link (© `copyright`, `copyleft` or the Kopimi triangle `kopimi`) to a legal document, the year, the organisation and a rights statement (`all`, `none`, `jam`, or your own text). The documents are served from `legalBase` (default the canonical host `https://meddleware.co.uk/legal/`, so an app ships no copies); the link is checked with `safePath` / `safeHref`. The Link in Bio renderer draws the same notice in Rust; change both together. |
 | `AppFooter` | Page footer (`<footer>`). Slots `start`, default and `end` render directly; `docsUrl` / `devUrl` render a component-owned `<nav aria-label="Documentation">` at the inline end. |
 
 All three accept a `variant` prop (a CSS class, `mw-panel--dark` and so on, defined in the reset; `colors` overrides are written to the element through the CSSOM, never as an inline `style` attribute, so they work under a strict CSP):
@@ -86,6 +87,8 @@ All three accept a `variant` prop (a CSS class, `mw-panel--dark` and so on, defi
 | --- | --- |
 | `UiButton` | Styled button, or a link that looks like one (`href`, checked with `safeHref`). `variant` primary / secondary / ghost / danger / link; `size` md / sm; `busy` shows a spinner, sets `aria-busy` and blocks interaction without losing the label. Hover is an inner ring in the label colour, so the label keeps its contrast. |
 | `UiCard` | Card: optional `<header>` (title), body content directly inside, optional `<footer>`. `as` section / article / li, `level` 2–6 for the heading, `plain` drops the header band, `href` makes the whole card a link through its title (one tab stop). Inside a list item the band and footer are plain elements (a `<header>` there would become a page-level landmark). |
+| `UiRoleGuide` (and `RoleGuideRole`) | "I'm here to…": a native radio group of paths, each with a numbered path of steps, what the reader needs and gets, and links onward. CSS shows the chosen panel (`:has(:checked)`), so it works without JavaScript; with it the choice is mirrored in the address (`#for-<id>`). Nothing is stored. |
+| `UiToolIntro` | The one-line description at the top of a tool view, in one style across every tool. |
 | `UiSelect` | Styled native `<select>` (single root; attributes fall through; chevron painted in CSS). Label it with `UiFormField` or an `aria-label`. |
 | `UiFormField` | A labelled field as a `<p>`: `<label for>` + `label-suffix` slot (e.g. `UiFieldHint`, kept outside the label) + control slot (receives `attrs` with `id` / `aria-*`) + hint/error `<small>`. Slot content must be phrasing content. |
 | `UiNotice` | Notice / alert banner. `type` info / warning / error / ok (roles: `alert` for error, `status` for ok and warning), `message` prop or slot, `as` p / div for block content. The text keeps body colour; the tone is the border and tint. |
@@ -116,12 +119,13 @@ icon copies:
 | `UiStatusBar` | Status bar as a list. Standard items from optional props `network` (+ `healthy`), `epoch`, `lastRefresh` (the relative time ticks on its own); extra `<li>` items in the default slot. |
 | `UiDataTable` | Table. `head` slot: `<th>` cells **only** (never a `<tr>`; the component wraps them, and a dev check warns); default slot: rows; `rows` (0 shows `empty`), `caption` (visually hidden accessible name). When wider than its box the scroll area becomes a focusable, labelled region and says so. A `th scope="row"` reads as the row title, not a column header. |
 | `UiBadge` | Status or tag as words + symbol + border: `tone` ok / warn / danger / info / accent / neutral, `symbol` (own glyph, `false`, or the tone's default). The label keeps body colour. (`variant` is the old API.) |
-| `UiStatusDot` | Decorative health dot: `status` operational / degraded / down / unknown (or ok / warn / error), `size` sm / md. Put the state in words beside it. |
+| `UiStatusDot` (and `StatusDotStatus`) | Decorative health dot: `status` operational / degraded / down / unknown (or ok / warn / error), `size` sm / md. Put the state in words beside it. |
+| `StatusWidget` | A compact link to the platform status page, polled from the status API (`apiUrl`, `href`, `pollInterval`, at least 15 s). It claims nothing until the first answer, and shows exactly what the API says; see "Status" below. |
 | `UiActivityFeed` / `UiActivityItem` | Activity list (`UiActivityItem` takes `type`, `time`, optional `datetime` to render a `<time>`). |
-| `UiSegmentedControl` | Radio-group choice: `label` names the group (a `<legend>`, visually hidden unless `label-hidden` is false), the chosen option carries a ✓, `layout` inline / wrap / grid. |
-| `UiStepper` | Steps: a wizard (`v-model` index) or a progress list (`status` per step: done / busy / error / pending; `orientation="vertical"`), with the state in words for assistive technology. |
+| `UiSegmentedControl` (and `SegmentedOption`) | Radio-group choice: `label` names the group (a `<legend>`, visually hidden unless `label-hidden` is false), the chosen option carries a ✓, `layout` inline / wrap / grid. |
+| `UiStepper` (and `StepperStep`, `StepStatus`) | Steps: a wizard (`v-model` index) or a progress list (`status` per step: done / busy / error / pending; `orientation="vertical"`), with the state in words for assistive technology. |
 | `UiMeter` | Labelled native `<meter>` with the state in words (within / close to / over). |
-| `UiPager` + `usePager` | Previous / next for a keyset-paginated list; `usePager(load)` keeps the cursors seen and drops out-of-order answers. |
+| `UiPager` + `usePager` (and `PageOf`, `Pager`) | Previous / next for a keyset-paginated list; `usePager(load)` keeps the cursors seen and drops out-of-order answers. |
 
 ### Forms and small primitives
 
@@ -137,8 +141,10 @@ icon copies:
 ### Helpers
 
 The framework-free helpers live in [`@meddleware/web-utils`](https://www.npmjs.com/package/@meddleware/web-utils) and are re-exported here
-(`suiExplorerUrl`, `walruscanBlobUrl`, `safeHref`, `safePath`, `truncateMiddle`, the status parser and its `STATUS_LABEL` /
-`STATUS_HEADLINE`). Composables: `useColorMode`, `useSeason`, `useNow`, `useStatusSnapshot`, `usePager`.
+(`suiExplorerUrl`, `walruscanBlobUrl`, `safeHref`, `safePath`, `safeIcon`, `truncateMiddle` with `DEFAULT_TRUNCATE_CHARS`, the status parser
+`parseSnapshot` / `isStatusLevel` and its `STATUS_LABEL` / `STATUS_HEADLINE`). Composables: `useColorMode`, `useSeason`, `useNow`,
+`useStatusSnapshot`, `usePager`, `useStickyOffset`. Also exported: `tabIds` (the tab and panel ids `AppTabNav` and `UiTabPanel` share, with
+the `TabIds` type) and `BadgeTone` (a `UiBadge` tone).
 
 ### Explorer helper
 
@@ -152,10 +158,41 @@ The framework-free helpers live in [`@meddleware/web-utils`](https://www.npmjs.c
 | Export | Type | Description |
 | --- | --- | --- |
 | `ColorModeControl` | Vue SFC | Presentational light / dark / system toggle. **Owns no state** — bind with `v-model`. |
-| `useColorMode(default?)` | Composable | Module-singleton colour-mode state manager. Sets `data-theme` on `<html>`, persists to `localStorage`, follows system preference when mode is `'system'`. |
+| `useColorMode(default?)` | Composable | Module-singleton colour-mode state manager. Sets `data-theme` on `<html>` and follows the system preference when the mode is `'system'`. **Nothing is stored until the person ticks "Remember on this device"** (`remember` / `setRemember`, bound to the control's `v-model:remember`): then the choice is kept in `localStorage` under `mw-color-mode`, and unticking removes it (D134). |
 | `ColorMode` | Type | `'light' \| 'dark' \| 'system'` |
 | `PanelVariant` | Type | `'light' \| 'dark' \| 'transparent'` |
 | `PanelColors` | Type | Per-instance colour override shape for layout shell components. |
+
+### Status
+
+| Export | Type | Description |
+| --- | --- | --- |
+| `useStatusSnapshot({ url, intervalMs?, timeoutMs? })` | Composable | Polls the status API once on mount and then while the tab is visible; returns `snapshot`, `error`, `loading`, `refresh`. A response that is not a valid snapshot is an error, never "healthy"; an older slower poll never overwrites a newer one. Call it from a component's `setup`. |
+| `MIN_STATUS_POLL_MS` | Constant | 15 000: the shortest poll interval honoured. |
+| `UseStatusSnapshotOptions`, `StatusSnapshotState` | Types | The options and the returned state. |
+| `StatusLevel`, `StatusComponent`, `StatusGroup`, `StatusSnapshot` | Types | The shapes of the status API's answer (re-exported from `@meddleware/web-utils`). |
+
+### Layout helpers
+
+`useStickyOffset(target, '--property')` publishes the height of a sticky element as a custom property on `<html>`, so the reset can pad the
+scroll area and focus is never hidden behind it (WCAG 2.4.11). `AppHeader` does this itself; call it for a second sticky layer (a tab strip, with
+`--mw-sticky-extra`). Call it from a component's `setup`.
+
+### Runtime configuration
+
+A static app is built once and configured per deployment: the operator serves a same-origin `/runtime-config.json` that overrides the build-time
+endpoint variables (ADR-0005). Only endpoints can be overridden (`RUNTIME_ENDPOINT_KEYS`: the indexer and the Walrus relays), never ids, fees or
+addresses.
+
+| Export | Description |
+| --- | --- |
+| `loadRuntimeConfig(path?, fetchImpl?)` | Fetch and apply the file. Never throws: a missing, non-JSON or invalid file leaves the build-time values in force. Call it once, before the app's modules are imported. |
+| `withRuntimeEnv(import.meta.env)` | The build-time environment with the overrides on top; read every endpoint through it. |
+| `runtimeEndpoints()` | The overrides applied (empty before it ran or when none applied). |
+| `parseRuntimeConfig(input)`, `parseEndpoint(value)` | The validators: unknown keys and bad values (non-https, credentials, a query) are dropped and reported. |
+| `RUNTIME_CONFIG_PATH`, `RUNTIME_ENDPOINT_KEYS` | The default location (`/runtime-config.json`) and the allowed keys. |
+| `RuntimeEndpointKey`, `RuntimeEndpoints` | Types. |
+| `resetRuntimeConfigForTesting()` | Test hook: forget the loaded overrides. |
 
 ## Theming
 
@@ -181,9 +218,29 @@ const { mode } = useColorMode()
 </template>
 ```
 
+## Development
+
+There is a build step: the package ships `dist/` (one module per component, each with its own CSS). The checks, all run in CI on every push:
+
+```bash
+npm ci                    # install exactly the lockfile
+npm run type-check        # vue-tsc over the .ts files and the <script> blocks of the .vue files
+npm run lint              # stylelint, eslint + vuejs-a11y, and html-validate over the templates
+npm test                  # 200 jsdom unit and axe tests, then the brand check
+npm run build             # dist/: declarations, one module per component, reset.css, base.css, theme-init.js
+npm run check:dist        # asserts on dist/ that a component brings exactly its own CSS (run after the build)
+npx playwright install chromium firefox webkit
+npm run test:e2e          # the gallery in real browsers, every theme × season (63 tests on Chromium)
+npm run shots             # screenshots of every state, for looking (SHOTS=1)
+npx --no-install mw-audit-gate   # the dependency gate
+```
+
+A new component needs a gallery entry, a behaviour test and an axe case (CLAUDE.md, "Adding a component"). How to propose a change is in
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## Publishing
 
-Published to npmjs on `v*` git tags via `.github/workflows/publish.yml` using npm trusted publishing (OIDC) — no long-lived secrets required. The workflow installs dependencies, builds `dist/`, and publishes.
+Published to npmjs on `v*` git tags via `.github/workflows/npm-publish.yml` using npm trusted publishing (OIDC) — no long-lived secrets required. The workflow installs dependencies, builds `dist/`, and publishes.
 
 To release: bump `version` in `package.json`, add a CHANGELOG entry, run `npm run build` to verify, commit, tag (`git tag v0.x.y`), push the tag.
 

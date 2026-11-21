@@ -1,8 +1,17 @@
 <script setup lang="ts">
 // A checkbox with its label wrapped around it (a click on the text toggles it). The label is the `label` prop or, for rich content, the
 // `label` slot; `hint` adds a muted aside inside the same label, so it is read with it.
+/** Whether the box is checked. */
 const model = defineModel<boolean>({ default: false })
-defineProps<{ label?: string; hint?: string; disabled?: boolean }>()
+defineProps<{
+  /** The label text; the `label` slot takes rich content instead. */
+  label?: string
+  /** A muted aside inside the same label, so it is read with it. */
+  hint?: string
+  /** Disables the checkbox. */
+  disabled?: boolean
+}>()
+// Template: The label wraps the input: the native association, no `for`/`id` pair, and a click on the text toggles the box.
 </script>
 
 <template>
@@ -13,6 +22,7 @@ defineProps<{ label?: string; hint?: string; disabled?: boolean }>()
 </template>
 
 <style scoped>
+/* Box and text side by side; the box aligns to the first line so a wrapped label does not centre it. */
 .mw-check {
   display: flex;
   gap: var(--space-xs);

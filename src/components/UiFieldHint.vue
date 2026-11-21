@@ -21,16 +21,24 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { placeTip } from '../internal/placeTip'
 
-defineProps<{ fieldId: string }>()
+defineProps<{
+  /** The id of the field this hint belongs to; the hint text's id is derived from it, so the button can be `aria-describedby` it. */
+  fieldId: string
+}>()
 
+// The wrapper (holds the button and, in the DOM, the text) and the text element itself, which is the popover.
 const root = ref<HTMLElement | null>(null)
 const tip = ref<HTMLElement | null>(null)
+// Whether the text is showing, and whether Escape has dismissed it (which keeps it shut until the pointer and focus have both left).
 const open = ref(false)
 const dismissed = ref(false)
+// The three reasons the text may be open. Plain variables, not refs: nothing renders from them, `apply()` reads them and acts.
 let hovered = false
 let focused = false
 let pinned = false
+// Whether the Escape listener is on the document, so it is added once however often it is asked.
 let escapeListening = false
+// The pending close after the pointer leaves, a pending placement frame, and the observer that follows the text's size.
 let closeTimer: ReturnType<typeof setTimeout> | undefined
 let frame = 0
 let observer: ResizeObserver | null = null
@@ -41,6 +49,7 @@ const CLOSE_DELAY_MS = 150
 const GAP = 6
 const MARGIN = 8
 
+// Development warning only (see onMounted): the check costs a DOM query, so it is skipped in a production build.
 const isDev = (import.meta as { env?: { DEV?: boolean } }).env?.DEV === true
 
 /** Whether the text should be showing now. */
@@ -86,6 +95,10 @@ function listenForEscape(on: boolean): void {
   else document.removeEventListener('keydown', onKey)
 }
 
+/**
+ * Escape closes the text (WCAG 1.4.13: dismissible without moving the pointer or the focus) and keeps it closed until the visit ends.
+ * @param e - the keydown event on the document
+ */
 function onKey(e: KeyboardEvent): void {
   if (e.key !== 'Escape') return
   dismissed.value = true
@@ -93,7 +106,10 @@ function onKey(e: KeyboardEvent): void {
   apply()
 }
 
-/** A press outside the hint unpins it (a tap on a touch screen has no "pointer left"). */
+/**
+ * A press outside the hint unpins it (a tap on a touch screen has no "pointer left").
+ * @param e - the pointerdown event on the document
+ */
 function onOutside(e: Event): void {
   if (root.value && e.target instanceof Node && root.value.contains(e.target)) return
   pinned = false
@@ -129,6 +145,7 @@ function apply(): void {
   }
 }
 
+/** Remove everything `apply()` added while the text was open: the observer, the document and window listeners and any pending frame. */
 function teardown(): void {
   observer?.disconnect()
   observer = null
@@ -139,12 +156,15 @@ function teardown(): void {
   frame = 0
 }
 
+// The pointer entering or leaving the wrapper (the button and the text are inside it, so moving between them keeps it open).
+/** The pointer entered: open the text, and cancel any pending close. */
 function enter(): void {
   clearTimeout(closeTimer)
   hovered = true
   listenForEscape(true)
   apply()
 }
+/** The pointer left: close after a short delay, so crossing the gap between the button and the text does not close it. */
 function leave(): void {
   clearTimeout(closeTimer)
   closeTimer = setTimeout(() => {
@@ -152,11 +172,13 @@ function leave(): void {
     apply()
   }, CLOSE_DELAY_MS)
 }
+/** Focus entered the button or the text: open it. */
 function focusIn(): void {
   focused = true
   listenForEscape(true)
   apply()
 }
+/** Focus left both: close it (unless it is hovered or pinned). */
 function focusOut(): void {
   focused = false
   apply()
@@ -178,6 +200,7 @@ function press(e: Event): void {
   apply()
 }
 
+// Native listeners from script (not template handlers) so the wrapper stays a plain element with no handler in the markup.
 onMounted(() => {
   const el = root.value
   el?.addEventListener('mouseenter', enter)
@@ -201,6 +224,7 @@ onBeforeUnmount(() => {
   if (open.value) tip.value?.hidePopover?.()
   teardown()
 })
+// Template: The button is the control; the <small> is the text, linked by aria-describedby (no role on it: HTML has no tooltip element, and the description reaches assistive technology through that attribute). popover="manual": the browser draws it in the top layer, and this component decides when to show it.
 </script>
 
 <template>
@@ -218,6 +242,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* The wrapper sits inline after the label, with a small gap; it is the anchor the text is placed against. */
 .mw-field-hint {
   position: relative;
   display: inline-block;
@@ -245,6 +270,7 @@ onBeforeUnmount(() => {
   font-family: inherit;
 }
 
+/* Keyboard focus ring in the fleet's focus colour. */
 .mw-field-hint__btn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 1px;

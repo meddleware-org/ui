@@ -1,16 +1,24 @@
 // @vitest-environment jsdom
+// The status widget claims nothing until it has read an answer, shows exactly what the API says, and polls on a floor-limited interval that
+// pauses in a hidden tab. `fetch` is always a stand-in, so no test touches the network.
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import StatusWidget from '../components/StatusWidget.vue'
 
+/**
+ * A valid status snapshot with one group and one component, all in the given state.
+ * @param overall - the status level of everything in it
+ */
 const snapshot = (overall: string) => ({
   generated_at: '2026-10-08T00:00:00Z',
   overall,
   groups: [{ name: 'Platform', status: overall, components: [{ name: 'Web', status: overall }] }],
 })
+/** A stand-in `fetch` answering with some JSON (or a 500 when `ok` is false). */
 const respond = (body: unknown, ok = true) => vi.fn(async () => new Response(JSON.stringify(body), { status: ok ? 200 : 500, headers: { 'content-type': 'application/json' } }))
 
 describe('StatusWidget', () => {
+  // Fake timers: the polling interval is a real `setInterval`, which the tests advance by hand.
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => {
     vi.useRealTimers()
@@ -19,6 +27,7 @@ describe('StatusWidget', () => {
   })
 
   it('claims nothing until the first answer arrives', async () => {
+    // A fetch that never answers, so the widget stays in its first state.
     vi.stubGlobal('fetch', () => new Promise(() => {}))
     const w = mount(StatusWidget)
     expect(w.text()).toBe('Checking status…')

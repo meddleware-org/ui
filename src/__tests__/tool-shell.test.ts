@@ -3,13 +3,16 @@ import { describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AppToolShell from '../components/AppToolShell.vue'
 
+// The frame every tool app shares: one hidden page heading, the tool in <main>, actions beside the colour-mode control, and docs links by slug.
 describe('AppToolShell', () => {
+  // The shell with a tool and an action in its slots; `props` overrides the defaults.
   const mountShell = (props: Record<string, unknown> = {}) =>
     mount(AppToolShell, {
       props: { title: 'Access Gate', slug: 'access-gate', ...props },
       slots: { default: '<p id="tool">the tool</p>', actions: '<button type="button">Connect</button>' },
     })
 
+  // The shell adds the page's one h1 (visually hidden) because the header shows the brand, which is not a heading.
   it('puts the tool in the main landmark under one hidden page heading', () => {
     const w = mountShell()
     expect(w.findAll('h1')).toHaveLength(1)
@@ -18,14 +21,17 @@ describe('AppToolShell', () => {
     expect(w.get('main #tool').text()).toBe('the tool')
   })
 
+  // The header carries the tool's name as brand text, and the actions slot sits beside the colour-mode control.
   it('names the tool in the header, with its actions beside the colour-mode control', () => {
     const w = mountShell()
     expect(w.get('header').text()).toContain('Access Gate')
     expect(w.get('header button').text()).toBe('Connect')
+    // The action first, then the three colour-mode buttons (light, dark, system), so at least four buttons.
     expect(w.findAll('header button').length).toBeGreaterThanOrEqual(4) // the action, then light, dark, system
   })
 
   it('links the docs and developer pages of the tool by slug, and lets an app override them', () => {
+    // The footer links by tool slug, and an app may replace either link (or drop it with `false`).
     const hrefs = (w: ReturnType<typeof mountShell>) => w.findAll('footer a').map((a) => a.attributes('href'))
     expect(hrefs(mountShell())).toEqual(expect.arrayContaining(['https://docs.meddleware.co.uk/blockchain/sui/access-gate/', 'https://meddleware.dev/sui/access-gate/']))
     expect(hrefs(mountShell({ docsUrl: 'https://docs.example.test/x/' }))).toContain('https://docs.example.test/x/')
@@ -65,6 +71,7 @@ describe('AppToolShell', () => {
   })
 })
 
+// A table header without `scope` cannot be tied to its column by assistive technology: the development warning must fire for it.
 describe('UiDataTable header scope', () => {
   it('warns in development when a header cell has no scope', async () => {
     vi.resetModules()

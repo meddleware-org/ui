@@ -7,9 +7,11 @@ import BrandMark from '../components/BrandMark.vue'
 import * as ui from '../index'
 import { MARK_PATH, MARK_VIEW_BOX } from '../brand/mark'
 
+// The favicon and the in-page mark are drawn from the same path, so a change to one cannot leave the other behind.
 describe('the brand mark', () => {
   it('has a favicon with a transparent background that follows the colour mode and draws the same path', () => {
     expect(FAVICON).toContain('prefers-color-scheme:dark')
+    // A transparent background: no rectangle or circle behind the mark, so it sits on any tab colour.
     expect(FAVICON).not.toMatch(/<rect|<circle|<text/)
     expect(FAVICON).toContain('fill-rule="evenodd"')
     expect(FAVICON).toContain(MARK_PATH)

@@ -35,15 +35,26 @@ import SidebarItem from '../components/SidebarItem.vue'
 import ColorModeControl from '../components/ColorModeControl.vue'
 import StatusWidget from '../components/StatusWidget.vue'
 
+// Register the axe matcher at runtime (vitest globals are off); its types come from ./vitest-axe.d.ts.
 expect.extend(axeMatchers)
+// jsdom has no canvas and logs "Not implemented" when axe probes for one: return null up front, which is what axe already gets.
 HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElement.prototype.getContext
+// Fragments are not whole pages, so the page-level `region` rule does not apply to them.
 const opts = { rules: { region: { enabled: false } } }
+// jsdom has no <dialog> modality; the shim models the parts UiDialog uses so it can be rendered here.
 beforeAll(installDialogShim)
+/**
+ * Fail the test if axe finds a violation in some markup.
+ * @param html - the rendered HTML to check
+ */
 const clean = async (html: string): Promise<void> => {
   expect(await axe(html, opts)).toHaveNoViolations()
 }
 
+// One case per group of components: each renders the variants and states that change the markup (tones, errors, busy, disabled), because
+// a rule can pass for the default state and fail for another.
 describe('accessibility of the primitives (axe)', () => {
+  // The first group: the status components, each in several tones, because a tone changes the symbol and the colour classes.
   it('badges, dots and notices', async () => {
     await clean(
       [

@@ -20,10 +20,12 @@ const props = withDefaults(
   { truncate: true, chars: () => [...DEFAULT_TRUNCATE_CHARS] },
 )
 
+// The shortened text shown when no slot is given; the full value is always in the `title`, so nothing is lost by truncating.
 const label = computed(() => {
   if (!props.value) return ''
   return props.truncate ? truncateMiddle(props.value, props.chars) : props.value
 })
+// Template: The href goes through `safeHref` (web-utils): a URL that is not https (or loopback http) renders no href at all. target=_blank needs noopener and noreferrer so the destination cannot reach back through window.opener or learn where it was opened from.
 </script>
 
 <template>
@@ -44,6 +46,7 @@ const label = computed(() => {
   text-underline-offset: 0.18em;
   transition: color var(--duration-base);
 }
+/* On hover the dotted underline turns solid and the colour moves to --text, so the change is not colour alone. */
 .el-root:hover {
   color: var(--text);
   text-decoration-style: solid;

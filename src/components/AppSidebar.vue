@@ -19,8 +19,10 @@ const props = withDefaults(
   { variant: 'dark', navLabel: 'Primary' },
 )
 
+// The width as a CSS value: the caller's, or the shared token. It is bound into the stylesheet below with `v-bind`.
 const sidebarWidth = computed(() => props.width ?? 'var(--mw-sidebar-width)')
 
+// The <aside> element, needed to close the popover and to apply the panel colour overrides.
 const aside = ref<HTMLElement | null>(null)
 usePanelOverrides(aside, () => props.colors)
 
@@ -30,16 +32,19 @@ function onClick(e: MouseEvent): void {
   if (!el || !(e.target instanceof Element) || !e.target.closest('button, a[href]')) return
   if (typeof el.hidePopover === 'function' && el.matches(':popover-open')) el.hidePopover()
 }
+// A native listener on the element: one handler covers every item the caller slots in, whatever component they are.
 onMounted(() => aside.value?.addEventListener('click', onClick))
 onBeforeUnmount(() => aside.value?.removeEventListener('click', onClick))
 
 // Only the navigation block is component-owned. head/body/foot slot content renders directly and styles itself; the nav grows to fill, so
 // body/foot content settles at the bottom.
+// Template: popover="auto": the browser provides Escape-to-close, click-outside-to-close, focus return and the top layer for the narrow-screen drawer. On wide screens the same element is simply a column (the styles below switch it back to static).
 </script>
 
 <template>
   <aside ref="aside" class="mw-sidebar" :class="`mw-panel--${variant} mw-sidebar--${variant}`" popover="auto">
     <slot name="head" />
+    <!-- The one navigation landmark this component owns; the slots around it render directly. -->
     <nav class="mw-sidebar__nav" :aria-label="navLabel"><slot /></nav>
     <slot name="body" />
     <slot name="foot" />
@@ -66,6 +71,7 @@ onBeforeUnmount(() => aside.value?.removeEventListener('click', onClick))
   inset: auto;
   position: static;
 }
+/* The navigation block grows to fill the column and scrolls on its own, so a long menu never pushes the foot slot off screen. */
 .mw-sidebar__nav {
   display: flex;
   flex-direction: column;
@@ -82,6 +88,7 @@ onBeforeUnmount(() => aside.value?.removeEventListener('click', onClick))
   .mw-sidebar:not(:popover-open) {
     display: none;
   }
+  /* Open: fixed to the inline start, at most 85% of the screen wide so some page stays visible behind it. */
   .mw-sidebar:popover-open {
     position: fixed;
     inset: 0 auto 0 0;

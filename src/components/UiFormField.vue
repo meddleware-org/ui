@@ -12,19 +12,26 @@
 import { computed } from 'vue'
 
 const props = defineProps<{
+  /** The control's id; the label's `for` points at it. */
   id: string
+  /** The label text. */
   label: string
+  /** An error message; replaces the hint, marks the control invalid and is what the control is described by. */
   error?: string | null
+  /** Help text under the control, shown while there is no error. */
   hint?: string
 }>()
 
+// Ids derived from the control's id, so a page with several fields never has two the same.
 const errorId = computed(() => `${props.id}-err`)
 const hintId = computed(() => `${props.id}-hint-text`)
+// What the control must carry to be wired to its label, error and hint; handed to the slot so any control can take it with v-bind.
 const slotAttrs = computed(() => ({
   id: props.id,
   'aria-invalid': props.error ? (true as const) : undefined,
   'aria-describedby': props.error ? errorId.value : props.hint ? hintId.value : undefined,
 }))
+// Template: A <p> holding label, control and <small> text: the HTML spec's own idiom for one control. The error is described-by when present, the hint otherwise; a field never points at both.
 </script>
 
 <template>
@@ -44,6 +51,7 @@ const slotAttrs = computed(() => ({
   min-inline-size: 0;
   max-inline-size: 100%;
 }
+/* The label is semibold and sits above its control with room above, so fields in a form do not run together. */
 .mw-form-field__label {
   display: inline-block;
   font-weight: var(--font-weight-semibold);
@@ -53,6 +61,7 @@ const slotAttrs = computed(() => ({
 .mw-form-field :slotted(:is(input, select, textarea)) {
   display: block;
 }
+/* Hint and error share a layout: a small block line directly under the control. */
 .mw-form-field__hint,
 .mw-form-field__error {
   display: block;
@@ -63,6 +72,7 @@ const slotAttrs = computed(() => ({
   color: var(--muted);
   font-weight: var(--font-weight-regular);
 }
+/* The error is in the danger colour; its wording, not the colour, says what is wrong (the copy standard). */
 .mw-form-field__error {
   color: var(--danger);
 }

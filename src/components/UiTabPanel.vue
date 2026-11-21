@@ -6,8 +6,15 @@
 import { computed } from 'vue'
 import { tabIds } from '../tabs.js'
 
-const props = defineProps<{ idPrefix: string; tab: string }>()
+const props = defineProps<{
+  /** The tab set's id prefix (the same one AppTabNav was given). */
+  idPrefix: string
+  /** The id of the tab this panel shows. */
+  tab: string
+}>()
+// The ids come from one function (`tabs.ts`) shared with AppTabNav, so the tab's `aria-controls` and this panel's id cannot drift apart.
 const ids = computed(() => tabIds(props.idPrefix, props.tab))
+// Template: role=tabpanel labelled by its tab, and focusable so a keyboard user can leave the tab list into a panel with no focusable first child.
 </script>
 
 <template>
@@ -17,6 +24,7 @@ const ids = computed(() => tabIds(props.idPrefix, props.tab))
 </template>
 
 <style scoped>
+/* The panel is a tab stop, so it shows focus; inset so the ring is not clipped by a scrolling parent. */
 .mw-tab-panel:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;

@@ -1,9 +1,12 @@
+// Vite and Vitest configuration of the library build. Library mode with `preserveModules`: one JavaScript module per source file, each component
+// importing its own CSS (vite/css-delivery.ts), so a consumer's bundler keeps only what it uses. Vitest settings live here too.
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import { assetFileName, cssDelivery } from './vite/css-delivery'
 
 export default defineConfig({
+  // `vue()` compiles the single-file components; `cssDelivery()` names and wires each component's stylesheet and writes reset.css and base.css.
   plugins: [vue(), cssDelivery()],
   // Playwright specs (e2e/) run under `npm run test:e2e`, not vitest.
   test: { exclude: ['e2e/**', 'node_modules/**', 'gallery-dist/**'] },
@@ -11,6 +14,7 @@ export default defineConfig({
   // are not part of the package (the kopimi PDF alone is 11.6 MB).
   publicDir: false,
   build: {
+    // The declarations are emitted into dist/ first (vue-tsc), so Vite must not clear the folder.
     emptyOutDir: false,
     // One CSS file per component (the plugin names and imports them) rather than one for the whole library.
     cssCodeSplit: true,
@@ -20,6 +24,7 @@ export default defineConfig({
         index: resolve(import.meta.dirname, 'src/index.ts'),
         'styles/reset': resolve(import.meta.dirname, 'src/styles/reset.ts'),
       },
+      // ES modules only: every consumer is a Vite or VitePress build, which tree-shakes them.
       formats: ['es'],
     },
     rollupOptions: {

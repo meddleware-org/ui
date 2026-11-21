@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// The light / dark / system picker, as a group of buttons, with an optional "Remember on this device" box. It owns no state: the caller binds
+// it to `useColorMode()` or a store. Nothing is saved unless the person ticks the box (D134: nothing stored before an action).
 import type { ColorMode } from '../composables/useColorMode'
 
 /**
@@ -22,8 +24,14 @@ withDefaults(
   { modes: () => ['light', 'dark', 'system'], remember: undefined },
 )
 
-defineEmits<{ 'update:modelValue': [ColorMode]; 'update:remember': [boolean] }>()
+defineEmits<{
+  /** A mode button was pressed; the argument is the chosen mode. */
+  'update:modelValue': [ColorMode]
+  /** The "Remember on this device" box was changed; the argument is its new state. */
+  'update:remember': [boolean]
+}>()
 
+// The visible and tooltip text of each mode.
 const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system: 'System' }
 
 // A native group for the three mode buttons: the fieldset carries the pill styling and the (visually hidden) legend names the group.
@@ -69,6 +77,7 @@ const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system:
 </template>
 
 <style scoped>
+/* A bordered pill around the buttons; the fieldset's own border and padding are reset so only this border shows. */
 .mw-mode {
   display: inline-flex;
   flex-wrap: wrap;
@@ -98,6 +107,8 @@ const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system:
   cursor: pointer;
   transition: color var(--transition-base), background var(--transition-base);
 }
+/* Hover brightens the label to the full text colour; the active mode also gets a tint, so state is not colour alone (the pressed state is also
+   in the accessibility tree through aria-pressed). */
 .mw-mode__btn:hover {
   color: var(--_text, var(--text));
 }
@@ -105,6 +116,7 @@ const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system:
   color: var(--_text, var(--text));
   background: color-mix(in srgb, var(--_text, var(--text)) 14%, transparent);
 }
+/* Keyboard focus ring in the fleet's focus colour. */
 .mw-mode__btn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
@@ -121,6 +133,7 @@ const LABEL: Record<ColorMode, string> = { light: 'Light', dark: 'Dark', system:
   font-size: var(--font-size-sm);
   cursor: pointer;
 }
+/* The checkbox takes the panel's text colour as its accent, so it is visible on a dark and on a light panel. */
 .mw-mode__remember input {
   margin: 0;
   accent-color: var(--_text, var(--text));

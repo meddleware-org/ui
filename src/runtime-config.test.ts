@@ -1,3 +1,5 @@
+// Tests for the runtime endpoint configuration (runtime-config.ts, ADR-0005): which endpoints are accepted, that unknown keys and bad values
+// are dropped and reported, and that loading never throws and never applies anything from a page that is not the operator's JSON file.
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   loadRuntimeConfig,
@@ -8,12 +10,18 @@ import {
   withRuntimeEnv,
 } from './runtime-config.js'
 
+/**
+ * A stand-in response for `fetch`.
+ * @param body - an object (sent as JSON) or a string (sent as is)
+ * @param init - the status and content type
+ */
 const json = (body: unknown, init: { status?: number; type?: string } = {}) =>
   new Response(typeof body === 'string' ? body : JSON.stringify(body), {
     status: init.status ?? 200,
     headers: { 'content-type': init.type ?? 'application/json' },
   })
 
+// The loaded overrides are module state; reset them so one case cannot leak its endpoints into the next.
 afterEach(() => resetRuntimeConfigForTesting())
 
 describe('parseEndpoint', () => {

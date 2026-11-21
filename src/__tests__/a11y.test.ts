@@ -1,4 +1,7 @@
 // @vitest-environment jsdom
+// axe over the original set of components: the layout shell, navigation, dialog and the primitives that existed before the 0.1.x refresh
+// (a11y-primitives.test.ts covers the newer ones). Structure and ARIA only: jsdom has no layout, so colour contrast is checked in a real
+// browser by the gallery e2e.
 import { describe, it, expect, beforeAll, vi } from 'vitest'
 import { h } from 'vue'
 import { mount } from '@vue/test-utils'
@@ -18,6 +21,7 @@ HTMLCanvasElement.prototype.getContext = (() => null) as typeof HTMLCanvasElemen
 // Component fragments are not full pages, so page-level landmark rules
 // (region/landmark) don't apply — disable them for isolated component tests.
 const opts = { rules: { region: { enabled: false } } }
+// (axe's other rules stay on, including the ones for names, roles, labels and landmarks inside a component.)
 import CopyrightLine from '../components/CopyrightLine.vue'
 import UiButton from '../components/UiButton.vue'
 import SidebarItem from '../components/SidebarItem.vue'
@@ -52,8 +56,13 @@ import UiStepper from '../components/UiStepper.vue'
 import UiToolIntro from '../components/UiToolIntro.vue'
 import UiToolbarButton from '../components/UiToolbarButton.vue'
 
+// jsdom has no <dialog> modality; the shim models the parts UiDialog uses so it can be rendered here.
 beforeAll(installDialogShim)
 
+/**
+ * Fail the test if axe finds a WCAG violation in some markup.
+ * @param html - the rendered HTML to check
+ */
 async function expectNoViolations(html: string): Promise<void> {
   expect(await axe(html, opts)).toHaveNoViolations()
 }
@@ -61,6 +70,8 @@ async function expectNoViolations(html: string): Promise<void> {
 // Accessibility smoke tests: render representative components and assert axe
 // finds no WCAG violations in the rendered markup.
 describe('accessibility (axe)', () => {
+  // Each case renders one component in the states that change its markup, then hands the HTML to axe.
+  // axe finds structural faults (names, roles, labels, nesting); a clean result here is necessary, not sufficient (the gallery e2e adds colour).
   it('CopyrightLine has no violations', async () => {
     const wrapper = mount(CopyrightLine, {
       props: { organisationName: 'Meddleware', symbolVariant: 'kopimi' },

@@ -1,6 +1,7 @@
 // Shared id scheme linking an AppTabNav tab to its UiTabPanel (aria-controls / aria-labelledby).
 // Both components receive the same `idPrefix`; the tab id disambiguates within it.
 
+/** The two ids that link a tab to its panel. */
 export interface TabIds {
   /** id of the `role="tab"` button. */
   tab: string

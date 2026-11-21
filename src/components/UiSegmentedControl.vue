@@ -5,16 +5,23 @@
 // option carries a ✓ as well as the fill, so the choice never rests on colour alone.
 import { computed, useId } from 'vue'
 
+/** One choice in a segmented control. */
 export interface SegmentedOption {
+  /** The value `v-model` takes when this option is chosen. */
   id: string
+  /** The option's visible text. */
   label: string
+  /** A disabled option cannot be chosen. */
   disabled?: boolean
+  /** A tooltip for the option. */
   title?: string
 }
 
 const props = withDefaults(
   defineProps<{
+    /** The choices, in order. */
     options: SegmentedOption[]
+    /** The `id` of the chosen option (`v-model`). */
     modelValue: string
     /** Names the group (its `<legend>`). Required for a usable control: say what is being chosen. */
     label?: string
@@ -29,13 +36,17 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
+  /** An option was chosen; the argument is its `id`. */
   'update:modelValue': [id: string]
 }>()
 
+// One `name` for every radio makes them a single native group: arrow keys move the selection and only the chosen one is in the tab order.
 const groupName = useId()
+// The legend text: `label`, or the deprecated `ariaLabel` for callers that have not moved yet.
 const legend = computed(() => props.label ?? props.ariaLabel)
 
 // Canonical radio-group markup: the fieldset carries the segmented-pill styling and the legend names the group.
+// Template: A fieldset with a legend is the native name for a radio group; the legend is visually hidden by default but still names the group.
 </script>
 
 <template>
@@ -51,6 +62,7 @@ const legend = computed(() => props.label ?? props.ariaLabel)
       }"
       :title="opt.title"
     >
+      <!-- The radio is the real control (hidden visually, kept for keyboard and screen readers); the label around it is what is drawn. -->
       <input
         type="radio"
         :name="groupName"
@@ -66,6 +78,7 @@ const legend = computed(() => props.label ?? props.ariaLabel)
 </template>
 
 <style scoped>
+/* One bordered pill; each option is a cell. `overflow: hidden` clips the cells to the rounded corners. */
 .mw-seg {
   display: inline-flex;
   margin: 0;
@@ -75,12 +88,14 @@ const legend = computed(() => props.label ?? props.ariaLabel)
   border-radius: var(--radius);
   overflow: hidden;
 }
+/* A visible legend takes its own row above the options (floated full width, as a fieldset legend otherwise sits in the border). */
 .mw-seg__legend {
   float: inline-start;
   width: 100%;
   padding: var(--space-3xs) var(--space-xs);
   font-size: var(--font-size-sm);
 }
+/* `wrap`: more rows instead of horizontal scrolling when there are many options. */
 .mw-seg--wrap {
   flex-wrap: wrap;
 }
@@ -121,9 +136,11 @@ const legend = computed(() => props.label ?? props.ariaLabel)
 .mw-seg__item:last-child {
   border-right: none;
 }
+/* Hover tints an inactive cell; the active one keeps its fill and its tick. */
 .mw-seg__item:hover:not(.mw-seg__item--active) {
   background: var(--lift);
 }
+/* The chosen cell: the accent fill with its AAA-checked label colour (and a ✓ in the markup, so the choice is not colour alone). */
 .mw-seg__item--active {
   background: var(--accent);
   color: var(--accent-contrast);
@@ -134,11 +151,13 @@ const legend = computed(() => props.label ?? props.ariaLabel)
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }
+/* A disabled option is greyed with a filter and takes no pointer input. */
 .mw-seg__item--disabled {
   filter: grayscale(0.6);
   pointer-events: none;
   cursor: not-allowed;
 }
+/* Visually hidden but still focusable and in the accessibility tree (not display:none, which would remove it). */
 .mw-seg__item input[type='radio'] {
   position: absolute;
   opacity: 0;

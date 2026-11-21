@@ -162,7 +162,7 @@ changes to existing items or groups are required.
 - Seasonal theming lives entirely in design-tokens (`seasons.css` + `data-season`); components pick
   it up automatically via the role tokens — no per-component seasonal code.
 - Layout shell components (`AppHeader`, `AppSidebar`, `AppFooter`) accept a `variant: 'light' | 'dark' | 'transparent'` prop and use the theme-independent `--mw-panel-{dark,light}-*` tokens so a dark header renders correctly on a light page.
-- `useColorMode` manages the `data-theme` attribute on `<html>` and persists to `localStorage`. It is a module singleton — import it anywhere; all callers share the same state.
+- `useColorMode` manages the `data-theme` attribute on `<html>`. It stores nothing until the person ticks "Remember on this device" (`remember`, bound to `ColorModeControl`'s `v-model:remember`; D134, PECR Sch. A1); then it keeps the choice in `localStorage` (`mw-color-mode`, which `theme-init.js` reads before first paint), and unticking removes it. It is a module singleton — import it anywhere; all callers share the same state.
 - `ColorModeControl` is a presentational component only — it does not own state. Bind it with `v-model` to `useColorMode`.
 
 ## Peer dependency
@@ -209,6 +209,32 @@ This package depends on `@meddleware/design-tokens` for CSS custom properties. A
 - Do not bundle Vue; it is a peer dependency.
 - Do not publish without running `npm run build` first: `dist/` is what consumers receive.
 - Do not use hardcoded hex colours in component styles; reference the role tokens from `@meddleware/design-tokens`.
+
+## Commands
+
+```bash
+npm ci && npm run type-check && npm run lint && npm test   # what the `build` CI job checks, short of the build itself
+npm run build && npm run check:dist                        # dist/ and the delivery contract
+npm run build:gallery && npm run test:e2e                  # the gallery in real browsers (E2E_BROWSERS=all for all five projects)
+npm run build:brand                                        # regenerate src/brand/ from the vendored kopimi-k.svg (needs @resvg/resvg-js)
+npx --no-install mw-audit-gate                             # the dependency gate (from @meddleware/frontend-config)
+```
+
+## Gotchas
+
+- **Never put an HTML comment before a component's root element in its `<template>`.** In a development build (and so in every unit test) it turns the
+  component into a fragment: `wrapper.classes()` and fallthrough attributes then see the comment, not the element. Write template notes inside the root
+  element, or as `//` comments in the `<script setup>` (the documentation pass moved 38 of them there).
+- **Scoped-style hashes change with the source.** Editing a component, even only a comment, changes the `data-v-…` ids in `dist/`; that is harmless and is
+  not a behaviour change (the documentation pass proved the rest of `dist/` identical).
+- **`src/brand/mark.ts` is generated** (`npm run build:brand`): change `scripts/build-brand.mjs`, not the file.
+- **`.github/audit-gate.mjs` is not here any more**: CI runs `npx --no-install mw-audit-gate` (FU-0196).
+
+## Related
+
+- The audit: [`docs/audit/ui-audit.md`](docs/audit/ui-audit.md).
+- How to propose a change: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- Eighteen repositories depend on this package (the apps, sites, `wallet-adapter`, `walrus-storage-kit`, `vitepress-theme`, `chain-payments-kit`); release the apps after it.
 
 ## Interoperability
 

@@ -1,8 +1,15 @@
+// Lets a sticky header or strip tell the page how tall it is, so the scroll area can leave room for it (WCAG 2.4.11). See the doc comment on
+// `useStickyOffset` for the full reasoning.
 import { onBeforeUnmount, onMounted, type Ref } from 'vue'
 
 /** An element, or a component instance (whose root element is read). */
 type Target = HTMLElement | { $el?: unknown } | null
 
+/**
+ * The DOM element of a target.
+ * @param target - an element, or a component instance whose root element is read
+ * @returns the element, or `null` when there is none (not mounted yet, or a fragment root)
+ */
 function elementOf(target: Target): HTMLElement | null {
   if (!target) return null
   const el = target instanceof HTMLElement ? target : (target as { $el?: unknown }).$el
@@ -22,7 +29,9 @@ function elementOf(target: Target): HTMLElement | null {
  */
 export function useStickyOffset(target: Ref<Target>, property: `--${string}`): void {
   let observer: ResizeObserver | null = null
+  // The last height written, so an unchanged height does not write again (-1: none yet).
   let last = -1
+  // Set on unmount, so a frame that was already queued does not write after the property was removed.
   let gone = false
   onMounted(() => {
     const el = elementOf(target.value)
@@ -36,6 +45,7 @@ export function useStickyOffset(target: Ref<Target>, property: `--${string}`): v
       // 0 is an element that is not laid out yet (or is hidden): keep what the page has (the reset's fallback) until it has a size.
       if (height === 0 || height === last) return
       last = height
+      // Written on the next frame, never inside the observer callback (see the doc comment): that is what avoids the loop error.
       requestAnimationFrame(() => {
         if (!gone) document.documentElement.style.setProperty(property, `${height}px`)
       })

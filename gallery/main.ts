@@ -8,6 +8,7 @@ import '@meddleware/design-tokens/seasons.css'
 import '../src/styles/reset.css'
 import ComponentGallery from './ComponentGallery.vue'
 
+// The URL decides what the sweeps see: `?view=`, `?theme=` and `?season=`.
 const params = new URLSearchParams(location.search)
 const root = document.documentElement
 root.setAttribute('data-theme', params.get('theme') === 'dark' ? 'dark' : 'light')
@@ -20,4 +21,5 @@ window.fetch = (async () =>
     { headers: { 'Content-Type': 'application/json' } },
   )) as typeof fetch
 
+// Mount with the same view and theme the page was given, so the colour-mode control starts in the matching mode.
 createApp(ComponentGallery, { view: params.get('view') ?? 'all', theme: params.get('theme') === 'dark' ? 'dark' : 'light' }).mount('#app')

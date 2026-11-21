@@ -1,3 +1,6 @@
+// Colour schemes for the panel components (AppHeader, AppSidebar, AppFooter): a theme-independent light or dark panel, or transparent over the
+// page. `panelVars` resolves a variant to local custom properties; `usePanelOverrides` applies a caller's per-instance overrides. Internal: not exported
+// from the package, only its types are.
 import { onBeforeUnmount, onMounted, watch, type Ref } from 'vue'
 
 /** Panel colour scheme: theme-independent `light`/`dark` panel tokens, or `transparent`. */
@@ -5,13 +8,21 @@ export type PanelVariant = 'light' | 'dark' | 'transparent'
 
 /** Optional per-instance colour overrides (win over the token defaults). */
 export interface PanelColors {
+  /** Panel background. */
   bg?: string
+  /** A raised surface on the panel. */
   surface?: string
+  /** Body text colour. */
   text?: string
+  /** Secondary text colour (must stay legible on `bg`). */
   muted?: string
+  /** Divider and edge colour. */
   border?: string
+  /** Success status colour legible on this panel. */
   ok?: string
+  /** Danger status colour legible on this panel. */
   danger?: string
+  /** Informational status colour legible on this panel. */
   info?: string
 }
 
@@ -24,6 +35,9 @@ export interface PanelColors {
  * legible on that panel; the components re-scope `--ok`/`--danger`/`--info` to
  * them for their content. Transparent panels keep the page's status roles.
  * Any supplied `colors` override the defaults — token values are the default.
+ * @param variant - which panel scheme to resolve
+ * @param colors - optional per-instance overrides
+ * @returns the custom properties (name to value) for the panel's root element
  */
 export function panelVars(variant: PanelVariant, colors?: PanelColors): Record<string, string> {
   let base: Record<string, string>
@@ -74,14 +88,18 @@ export function panelVars(variant: PanelVariant, colors?: PanelColors): Record<s
   return base
 }
 
+/** The override keys, in one list so setting and clearing cannot disagree about which properties a panel owns. */
 const OVERRIDE_KEYS = ['bg', 'surface', 'text', 'muted', 'border', 'ok', 'danger', 'info'] as const
 
 /**
  * Apply a panel's per-instance `colors` overrides to its root element. The variant's own colours are CLASSES (`mw-panel--dark` …, in the
  * reset), so only an override is ever written, and it is written through the CSSOM (`style.setProperty`) rather than a `style` attribute
  * in the template: nothing inline is rendered, and it needs no `'unsafe-inline'` in a strict `style-src`. Clearing `colors` clears it.
+ * @param el - the panel's root element
+ * @param colors - a function returning the current overrides (read again whenever they change)
  */
 export function usePanelOverrides(el: Ref<HTMLElement | null>, colors: () => PanelColors | undefined): void {
+  /** Write each override, and remove any that is no longer set. */
   const apply = (): void => {
     const root = el.value
     if (!root) return

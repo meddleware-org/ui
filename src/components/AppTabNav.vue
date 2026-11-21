@@ -11,18 +11,25 @@
 // variant="raised": desktop-app raised-tab style (active tab "opens" into content area).
 import { tabIds } from '../tabs.js'
 
+/** One tab. */
 export interface AppTab {
+  /** A stable id; `v-model` takes it when the tab is chosen, and it builds the tab and panel ids. */
   id: string
+  /** The tab's visible text. */
   label: string
 }
 
 const props = withDefaults(
   defineProps<{
+    /** The tabs, in order. */
     tabs: AppTab[]
+    /** The `id` of the selected tab (`v-model`). */
     modelValue: string
     /** Shared with the UiTabPanel(s) of this tab set to link tab ↔ panel ids. */
     idPrefix: string
+    /** Names the tab list for assistive technology. */
     ariaLabel?: string
+    /** `underline` (default) draws an indicator under the active tab; `raised` draws a desktop-app tab that opens into the content. */
     variant?: 'underline' | 'raised'
     /** 'lg' enlarges the tabs (padding + font) so they stand out from body text. */
     size?: 'md' | 'lg'
@@ -35,12 +42,17 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
+  /** A tab was chosen (by click or by key); the argument is its `id`. */
   'update:modelValue': [id: string]
 }>()
 
 // Indexed explicitly: Vue does not guarantee v-for template-ref array order.
 const buttons: HTMLButtonElement[] = []
 
+/**
+ * Choose a tab and move focus to it (the focused tab is activated at once, as the tabs pattern allows).
+ * @param index - the tab's position
+ */
 function select(index: number): void {
   const tab = props.tabs[index]
   if (!tab) return
@@ -48,8 +60,14 @@ function select(index: number): void {
   buttons[index]?.focus()
 }
 
+/**
+ * The tabs pattern's keys: Left and Right move between tabs and wrap, Home and End jump to the ends.
+ * @param e - the keydown event
+ * @param index - the position of the tab the key was pressed on
+ */
 function onKeydown(e: KeyboardEvent, index: number): void {
   const last = props.tabs.length - 1
+  // The tab to move to; -1 means "not a key this pattern uses", so the key keeps its normal behaviour.
   const target =
     e.key === 'ArrowRight' ? (index === last ? 0 : index + 1)
     : e.key === 'ArrowLeft' ? (index === 0 ? last : index - 1)
@@ -90,6 +108,7 @@ function onKeydown(e: KeyboardEvent, index: number): void {
 </template>
 
 <style scoped>
+/* Two variants share one markup: `underline` (the default) and `raised`; the rules below are grouped by variant. */
 /* ── Underline variant (default) ─────────────────────────────────────── */
 
 .mw-tab-nav {
@@ -123,6 +142,7 @@ function onKeydown(e: KeyboardEvent, index: number): void {
   transition: color var(--transition-base), border-color var(--transition-base);
 }
 
+/* Hover only brightens the label; the active tab is shown by its underline and its weight, not by colour alone. */
 .mw-tab-nav__tab:hover {
   color: var(--text);
 }
@@ -147,6 +167,8 @@ function onKeydown(e: KeyboardEvent, index: number): void {
   flex-shrink: 0;
 }
 
+/* A raised strip scrolls sideways when the tabs do not fit; the scrollbar is hidden because the strip is a navigation control, and the tabs stay
+   reachable by keyboard (roving focus scrolls the focused tab into view). */
 .mw-tab-nav--raised::-webkit-scrollbar {
   display: none;
 }

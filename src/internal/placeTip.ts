@@ -12,11 +12,13 @@ export interface Box {
 /** Which side of the anchor the tip is on. */
 export type Side = 'bottom' | 'top' | 'right' | 'left'
 
+/** Where a tip goes and how it was chosen. */
 export interface Placement {
   /** The tip's left edge in DOCUMENT coordinates (the page's own, so the tip scrolls with the page). */
   left: number
   /** The tip's top edge in document coordinates. */
   top: number
+  /** The side of the anchor the tip is on. */
   side: Side
   /** False when no side keeps the whole tip inside the viewport: the default side is used and the page grows to hold it. */
   fits: boolean
@@ -31,7 +33,18 @@ function clamp(start: number, size: number, min: number, max: number): number {
 }
 
 /** The tip's top-left corner (viewport coordinates) for one side, shifted along that side to stay on screen. */
+/**
+ * The tip's top-left corner for one side.
+ * @param side - which side of the anchor
+ * @param anchor - the anchor's rectangle
+ * @param tip - the tip's size
+ * @param viewport - the visible area
+ * @param gap - the space between the anchor and the tip
+ * @param margin - the space kept clear at the viewport's edges
+ * @returns the corner in viewport coordinates
+ */
 function corner(side: Side, anchor: Box, tip: { width: number; height: number }, viewport: { width: number; height: number }, gap: number, margin: number): { left: number; top: number } {
+  // Sliding along the side: a tip below or above is moved sideways to stay on screen, one beside the anchor is moved up or down.
   const alongX = clamp(anchor.left, tip.width, margin, viewport.width - margin)
   const alongY = clamp(anchor.top, tip.height, margin, viewport.height - margin)
   switch (side) {
@@ -58,6 +71,7 @@ function corner(side: Side, anchor: Box, tip: { width: number; height: number },
  * @param scroll The page's scroll offsets (`scrollX`, `scrollY`), added to turn viewport coordinates into document coordinates.
  * @param gap The space between the anchor and the tip.
  * @param margin The space kept clear at the viewport's edges.
+ * @returns the chosen side, the position in document coordinates, and whether the whole tip fits on screen
  */
 export function placeTip(
   anchor: Box,
@@ -67,9 +81,11 @@ export function placeTip(
   gap: number,
   margin: number,
 ): Placement {
+  /** Whether the whole tip, placed at a corner, is inside the viewport less the margin on every edge. */
   const fitsOnScreen = (c: { left: number; top: number }): boolean =>
     c.left >= margin && c.top >= margin && c.left + tip.width <= viewport.width - margin && c.top + tip.height <= viewport.height - margin
 
+  // The first side that fits wins; the default (below) is the fallback when none does.
   let chosen: Side | null = null
   let at = corner('bottom', anchor, tip, viewport, gap, margin)
   for (const side of SIDE_ORDER) {

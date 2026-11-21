@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // A styled native <input> (type `text` unless a `type` attribute says otherwise). A single root: attributes (id, type, aria-*, placeholder, disabled…) fall through to the input itself, and the
 // value is `v-model`. Labelled by its context (UiFormField's label[for], or an aria-label); this primitive carries no label of its own.
+/** The input's value. */
 const model = defineModel<string | number>()
 </script>
 
@@ -9,6 +10,7 @@ const model = defineModel<string | number>()
 </template>
 
 <style scoped>
+/* The control's edge is --control-border (3:1, WCAG 1.4.11): a field is found by its border, so the divider colour is not enough. */
 .mw-input {
   width: 100%;
   padding: var(--space-2xs) var(--space-xs);
@@ -18,6 +20,7 @@ const model = defineModel<string | number>()
   border-radius: var(--radius);
   font: inherit;
 }
+/* A placeholder is hint text, not a value: --muted keeps it readable without looking filled in. */
 .mw-input::placeholder {
   color: var(--muted);
 }
@@ -26,9 +29,11 @@ const model = defineModel<string | number>()
   outline: 2px solid var(--focus-ring);
   outline-offset: 1px;
 }
+/* Invalid state is set by the field (aria-invalid) and drawn here, so the colour and the announcement cannot disagree. */
 .mw-input[aria-invalid='true'] {
   border-color: var(--danger);
 }
+/* A disabled control is exempt from contrast; greying it with a filter (not opacity) keeps any text over it at full contrast elsewhere. */
 .mw-input:disabled {
   filter: grayscale(0.6);
   cursor: not-allowed;

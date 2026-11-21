@@ -13,23 +13,35 @@ import UiStatusDot from './UiStatusDot.vue'
 
 const props = withDefaults(
   defineProps<{
+    /** The network's name (capitalised for display); omit to show no network item. */
     network?: string
+    /** Whether the network is healthy: the dot is ok (default) or error. */
     healthy?: boolean
+    /** The epoch number; `null` shows a placeholder while it loads; omit to show no epoch item. */
     epoch?: number | null
+    /** When the data was last refreshed; `null` shows "Loading…"; omit to show no refresh item. The text ticks on its own. */
     lastRefresh?: Date | null
   }>(),
   { healthy: true },
 )
 
+// One shared clock that ticks every second, so "Refreshed 12s ago" keeps counting without the parent re-rendering.
 const now = useNow(1000)
 const networkLabel = computed(() => (props.network ? props.network.charAt(0).toUpperCase() + props.network.slice(1) : ''))
 
+/**
+ * How long ago a date was, in the coarse units a status bar needs.
+ * @param d - the moment to measure from
+ * @returns `just now` under five seconds, then seconds, then whole minutes
+ */
 function timeAgo(d: Date): string {
+  // Clamped at zero: a clock a little behind the server's would otherwise show "-3s ago".
   const s = Math.max(0, Math.floor((now.value - d.getTime()) / 1000))
   if (s < 5) return 'just now'
   if (s < 60) return `${s}s ago`
   return `${Math.floor(s / 60)}m ago`
 }
+// Template: role="list" is explicit because the list has no markers and Safari with VoiceOver would otherwise drop the list semantics.
 </script>
 
 <template>
@@ -37,6 +49,7 @@ function timeAgo(d: Date): string {
     <li v-if="network">
       <UiStatusDot :status="healthy ? 'ok' : 'error'" />
       {{ networkLabel }}
+      <!-- The dot is decoration, so the health is also written for assistive technology. -->
       <span class="mw-visually-hidden">({{ healthy ? 'status OK' : 'status error' }})</span>
     </li>
     <template v-if="epoch !== undefined">
@@ -52,6 +65,7 @@ function timeAgo(d: Date): string {
 </template>
 
 <style scoped>
+/* A strip pinned to the bottom of its scroll container: small monospace text in the muted colour (AAA), with a rule above. */
 .mw-statusbar {
   display: flex;
   flex-wrap: wrap; /* at 200% text the items no longer fit one line */
@@ -71,6 +85,7 @@ function timeAgo(d: Date): string {
   bottom: 0;
   z-index: var(--z-raised);
 }
+/* `:deep` because the items include `<li>`s the caller puts in the default slot, which scoped styles would not otherwise reach. */
 .mw-statusbar > :deep(li) {
   display: flex;
   align-items: center;

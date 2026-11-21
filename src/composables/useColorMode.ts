@@ -1,8 +1,12 @@
+// The colour mode as app-global state: light, dark, or follow the system, applied as `data-theme` on <html>. Nothing is written to the browser
+// unless the person ticks "Remember on this device" (D134: nothing stored before an action; PECR Sch. A1). `theme-init.js` reads the same
+// key before first paint, so a remembered choice does not flash the other theme.
 import { effectScope, ref, watch, type Ref } from 'vue'
 
 /** The user's colour-mode preference: force `light`/`dark`, or follow the OS with `system`. */
 export type ColorMode = 'light' | 'dark' | 'system'
 
+/** The localStorage key shared with `theme-init.js` (a test keeps the two in step). */
 const STORAGE_KEY = 'mw-color-mode'
 
 /** Module-singleton state — the colour mode is app-global and externally managed. */
@@ -13,8 +17,13 @@ const mode: Ref<ColorMode> = ref<ColorMode>('system')
  * off removes what was stored: the "simple means of objecting" PECR Sch. A1 para 6 asks for (docs/legal STORAGE_LEDGER B2, L-PECR-2).
  */
 const remember: Ref<boolean> = ref(false)
+// The first call sets everything up once; later calls (every component that uses the composable) share the same state.
 let initialized = false
 
+/**
+ * Write the choice to storage, or remove it.
+ * @param m - the mode to keep, or `null` to forget what was stored
+ */
 function store(m: ColorMode | null): void {
   try {
     if (typeof localStorage === 'undefined') return
@@ -25,6 +34,7 @@ function store(m: ColorMode | null): void {
   }
 }
 
+/** Whether the operating system asks for a dark colour scheme (false where `matchMedia` is missing, as in a server render). */
 function systemPrefersDark(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -33,10 +43,18 @@ function systemPrefersDark(): boolean {
   )
 }
 
+/**
+ * Whether a mode means the dark theme right now.
+ * @param m - the mode
+ */
 function resolveDark(m: ColorMode): boolean {
   return m === 'dark' || (m === 'system' && systemPrefersDark())
 }
 
+/**
+ * Put the theme on <html> as `data-theme`, which the design tokens key their light and dark values on.
+ * @param m - the mode to apply
+ */
 function apply(m: ColorMode): void {
   if (typeof document === 'undefined') return
   document.documentElement.setAttribute('data-theme', resolveDark(m) ? 'dark' : 'light')
@@ -66,6 +84,7 @@ export function useColorMode(defaultMode: ColorMode = 'system') {
     remember.value = stored !== null
     apply(mode.value)
 
+    // Follow the system while the mode is `system`: a change of the OS setting (or the time-of-day switch) takes effect at once.
     if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
       window
         .matchMedia('(prefers-color-scheme: dark)')
@@ -85,6 +104,7 @@ export function useColorMode(defaultMode: ColorMode = 'system') {
     })
   }
 
+  /** Choose a mode (applied at once; kept only if `remember` is on). */
   function set(m: ColorMode): void {
     mode.value = m
   }

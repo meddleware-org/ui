@@ -4,19 +4,27 @@
 //   import '@meddleware/ui/reset.css'       // element defaults and utilities (required once per app)
 // Each component brings its own CSS when it is imported, so a bundler keeps only what an app uses. `@meddleware/ui/base.css` (reset +
 // every component) remains for consumers that want the single file.
+//
+// This file only re-exports; it is the package's public API (the README's export table is the authoritative list). The groups are: the layout
+// shell, the form and content primitives, the desktop-console primitives, the helpers re-exported from `@meddleware/web-utils` (so this
+// package's API stays unchanged), the composables, and the runtime endpoint configuration (ADR-0005).
 
+// The layout shell and the colour-mode control.
 export { default as AppHeader } from './components/AppHeader.vue'
 export { default as AppSidebar } from './components/AppSidebar.vue'
 export { default as AppFooter } from './components/AppFooter.vue'
 export { default as AppToolShell } from './components/AppToolShell.vue'
 export { default as BrandMark } from './components/BrandMark.vue'
 export { default as ColorModeControl } from './components/ColorModeControl.vue'
+// Buttons, cards and the guide: the general-purpose surfaces and actions.
 export { default as UiButton } from './components/UiButton.vue'
 export { default as UiCard } from './components/UiCard.vue'
 export { default as UiRoleGuide } from './components/UiRoleGuide.vue'
 export type { RoleGuideRole } from './components/UiRoleGuide.vue'
+// Native-element wrappers and notices: the styled select, and the message box with its ARIA role by urgency.
 export { default as UiSelect } from './components/UiSelect.vue'
 export { default as UiNotice } from './components/UiNotice.vue'
+// The sidebar's entries and groups, and the tab list with its panel (the WAI-ARIA tabs pattern; `tabIds` links a tab to its panel).
 export { default as SidebarItem } from './components/SidebarItem.vue'
 export { default as SidebarGroup } from './components/SidebarGroup.vue'
 export { default as AppTabNav } from './components/AppTabNav.vue'
@@ -24,14 +32,17 @@ export type { AppTab } from './components/AppTabNav.vue'
 export { default as UiTabPanel } from './components/UiTabPanel.vue'
 export { tabIds } from './tabs.js'
 export type { TabIds } from './tabs.js'
+// The modal dialog (native <dialog>), then the chain-value helpers: an address with a copy button, an explorer link, the copyright notice.
 export { default as UiDialog } from './components/UiDialog.vue'
 export { default as CopyableAddress } from './components/CopyableAddress.vue'
 export { default as ExplorerLink } from './components/ExplorerLink.vue'
 export { default as CopyrightLine } from './components/CopyrightLine.vue'
+// Step sequences and segmented choices: a wizard or progress list, and a radio group drawn as a pill.
 export { default as UiStepper } from './components/UiStepper.vue'
 export type { StepperStep, StepStatus } from './components/UiStepper.vue'
 export { default as UiSegmentedControl } from './components/UiSegmentedControl.vue'
 export type { SegmentedOption } from './components/UiSegmentedControl.vue'
+// The form: the help hint, the labelled field wrapper, and one field component per control type.
 export { default as UiFieldHint } from './components/UiFieldHint.vue'
 export { default as UiFormField } from './components/UiFormField.vue'
 export { default as UiToolIntro } from './components/UiToolIntro.vue'
@@ -42,6 +53,8 @@ export { default as UiTextField } from './components/UiTextField.vue'
 export { default as UiSelectField } from './components/UiSelectField.vue'
 export { default as UiCheckField } from './components/UiCheckField.vue'
 export { default as UiDateTimeField } from './components/UiDateTimeField.vue'
+// Feedback and small content pieces: the quota meter, the pager, the live region, the empty state, the copy button, the code block, the skip link,
+// the amount, and the page frame.
 export { default as UiMeter } from './components/UiMeter.vue'
 export { default as UiPager } from './components/UiPager.vue'
 export { default as UiLiveStatus } from './components/UiLiveStatus.vue'
@@ -61,6 +74,7 @@ export { default as UiToolbar } from './components/UiToolbar.vue'
 export type { ToolbarAction } from './components/UiToolbar.vue'
 export { default as UiToolbarButton } from './components/UiToolbarButton.vue'
 export { default as UiStatGrid } from './components/UiStatGrid.vue'
+// Tables and readouts: the stat rows, the data table, the status bar and dot, and the activity feed.
 export { default as UiStatRow } from './components/UiStatRow.vue'
 export { default as UiDataTable } from './components/UiDataTable.vue'
 export { default as UiStatusBar } from './components/UiStatusBar.vue'
@@ -69,14 +83,17 @@ export type { StatusDotStatus } from './components/UiStatusDot.vue'
 export { default as UiActivityFeed } from './components/UiActivityFeed.vue'
 export { default as UiActivityItem } from './components/UiActivityItem.vue'
 
+// The platform status link, polled from the status API.
 export { default as StatusWidget } from './components/StatusWidget.vue'
 
 // Framework-free helpers live in @meddleware/web-utils; they are re-exported here so this package's public API is unchanged.
 export { suiExplorerUrl, walruscanBlobUrl, safeHref, safePath, safeIcon, truncateMiddle, DEFAULT_TRUNCATE_CHARS } from '@meddleware/web-utils'
 export type { SuiNetwork, SuiExplorerKind } from '@meddleware/web-utils'
+// The status parsing helpers and the status types (the status page and the widget share one parser and one wording).
 export { isStatusLevel, parseSnapshot, STATUS_LABEL, STATUS_HEADLINE } from '@meddleware/web-utils'
 export type { StatusLevel, StatusComponent, StatusGroup, StatusSnapshot } from '@meddleware/web-utils'
 
+// Composables: state and behaviour a component or an app can use directly.
 export { useColorMode } from './composables/useColorMode.js'
 export type { ColorMode } from './composables/useColorMode.js'
 export { useSeason } from './composables/useSeason.js'
@@ -85,9 +102,11 @@ export { useStatusSnapshot, MIN_STATUS_POLL_MS } from './composables/useStatusSn
 export type { UseStatusSnapshotOptions, StatusSnapshotState } from './composables/useStatusSnapshot.js'
 export { usePager } from './composables/usePager.js'
 export { useStickyOffset } from './composables/useStickyOffset.js'
+// Types for the pager, and for the panel components' colour options.
 export type { Pager, PageOf } from './composables/usePager.js'
 export type { PanelVariant, PanelColors } from './internal/panel.js'
 
+// Runtime endpoint configuration: load the operator's `/runtime-config.json` once, before the app's modules, then read endpoints through it.
 export {
   loadRuntimeConfig,
   runtimeEndpoints,

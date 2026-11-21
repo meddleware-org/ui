@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// The page header: a panel (light, dark or transparent) holding, in order, an optional menu button (narrow screens, opens an AppSidebar as a
+// drawer), the brand slot, the default slot and the actions slot. Sticky by default, and it publishes its real height as `--mw-header-offset`
+// so the reset can pad the scroll area and focus is never hidden behind it (WCAG 2.4.11). Content in the slots renders directly; the caller
+// owns its layout.
 import { ref } from 'vue'
 import { usePanelOverrides, type PanelVariant, type PanelColors } from '../internal/panel'
 import { useStickyOffset } from '../composables/useStickyOffset'
@@ -25,6 +29,7 @@ const props = withDefaults(
   { variant: 'dark', sticky: true, menuLabel: 'Menu' },
 )
 
+// The <header> element, needed to apply the colour overrides and to measure the height.
 const root = ref<HTMLElement | null>(null)
 usePanelOverrides(root, () => props.colors)
 
@@ -58,6 +63,7 @@ if (props.sticky) useStickyOffset(root, '--mw-header-offset')
 </template>
 
 <style scoped>
+/* A flex row on the panel's colours, with a rule under it. */
 .mw-header {
   display: flex;
   align-items: center;
@@ -70,9 +76,11 @@ if (props.sticky) useStickyOffset(root, '--mw-header-offset')
   color: var(--_text);
   border-bottom: 1px solid var(--_border);
   font-family: var(--mw-font-sans);
+  /* The transitions are for the panel's colours when the theme changes; the sticky header's paint itself does not depend on scroll position. */
   transition: background var(--transition-base), backdrop-filter var(--transition-base),
     border-color var(--transition-base), box-shadow var(--transition-base);
 }
+/* Pinned to the top of the viewport, above the page content (the z-index token keeps it under dialogs and the drawer). */
 .mw-header--sticky {
   position: sticky;
   top: 0;
@@ -86,6 +94,7 @@ if (props.sticky) useStickyOffset(root, '--mw-header-offset')
   border-bottom-color: var(--border);
   box-shadow: var(--shadow-1);
 }
+/* The brand takes the brand typography and pushes everything after it to the inline end (`margin-inline-end: auto`). */
 .mw-header__brand {
   display: flex;
   align-items: center;
@@ -116,6 +125,7 @@ if (props.sticky) useStickyOffset(root, '--mw-header-offset')
   color: inherit;
   cursor: pointer;
 }
+/* Hover tints from the button's own colour, so it works on every panel variant. */
 .mw-header__menu:hover {
   background: color-mix(in srgb, currentColor 12%, transparent);
 }

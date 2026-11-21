@@ -3,6 +3,7 @@
 // the tone only colours the border, the tint and the symbol, so colour never carries the meaning alone (WCAG 1.4.1).
 import { computed } from 'vue'
 
+/** A badge's tone: what colours its border, tint and symbol. */
 export type BadgeTone = 'ok' | 'warn' | 'danger' | 'info' | 'accent' | 'neutral'
 
 const props = withDefaults(defineProps<{
@@ -20,10 +21,14 @@ const props = withDefaults(defineProps<{
   symbol: undefined,
 })
 
+// The symbol shown for each tone when the caller gives none: a shape per tone, so tone is never carried by colour alone.
 const DEFAULT_SYMBOL: Record<BadgeTone, string> = { ok: '✓', warn: '!', danger: '✗', info: 'i', accent: '•', neutral: '•' }
+// The deprecated `variant` prop mapped onto tones, so old callers keep working.
 const FROM_VARIANT: Record<NonNullable<typeof props.variant>, BadgeTone> = { active: 'ok', pending: 'warn', closed: 'neutral', neutral: 'neutral' }
 
+// `tone` wins over the deprecated `variant`; with neither, the badge is neutral.
 const resolved = computed<BadgeTone>(() => props.tone ?? (props.variant ? FROM_VARIANT[props.variant] : 'neutral'))
+// The symbol to draw: none when turned off, the caller's own when given, and the tone's default only when a tone was chosen explicitly.
 const shown = computed(() => {
   if (props.symbol === false) return ''
   if (props.symbol !== undefined) return props.symbol
@@ -36,6 +41,7 @@ const shown = computed(() => {
 </template>
 
 <style scoped>
+/* `--_tone` is the one colour every tone sets; the border, the tint and the symbol all read from it. The text stays --text (AAA on the tint). */
 .mw-badge {
   --_tone: var(--border);
   display: inline-flex;
@@ -67,9 +73,11 @@ const shown = computed(() => {
 .mw-badge--accent {
   --_tone: var(--accent);
 }
+/* The symbol takes the tone colour; it is decorative (hidden from assistive technology) and the label carries the meaning. */
 .mw-badge__symbol {
   color: var(--_tone);
 }
+/* The warning hue is too light to read as a glyph on the tint, so warn uses its darker text variant for the symbol. */
 .mw-badge--warn .mw-badge__symbol {
   color: var(--warning-text);
 }

@@ -21,13 +21,19 @@
 import { computed } from 'vue'
 import { safeHref, safePath } from '@meddleware/web-utils'
 
+/** The named rights statements: `all` ("All rights reserved."), `none`, `jam` ("All jams preserved.") or any custom text. */
 type RightsStatementVariant = 'all' | 'none' | 'jam' | 'custom'
+/** The mark drawn before the year: the © sign, the copyleft mark or the Kopimi triangle. */
 type SymbolVariant = 'copyright' | 'copyleft' | 'kopimi'
 
 const props = withDefaults(defineProps<{
+  /** The organisation named in the notice. */
   organisationName: string
+  /** The year shown (default: the current year). */
   year?: number
+  /** A named statement (`all`, `none`, `jam`), `''` for none, or any custom sentence. */
   rightsStatement?: RightsStatementVariant | string
+  /** Which mark to draw and which legal document it links to. */
   symbolVariant?: SymbolVariant
   /**
    * Where the legal documents are served (default `https://meddleware.co.uk/legal/`, the one canonical host, so an app ships no copies).
@@ -45,17 +51,24 @@ const props = withDefaults(defineProps<{
   legalBase: 'https://meddleware.co.uk/legal/',
 })
 
-/** A root-relative path that stays on the site (`safePath`) or a URL `safeHref` allows. */
+/**
+ * Check a link target: a root-relative path stays on the site (`safePath`), anything else must be a URL `safeHref` allows.
+ * @param href - the candidate link
+ * @returns the checked link, or `undefined` when it is not safe
+ */
 function symbolLink(href: string): string | undefined {
   return href.startsWith('/') ? safePath(href) : safeHref(href)
 }
 
+// The legal document each mark links to; the files are served from `legalBase`.
 const DOCUMENT: Record<SymbolVariant, string> = {
   kopimi: 'powr.broccoli-kopimi.pdf',
   copyleft: 'copyleft.html',
   copyright: 'copyright.html',
 }
 
+// The link target, in order of preference: the caller's override, the document under `legalBase`, then a same-origin `/legal/` fallback, so a
+// refused URL never leaves the symbol without a destination.
 const computedSymbolHref = computed(
   () =>
     (props.symbolHref ? symbolLink(props.symbolHref) : undefined) ||
@@ -67,11 +80,13 @@ const computedSymbolHref = computed(
 // construction there (the boundary lint rule requires a helper call in the binding).
 const symbolIsPath = computed(() => computedSymbolHref.value.startsWith('/'))
 
+// The accessible name of the symbol link: the symbol alone says nothing to a screen reader, so the label names the document.
 const computedSymbolLabel = computed(() =>
   props.symbolLabel ||
   (props.symbolVariant === 'kopimi' ? 'Kopimi legal notice' : props.symbolVariant === 'copyleft' ? 'Copyleft legal notice' : 'Copyright legal notice'),
 )
 
+// The sentence after the organisation name; an empty string leaves it out, and an unknown value is shown as the caller's own text.
 const resolvedRightsStatement = computed(() => {
   if (props.rightsStatement === '') return ''
   if (props.rightsStatement === 'none') return 'No rights reserved.'
@@ -79,6 +94,7 @@ const resolvedRightsStatement = computed(() => {
   if (props.rightsStatement === 'jam') return 'All jams preserved.'
   return props.rightsStatement
 })
+// Template: <small> is the element for legal and rights text. The symbol is the link to the legal document (and its accessible name); the copyleft and kopimi marks are drawn inline so they follow `currentColor` and need no image request. The href is rechecked here with the matching sanitiser, because the boundary lint rule wants a helper call in the binding itself.
 </script>
 
 <style scoped>
@@ -92,6 +108,7 @@ const resolvedRightsStatement = computed(() => {
   text-align: center;
 }
 
+/* The symbol and its link stay together on one line (`nowrap`) and take the notice's own colour; hover underlines instead of recolouring. */
 .symbol-link {
   white-space: nowrap;
   color: inherit;
@@ -105,6 +122,7 @@ const resolvedRightsStatement = computed(() => {
   text-decoration: underline;
 }
 
+/* The drawn marks sit slightly below the baseline so they align with the text's x-height. */
 .symbol-mark {
   display: inline;
   vertical-align: -0.15em;

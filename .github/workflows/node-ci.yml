@@ -1,3 +1,7 @@
+# Node CI for the component library. Two jobs run in parallel: `build` (audit, type-check, lint, unit and axe tests, build, the delivery contract,
+# and what the npm tarball would contain) and `e2e` (the component gallery in real browsers, every theme × season, which jsdom cannot do). It
+# runs on every push to main and every pull request, and the release workflow (npm-publish.yml) calls it on the tagged commit so a tag that fails
+# never publishes.
 name: Node CI
 
 on:
@@ -8,9 +12,11 @@ on:
   # The release workflow runs the same checks on the tagged commit.
   workflow_call:
 
+# Read-only: CI needs nothing but the checkout.
 permissions:
   contents: read
 
+# No tool may phone home from CI (the fleet's privacy rule; npm, Node and other tools honour it).
 env:
   DO_NOT_TRACK: "1"
 
@@ -20,34 +26,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Actions are pinned by full commit SHA with the version in a comment (D12).
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # Node 26 is the fleet baseline (D56); the npm cache speeds up the install.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '26'
           cache: npm
 
+      # `npm ci` installs exactly the lockfile, so CI tests what was reviewed.
       - name: Install dependencies
         run: npm ci
 
+      # The shared dependency gate from @meddleware/frontend-config: high and critical advisories fail unless
+      # .github/audit-allowlist.json accepts them with a reason and an expiry (an empty list today). It replaced a copy of the same file in this
+      # repository (FU-0196).
       - name: Audit dependencies
-        run: node .github/audit-gate.mjs
+        run: npx --no-install mw-audit-gate
 
+      # vue-tsc: TypeScript over the .ts files and the <script> blocks of the .vue files.
       - name: Type-check
         run: npm run type-check
 
+      # Three linters, one script: stylelint (the token-only rules and a11y rules), eslint with the Vue accessibility plugin, and html-validate
+      # over the component templates.
       - name: Lint (stylelint, eslint + vuejs-a11y, html-validate)
         run: npm run lint
 
+      # Unit tests under jsdom, the axe structural checks, and the brand check (the derived brand files match their source).
       - name: Unit tests (incl. axe a11y)
         run: npm test
 
+      # `dist/` is what npm consumers receive: one module per component, each with its own CSS.
       - name: Build
         run: npm run build
 
+      # Asserts on the built files that importing one component brings exactly its own CSS (scripts/check-dist.mjs).
       - name: Delivery contract (each component brings its own CSS; layers; reset)
         run: npm run check:dist
 
+      # The tarball must hold `dist/` and the manifest, and stay under 1 MB: a stray file would publish whatever it contains, and the package is
+      # loaded by every app.
       - name: Package contents (file list and size)
         run: |
           npm pack --dry-run --json > pack.json
@@ -62,6 +82,8 @@ jobs:
             console.log('tarball:', files.length, 'files,', p.unpackedSize, 'bytes unpacked')
           "
 
+  # The gallery in real browsers (Chromium, Firefox, WebKit), at AA and AAA contrast, in every theme × season, plus the forced-colours, motion and
+  # shell specs. Separate from `build` so the browsers install in parallel with the other checks.
   e2e:
     name: Real-browser accessibility (Playwright + axe, theme × season)
     runs-on: ubuntu-latest
@@ -76,9 +98,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The three engines the support promise names; --with-deps installs the system libraries they need on the runner.
       - name: Install browsers
         run: npx playwright install --with-deps chromium firefox webkit
 
+      # E2E_BROWSERS=all runs all five Playwright projects (the two mobile viewports as well).
       - name: Component gallery, every theme × season
         run: npm run test:e2e
         env:

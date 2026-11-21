@@ -38,24 +38,28 @@ import CopyableAddress from '../components/CopyableAddress.vue'
 import { usePager } from '../composables/usePager'
 import { useNow } from '../composables/useNow'
 
+// Fake timers, stubbed globals and spies are undone after every test, so one case cannot leak its clock or its clipboard into the next.
 afterEach(() => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
+// A badge carries its tone in a border, a tint and a symbol, never by colour alone; the old `variant` names still work for callers not yet moved.
 describe('UiBadge', () => {
   it('draws a tone as border, tint and symbol, with the label in body colour', () => {
     const w = mount(UiBadge, { props: { tone: 'ok' }, slots: { default: 'Posted' } })
     expect(w.classes()).toContain('mw-badge--ok')
     expect(w.find('.mw-badge__symbol').text()).toBe('✓')
     expect(w.find('.mw-badge__symbol').attributes('aria-hidden')).toBe('true')
+    // The symbol is hidden from assistive technology, but it is part of the text the sighted reader sees: ✓ then the label.
     expect(w.text()).toBe('✓Posted')
   })
 
   it('takes its own symbol, or none, and defaults to a quiet neutral badge', () => {
     expect(mount(UiBadge, { props: { tone: 'warn', symbol: '◐' }, slots: { default: 'Queued' } }).find('.mw-badge__symbol').text()).toBe('◐')
     expect(mount(UiBadge, { props: { tone: 'danger', symbol: false }, slots: { default: 'Failed' } }).find('.mw-badge__symbol').exists()).toBe(false)
+    // With no tone and no variant the badge is neutral and draws no symbol: a quiet tag, not a status.
     const plain = mount(UiBadge, { slots: { default: 'Tag' } })
     expect(plain.classes()).toContain('mw-badge--neutral')
     expect(plain.find('.mw-badge__symbol').exists()).toBe(false)
@@ -65,10 +69,12 @@ describe('UiBadge', () => {
     expect(mount(UiBadge, { props: { variant: 'active' }, slots: { default: 'x' } }).classes()).toContain('mw-badge--ok')
     expect(mount(UiBadge, { props: { variant: 'pending' }, slots: { default: 'x' } }).classes()).toContain('mw-badge--warn')
     expect(mount(UiBadge, { props: { variant: 'closed' }, slots: { default: 'x' } }).classes()).toContain('mw-badge--neutral')
+    // An old caller never had a symbol, so mapping its variant to a tone must not add one.
     expect(mount(UiBadge, { props: { variant: 'active' }, slots: { default: 'x' } }).find('.mw-badge__symbol').exists()).toBe(false)
   })
 })
 
+// Two vocabularies (platform levels and the status bar's short aliases) must reduce to the same four tones.
 describe('UiStatusDot', () => {
   const cls = (status: string, size?: string) => mount(UiStatusDot, { props: { status, size } as never }).classes()
 
@@ -89,6 +95,7 @@ describe('UiStatusDot', () => {
   })
 })
 
+// The ARIA role follows urgency: an error interrupts (`alert`), ok and warning are polite (`status`), info announces nothing.
 describe('UiNotice', () => {
   it('sets the role from the type', () => {
     expect(mount(UiNotice, { props: { type: 'error' }, slots: { default: 'x' } }).attributes('role')).toBe('alert')
@@ -106,6 +113,7 @@ describe('UiNotice', () => {
   })
 })
 
+// A button or a link that looks like one. The link form must only ever carry a safe URL, and a disabled or busy link must not navigate.
 describe('UiButton', () => {
   it('is a button by default, with a type', () => {
     const w = mount(UiButton, { slots: { default: 'Go' } })
@@ -125,6 +133,7 @@ describe('UiButton', () => {
     const w = mount(UiButton, { props: { busy: true }, slots: { default: 'Saving' } })
     expect(w.find('.mw-spinner').exists()).toBe(true)
     expect(w.find('.mw-spinner').attributes('aria-hidden')).toBe('true')
+    // Busy sets `disabled` as well as `aria-busy`: a second click while an operation runs must not start another one.
     expect(w.attributes('aria-busy')).toBe('true')
     expect(w.attributes('disabled')).toBeDefined()
     expect(w.text()).toBe('Saving')
@@ -132,6 +141,7 @@ describe('UiButton', () => {
 
   it('a disabled or busy link does not navigate and leaves the tab order', async () => {
     const w = mount(UiButton, { props: { href: 'https://example.org', busy: true }, slots: { default: 'Open' } })
+    // A link cannot be `disabled`, so it loses its href, says so with aria-disabled, and leaves the tab order.
     expect(w.attributes('href')).toBeUndefined()
     expect(w.attributes('aria-disabled')).toBe('true')
     expect(w.attributes('tabindex')).toBe('-1')
@@ -143,6 +153,7 @@ describe('UiButton', () => {
   })
 })
 
+// The card's root element, heading rank and header band are the caller's choice; a linked card carries one link through its title (one tab stop).
 describe('UiCard', () => {
   it('is a titled section by default, with an h3', () => {
     const w = mount(UiCard, { props: { title: 'Gate' }, slots: { default: '<p>Body</p>' } })
@@ -172,7 +183,9 @@ describe('UiCard', () => {
   })
 })
 
+// The data table's empty state, head-slot rules (one row, scoped headers) and its sideways-scroll behaviour, which makes the box a labelled, focusable region.
 describe('UiDataTable', () => {
+  // A header cell with the `scope` the component asks for, reused by the cases below.
   const head = '<th scope="col">Name</th>'
 
   it('shows the empty text when it has zero rows, and renders no body', () => {
@@ -215,6 +228,7 @@ describe('UiDataTable', () => {
   })
 
   it('becomes a focusable, labelled region, and says so, when it is wider than its box', async () => {
+    // jsdom has no layout, so the widths the component measures are faked: the table is 900 wide in a 300 box.
     const sw = vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(900)
     const cw = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(300)
     const w = mount(UiDataTable, { props: { caption: 'Tasks', rows: 1 }, slots: { head, default: '<tr><td>a</td></tr>' } })
@@ -224,6 +238,7 @@ describe('UiDataTable', () => {
     expect(wrap.attributes('tabindex')).toBe('0')
     expect(wrap.attributes('aria-label')).toBe('Tasks')
     expect(w.find('.mw-data-table__hint').text()).toContain('Scroll sideways')
+    // The prototype getters are restored by hand: leaving them mocked would make every later test see a scrolling table.
     sw.mockRestore()
     cw.mockRestore()
   })
@@ -236,7 +251,9 @@ describe('UiDataTable', () => {
   })
 })
 
+// A radio group drawn as a pill: it keeps native radio semantics, names the group with a legend, and marks the choice with a tick as well as a fill.
 describe('UiSegmentedControl', () => {
+  // Three options, the middle one disabled, shared by the cases below.
   const options = [
     { id: 'a', label: 'Alpha' },
     { id: 'b', label: 'Beta', disabled: true },
@@ -262,13 +279,16 @@ describe('UiSegmentedControl', () => {
     const w = mount(UiSegmentedControl, { props: { options, modelValue: 'a', label: 'Mode' } })
     const radios = w.findAll('input[type="radio"]')
     expect(new Set(radios.map((r) => r.attributes('name'))).size).toBe(1)
+    // Choose the third (the second is disabled): the emitted value is its id.
     await radios[2]!.setValue(true)
     expect(w.emitted('update:modelValue')).toEqual([['c']])
     expect(radios[1]!.attributes('disabled')).toBeDefined()
   })
 })
 
+// A wizard (state derived from the current index) and a progress list (explicit statuses, said in words for assistive technology).
 describe('UiStepper', () => {
+  // A three-step wizard shared by the cases below.
   const steps = [
     { id: 'a', label: 'Details' },
     { id: 'b', label: 'Review' },
@@ -280,6 +300,7 @@ describe('UiStepper', () => {
     const items = w.findAll('li')
     expect(items.map((i) => i.classes().find((c) => c.startsWith('is-')))).toEqual(['is-done', 'is-active', 'is-upcoming'])
     expect(items[1]!.attributes('aria-current')).toBe('step')
+    // Only the done step is a button; pressing it goes back to that step (index 0).
     await w.find('button').trigger('click')
     expect(w.emitted('update:modelValue')).toEqual([[0]])
   })
@@ -307,7 +328,9 @@ describe('UiStepper', () => {
   })
 })
 
+// The WAI-ARIA toolbar pattern: one tab stop (a roving tabindex), and the arrow keys move between the enabled buttons, wrapping.
 describe('UiToolbar', () => {
+  // Three actions, the middle one disabled: the arrow keys must skip it.
   const actions = [
     { id: 'a', label: 'One' },
     { id: 'b', label: 'Two', disabled: true },
@@ -325,12 +348,14 @@ describe('UiToolbar', () => {
   it('has one tab stop, and the arrow keys move between enabled buttons, wrapping', async () => {
     const w = mount(UiToolbar, { props: { actions }, attachTo: document.body })
     const buttons = w.findAll('button').map((b) => b.element as HTMLButtonElement)
+    // One roving tab stop among the enabled buttons: the first is 0, the rest -1 (the disabled button has its own default of 0).
     expect(buttons.filter((b) => b.tabIndex === 0)).toHaveLength(2) // the disabled one keeps its own default
     ;(buttons[0] as HTMLButtonElement).focus()
     await w.trigger('keydown', { key: 'ArrowRight' })
     expect(document.activeElement).toBe(buttons[2])
     expect(buttons[2]!.tabIndex).toBe(0)
     expect(buttons[0]!.tabIndex).toBe(-1)
+    // From the last enabled button ArrowRight wraps to the first.
     await w.trigger('keydown', { key: 'ArrowRight' })
     expect(document.activeElement).toBe(buttons[0])
     await w.trigger('keydown', { key: 'End' })
@@ -341,8 +366,10 @@ describe('UiToolbar', () => {
   })
 })
 
+// The status bar's relative time ticks on its own through `useNow`, which must stop its timer when the component goes away.
 describe('UiStatusBar and useNow', () => {
   it('ticks the relative time on its own', async () => {
+    // A fixed clock, so "30s ago" and "1m ago" are exact.
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-10-31T12:00:00Z'))
     const w = mount(UiStatusBar, { props: { lastRefresh: new Date('2026-10-31T12:00:00Z') } })
@@ -364,6 +391,7 @@ describe('UiStatusBar and useNow', () => {
 
   it('stops the timer when its component unmounts', async () => {
     vi.useFakeTimers()
+    // A tiny component that only calls the composable, so the test sees the timer `useNow` creates and when it is cleared.
     const Probe = defineComponent({ setup: () => ({ now: useNow(1000) }), render: () => h('i', String(0)) })
     const w = mount(Probe)
     expect(vi.getTimerCount()).toBe(1)
@@ -372,8 +400,10 @@ describe('UiStatusBar and useNow', () => {
   })
 })
 
+// A stat row has two roots, so Vue cannot choose where fallthrough attributes go: class and id are forwarded to the value by hand.
 describe('UiStatRow', () => {
   it('forwards class and id to the value, not to nowhere', () => {
+    // The row is mounted inside a grid, as it is used, so the <dt> and <dd> land in the same parent.
     const w = mount(UiStatGrid, { slots: { default: () => h(UiStatRow, { label: 'Balance', class: 'big', id: 'bal' }, () => '12') } })
     const dd = w.find('dd')
     expect(dd.classes()).toContain('big')
@@ -382,7 +412,9 @@ describe('UiStatRow', () => {
   })
 })
 
+// Copying must be announced to assistive technology without relying on a changing name, and must claim nothing when the clipboard refuses.
 describe('UiCopyButton and CopyableAddress', () => {
+  // Press the copy button with a stand-in clipboard, then let the promise settle. `navigator` is stubbed whole: jsdom has no clipboard.
   const click = async (writeText: () => Promise<void>, props: Record<string, unknown> = { value: '0xabc' }) => {
     vi.stubGlobal('navigator', { clipboard: { writeText } })
     const w = mount(UiCopyButton, { props: props as { value: string } })
@@ -401,6 +433,7 @@ describe('UiCopyButton and CopyableAddress', () => {
 
   it('claims nothing when the clipboard refuses', async () => {
     const w = await click(async () => Promise.reject(new Error('denied')))
+    // The name stays "Copy" and the live region stays empty: a refused copy must not say "Copied".
     expect(w.find('button').attributes('aria-label')).toBe('Copy')
     expect(w.find('[role="status"]').text()).toBe('')
   })
@@ -411,6 +444,7 @@ describe('UiCopyButton and CopyableAddress', () => {
 
   it('resets after a moment and clears its timer on unmount', async () => {
     vi.useFakeTimers()
+    // After a copy one timer is pending (it clears the "copied" state); unmounting must cancel it.
     const w = await click(vi.fn(async () => undefined))
     expect(vi.getTimerCount()).toBe(1)
     w.unmount()
@@ -426,6 +460,7 @@ describe('UiCopyButton and CopyableAddress', () => {
   })
 })
 
+// The form fields: each wraps its control in UiFormField so the id, aria-invalid and aria-describedby association is done for the caller.
 describe('fields', () => {
   it('UiInput is a text input unless told otherwise, and is v-model', async () => {
     const w = mount(UiInput, { props: { modelValue: 'a', 'onUpdate:modelValue': (v: unknown) => w.setProps({ modelValue: v as string }) } })
@@ -453,10 +488,12 @@ describe('fields', () => {
     expect(input.attributes('accept')).toBe('image/png')
     expect(w.get('label').attributes('for')).toBe('icon')
     expect(input.attributes('aria-describedby')).toBeDefined()
+    // jsdom does not let a test choose a file, so the input's `files` is defined by hand, then a change event is sent as the browser would.
     const file = new File(['x'], 'a.png')
     Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
     await input.trigger('change')
     expect(w.emitted('select')).toEqual([[file]])
+    // Clearing the choice leaves no file: the component reports `null`, not undefined.
     Object.defineProperty(input.element, 'files', { value: [], configurable: true })
     await input.trigger('change')
     expect(w.emitted('select')?.[1]).toEqual([null])
@@ -464,12 +501,14 @@ describe('fields', () => {
 
   it('UiFileField shows an error as invalid and described', () => {
     const w = mount(UiFileField, { props: { id: 'f', label: 'F', error: 'Too large' } })
+    // The error is shown as text and the input is marked invalid: neither alone is enough for assistive technology.
     expect(w.get('input').attributes('aria-invalid')).toBe('true')
     expect(w.text()).toContain('Too large')
   })
 
   it('UiTextField and UiSelectField pass a label-suffix slot to the label row', () => {
     const t = mount(UiTextField, { props: { id: 'a', label: 'A', modelValue: '' }, slots: { 'label-suffix': '<span class="note">(optional)</span>' } })
+    // `label + .note`: the suffix sits beside the label, not inside it (a label may not contain other labelable elements).
     expect(t.find('label + .note').exists()).toBe(true)
     const s = mount(UiSelectField, { props: { id: 'b', label: 'B', options: [['x', 'X']], modelValue: 'x' }, slots: { 'label-suffix': '<span class="note">(permanent)</span>' } })
     expect(s.find('label + .note').exists()).toBe(true)
@@ -477,6 +516,7 @@ describe('fields', () => {
   })
 
   it('UiTextField turns autocomplete off, unless told otherwise', () => {
+    // A saved-address or name offer on a field that is not about the person is a privacy leak; off is the default and a caller can opt in.
     expect(mount(UiTextField, { props: { id: 'a', label: 'A', modelValue: '' } }).get('input').attributes('autocomplete')).toBe('off')
     const secret = mount(UiTextField, { props: { id: 'b', label: 'B', type: 'password', modelValue: '' }, attrs: { autocomplete: 'new-password' } })
     expect(secret.get('input').attributes('autocomplete')).toBe('new-password')
@@ -485,6 +525,7 @@ describe('fields', () => {
   it('UiTextField shows an error as invalid and described', () => {
     const w = mount(UiTextField, { props: { id: 'n', label: 'N', error: 'Required', modelValue: '' } })
     expect(w.find('input').attributes('aria-invalid')).toBe('true')
+    // With an error the field is described by the error (`n-err`), not by the hint.
     expect(w.find('input').attributes('aria-describedby')).toBe('n-err')
     expect(w.text()).toContain('Required')
   })
@@ -497,6 +538,7 @@ describe('fields', () => {
 
   it('UiSelectField lists [value, label] options with an optional "any" choice', async () => {
     const w = mount(UiSelectField, { props: { id: 's', label: 'Status', placeholder: 'Any', options: [['a', 'Alpha'], ['b', 'Beta']] as const, modelValue: '' } })
+    // The placeholder is the first, empty-valued option: the "any" choice.
     expect(w.findAll('option').map((o) => o.text())).toEqual(['Any', 'Alpha', 'Beta'])
     await w.find('select').setValue('b')
     expect(w.emitted('update:modelValue')?.[0]).toEqual(['b'])
@@ -505,6 +547,7 @@ describe('fields', () => {
 
   it('UiCheckField wraps its label, takes a rich label slot, and toggles', async () => {
     const w = mount(UiCheckField, { props: { label: 'Send now', hint: 'goes live', modelValue: false } })
+    // The root is a <label> wrapping the input, so a click on the text toggles the box.
     expect(w.element.tagName).toBe('LABEL')
     expect(w.text()).toContain('Send now')
     expect(w.text()).toContain('— goes live')
@@ -516,25 +559,30 @@ describe('fields', () => {
 
   it('UiDateTimeField shows wall time in the zone, names the zone, and emits a UTC instant', async () => {
     const w = mount(UiDateTimeField, { props: { id: 'd', label: 'Send at', zone: 'Europe/London', modelValue: '2026-07-01T08:30:00.000Z' } })
+    // 08:30 UTC in London in July (BST) is 09:30 wall time; the label names the zone so nobody has to guess which clock is being set.
     expect(w.find('label').text()).toBe('Send at (Europe/London)')
     expect((w.find('input').element as HTMLInputElement).value).toBe('2026-07-01T09:30')
     await w.find('input').setValue('2026-12-01T09:30')
     expect(w.emitted('update:modelValue')?.[0]).toEqual(['2026-12-01T09:30:00.000Z'])
+    // An emptied field is no instant: the model becomes `null`, not an empty string.
     await w.find('input').setValue('')
     expect(w.emitted('update:modelValue')?.[1]).toEqual([null])
   })
 })
 
+// The meter says its state in words next to the bar, so the colour is never the only signal; with no limit there is no bar at all.
 describe('UiMeter', () => {
   it('says the state in words next to a labelled meter', () => {
     const within = mount(UiMeter, { props: { label: 'Spend', used: 10, limit: 100, unit: 'USD' } })
     expect(within.find('meter').exists()).toBe(true)
+    // A real <label for> points at the meter's id, so the meter has an accessible name.
     expect(within.find('label').attributes('for')).toBe(within.find('meter').attributes('id'))
     expect(within.text()).toContain('10 / 100 USD — within the limit')
     expect(mount(UiMeter, { props: { label: 'Spend', used: 85, limit: 100 } }).text()).toContain('close to the limit')
     const over = mount(UiMeter, { props: { label: 'Spend', used: 130, limit: 100 } })
     expect(over.text()).toContain('over by 30')
     expect(over.find('.mw-meter__text--over').exists()).toBe(true)
+    // The bar is clamped at the limit (the <meter> would otherwise draw outside its range); the words carry the overshoot.
     expect(over.find('meter').attributes('value')).toBe('100')
   })
 
@@ -546,15 +594,18 @@ describe('UiMeter', () => {
   })
 })
 
+// The previous and next controls for a keyset list: they emit, disable at the ends and while loading, and show the page number.
 describe('UiPager', () => {
   it('emits prev and next, disables the ends, and shows the page', async () => {
     const w = mount(UiPager, { props: { index: 0, hasNext: true } })
     const [prev, next] = w.findAll('button')
+    // On the first page Previous is disabled; with a next page, Next is not.
     expect(prev!.attributes('disabled')).toBeDefined()
     expect(next!.attributes('disabled')).toBeUndefined()
     expect(w.find('output').text()).toBe('Page 1')
     await next!.trigger('click')
     expect(w.emitted('next')).toHaveLength(1)
+    // Move to a later page that is also the last: Previous works, Next is now disabled.
     await w.setProps({ index: 2, hasNext: false })
     await w.findAll('button')[0]!.trigger('click')
     expect(w.emitted('prev')).toHaveLength(1)
@@ -565,13 +616,16 @@ describe('UiPager', () => {
     const w = mount(UiPager, { props: { index: 1, hasNext: true, loading: true, prevLabel: 'Newer', nextLabel: 'Older', label: 'Tasks pages' } })
     expect(w.attributes('aria-label')).toBe('Tasks pages')
     expect(w.findAll('button').map((b) => b.text())).toEqual(['Newer', 'Older'])
+    // While a page loads both buttons are disabled, so a second request cannot be started.
     expect(w.findAll('button').every((b) => b.attributes('disabled') !== undefined)).toBe(true)
     expect(w.text()).toContain('(loading…)')
   })
 })
 
+// The small components with little logic: each test pins the one thing that matters (a live region always mounted, a focusable code block, an exact amount).
 describe('small components', () => {
   it('UiLiveStatus stays mounted when empty, so its announcements work', async () => {
+    // Mounted with no text: a live region inserted together with its text is not reliably announced, so it must already be there.
     const w = mount(UiLiveStatus, { props: { message: '' } })
     expect(w.find('output').exists()).toBe(true)
     expect(w.attributes('aria-label')).toBe('Status')
@@ -589,6 +643,7 @@ describe('small components', () => {
     const w = mount(UiCodeBlock, { props: { code: '{"a":1}', label: 'Payload' } })
     expect(w.element.tagName).toBe('FIGURE')
     expect(w.find('figcaption').text()).toBe('Payload')
+    // tabindex=0 on the <pre>: a keyboard user must be able to focus it to scroll a long block (WCAG 2.1.1).
     expect(w.find('pre').attributes('tabindex')).toBe('0')
     expect(w.find('code').text()).toBe('{"a":1}')
     expect(mount(UiCodeBlock, { props: { code: 'x', wrap: true } }).find('pre').classes()).toContain('mw-code__pre--wrap')
@@ -596,6 +651,7 @@ describe('small components', () => {
 
   it('UiSkipLink points at #main, or wherever it is told', () => {
     expect(mount(UiSkipLink).attributes('href')).toBe('#main')
+    // A page whose main landmark has another id passes its own href, which falls through and replaces the default.
     expect(mount(UiSkipLink, { attrs: { href: '#content' } }).attributes('href')).toBe('#content')
     expect(mount(UiSkipLink, { props: { label: 'Skip' } }).text()).toBe('Skip')
   })
@@ -606,17 +662,20 @@ describe('small components', () => {
     expect(w.text()).toBe('0.0131 WAL')
     expect(w.attributes('value')).toBe('13100000')
     expect(mount(UiAmount, { props: { value: '10000001', exact: true } }).text()).toBe('0.010000001 SUI')
+    // More than 2^53 base units: a float would have drifted here, the bigint digits do not.
     expect(mount(UiAmount, { props: { value: 9_007_199_254_740_993_000n } }).text()).toBe('9007199254.7410 SUI')
     expect(mount(UiAmount, { props: { value: 5 } }).text()).toBe('0.000000005 SUI')
   })
 
   it('UiAmount shows a dash for nothing or nonsense', () => {
+    // A missing value, text that is not an integer, and a decimal (base units are whole numbers) all show a dash rather than throw in a render.
     for (const value of [null, undefined, 'abc', '1.5']) expect(mount(UiAmount, { props: { value } }).text(), String(value)).toBe('—')
     expect(mount(UiAmount, { props: { value: null } }).attributes('value')).toBeUndefined()
   })
 
   it('UiAppShell frames the page: skip link, main landmark, header and footer', () => {
     const w = mount(UiAppShell, { slots: { header: '<header>H</header>', default: '<p>Body</p>', footer: '<footer>F</footer>' } })
+    // The skip link and the main landmark agree on an id, so the link lands on the content.
     expect(w.find('a.mw-skip').attributes('href')).toBe('#main')
     expect(w.find('main').attributes('id')).toBe('main')
     expect(w.find('main').text()).toBe('Body')
@@ -629,18 +688,22 @@ describe('small components', () => {
   })
 })
 
+// The header, sidebar and footer panels. Colour overrides must go through the CSSOM (never a rendered `style` attribute, which a strict CSP would block).
 describe('shell panels', () => {
   it('the variant is a class; custom colours are written to the CSSOM, not rendered as an attribute', async () => {
     const w = mount(AppHeader, { props: { variant: 'light', colors: { bg: 'rebeccapurple', text: 'white' } } })
     expect(w.classes()).toContain('mw-panel--light')
+    // The override is a custom property on the element's CSSOM, not a rendered `style` attribute.
     const el = w.element as HTMLElement
     expect(el.style.getPropertyValue('--_bg')).toBe('rebeccapurple')
     expect(el.style.getPropertyValue('--_text')).toBe('white')
+    // Clearing `colors` removes the property again.
     await w.setProps({ colors: undefined })
     expect(el.style.getPropertyValue('--_bg')).toBe('')
   })
 
   it('without overrides nothing inline is written at all', () => {
+    // All three panel components: the variant's colours are classes in the reset, so a panel with no override has no inline style at all.
     for (const comp of [AppHeader, AppFooter, AppSidebar]) {
       const w = mount(comp)
       expect((w.element as HTMLElement).getAttribute('style') ?? '').not.toContain('--_bg')
@@ -690,20 +753,25 @@ describe('shell panels', () => {
     const b = mount(SidebarItem, { props: { label: 'Home', active: true } })
     expect(b.element.tagName).toBe('BUTTON')
     expect(b.attributes('aria-current')).toBe('page')
+    // With an href it is a real link: a root-relative path is checked with `safePath`, anything else with `safeHref`.
     const a = mount(SidebarItem, { props: { label: 'Docs', href: '/docs' } })
     expect(a.element.tagName).toBe('A')
     expect(a.attributes('href')).toBe('/docs')
     expect(mount(SidebarItem, { props: { label: 'x', href: 'javascript:alert(1)' } }).attributes('href')).toBeUndefined()
+    // `//host` is a protocol-relative URL that would leave the site; it renders no href.
     expect(mount(SidebarItem, { props: { label: 'x', href: '//evil.example' } }).attributes('href')).toBeUndefined()
   })
 })
 
+// Keyset pagination: cursors are remembered so Previous works without a request, and an answer that arrives out of order must not overwrite a newer one.
 describe('usePager', () => {
+  // Three fake pages keyed by cursor ('' is the first page): the last has no next cursor.
   const pages: Record<string, { items: number[]; next_cursor: string | null }> = {
     '': { items: [1, 2], next_cursor: 'c1' },
     c1: { items: [3, 4], next_cursor: 'c2' },
     c2: { items: [5], next_cursor: null },
   }
+  // A spy loader, so the tests can count requests (Previous must not make one for a page already seen).
   const load = vi.fn(async (cursor: string | null) => pages[cursor ?? '']!)
 
   beforeEach(() => load.mockClear())
@@ -777,6 +845,7 @@ describe('usePager', () => {
   })
 })
 
+// A regression case: the field components must keep working inside a parent that binds them with `v-model` to a ref.
 describe('v-model with refs', () => {
   it('UiTextField works inside a parent using v-model', async () => {
     const value = ref('a')

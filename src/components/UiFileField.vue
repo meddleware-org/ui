@@ -5,17 +5,30 @@
 import UiFormField from './UiFormField.vue'
 
 defineProps<{
+  /** The input's id (the label points at it). */
   id: string
+  /** The label text. */
   label: string
+  /** Help text under the field. */
   hint?: string
+  /** An error message; also marks the input invalid. */
   error?: string | null
   /** The input's `accept` filter (media types or extensions). */
   accept?: string
+  /** Disables the input. */
   disabled?: boolean
+  /** Marks the input required. */
   required?: boolean
 }>()
-const emit = defineEmits<{ select: [file: File | null] }>()
+const emit = defineEmits<{
+  /** The chosen file, or `null` when the choice was cleared. */
+  select: [file: File | null]
+}>()
 
+/**
+ * Report the chosen file to the parent.
+ * @param event - the input's `change` event
+ */
 function onChange(event: Event): void {
   emit('select', (event.target as HTMLInputElement).files?.[0] ?? null)
 }
@@ -24,6 +37,7 @@ function onChange(event: Event): void {
 <template>
   <UiFormField :id="id" :label="label" :hint="hint" :error="error">
     <template #default="{ attrs }">
+      <!-- The field's id and ARIA wiring are passed by hand because the slot receives them as `attrs`, not as fallthrough attributes. -->
       <input
         :id="attrs.id"
         type="file"
@@ -40,6 +54,7 @@ function onChange(event: Event): void {
 </template>
 
 <style scoped>
+/* Fills its container but may shrink (`min-inline-size: 0`): a file input's intrinsic width would otherwise push a narrow layout sideways. */
 .mw-file {
   inline-size: 100%;
   min-inline-size: 0;
@@ -47,6 +62,7 @@ function onChange(event: Event): void {
   color: var(--text);
   font: inherit;
 }
+/* The native "Choose file" button, restyled to match the rest of the controls. */
 .mw-file::file-selector-button {
   margin-inline-end: var(--space-xs);
   padding: var(--space-2xs) var(--space-xs);

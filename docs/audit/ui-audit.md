@@ -22,13 +22,22 @@
 - AUDIT_TEMPLATE_VUE.md (2026-11-01) — mandatory; names `ui`
 - AUDIT_TEMPLATE_TS.md (2026-11-01)
 - AUDIT_TEMPLATE_A11Y.md (2026-11-01)
+- AUDIT_TEMPLATE_DOCS.md (2026-11-20)
+- AUDIT_TEMPLATE_RFC.md (2026-11-19), partial: the Popover and `<dialog>` platform features, ARIA authoring practices, WCAG 2.2, the URL helpers and the runtime-config JSON
+- AUDIT_TEMPLATE_IOP.md (2026-11-19), partial: public API and versioning, and the shared export of the rights notice
+- AUDIT_TEMPLATE_PRIV.md (2026-11-20), partial: what the components store, request or log in a visitor's browser (the colour-mode choice, the status poll, the runtime-config fetch)
 
 Not triggered: SUI, SUI_CLIENT (no chain access; `suiExplorerUrl` only builds links), SEAL, WALRUS,
 AUTH, OPS, IMG (no image; consumers host it), SITE.
 
 **Deployment status:**
 
-- **Latest (2026-11-06): `0.1.39` is released to npm** (CI green, trusted publishing with provenance): the tab list items use `role="none"` and the dev tools of the merged Dependabot groups moved; the apps take it in their 2026-11-06 releases. The bullets below are earlier history.
+- **Current (2026-11-21):** npm **`0.1.46` is `latest`** (tag `v0.1.46` → `7f2c564`, released 2026-11-20); one documentation commit since the tag, nothing under `src/`.
+  Eighteen consumers: `^0.1.46` in landing-site; `^0.1.45` in access-gate-ui, content-hub-ui, dashboard-ui, dev-site, docs-site, link-in-bio-ui, roadmap-site, sealed-storage-ui, status-ui,
+  token-issuance-ui, treasury-ui, walrus-storage-ui; `^0.1.43` in chain-payments-kit; `^0.1.42` in wallet-adapter and walrus-storage-kit; `^0.1.41` in vitepress-theme; `^0.1.35` in dao-ui.
+  The package has 241 files, 322 kB unpacked (0.1.46's tarball, `npm pack --dry-run`). Open Dependabot pull requests: #17 (jsdom 31, CI green) and #18 (a group of nine updates: vite 8.3.8,
+  vue 3.5.45, html-validate 11.21.1, @vue/test-utils 2.6.0 and others) whose real-browser job fails while its lint, type-check, test and build job passes (FU-0199). The bullets below are history.
+- **Earlier, 2026-11-06: `0.1.39` is released to npm** (CI green, trusted publishing with provenance): the tab list items use `role="none"` and the dev tools of the merged Dependabot groups moved; the apps take it in their 2026-11-06 releases. The bullets below are earlier history.
 
 - **Update 2026-11-01:** npm `@meddleware/ui` **0.1.37** is `latest` (released 2026-11-01: per-component CSS in cascade layers, the new field and status components, large-text fixes); `dist/` only, 219 files, 247 kB unpacked. **0.1.38 is prepared** with F13 (field edges use `--control-border`) and F14, requiring `@meddleware/design-tokens` ^0.1.13 and `@meddleware/web-utils` ^0.0.2. The 0.1.32 bullets below are history.
 - npm `@meddleware/ui` **0.1.32** (released 2026-10-19; tag `v0.1.32`, publish run 39185227316, whose release
@@ -64,6 +73,22 @@ AUTH, OPS, IMG (no image; consumers host it), SITE.
 - Realised ceiling at this pass: **Low**; after the 0.1.31 and 0.1.32 fixes no finding is open at any severity.
 
 **Status:** re-verified 2026-10-09 (first-pass baseline 2026-10-03, `v0.1.30`; fixes released in `v0.1.31`); release status re-checked 2026-10-19 (`v0.1.32` released; F12 added and RESOLVED).
+Part B documentation pass 2026-11-21 (0.1.46 current): F27 found and resolved (unreleased). Totals: F1 to F27, of which F10, F15, F16, F17 and F18 are Positive: 22 dispositioned findings, all RESOLVED (F6 split, see its entry).
+
+**Front matter (DOCS, RFC, IOP and PRIV lenses, added 2026-11-21):**
+
+| Field | Value |
+| --- | --- |
+| Documentation status | ledger (workspace `docs/audit/DOCS_LEDGER.tsv`): 137 tracked files, 125 done (122 measured against the thresholds), 12 excluded (the lockfile, `LICENSE`, the generated `docs/INTEROP.md`, the two published legal notices `legal/copyright.html` and `legal/copyleft.html`, and the binary and image assets), 0 pending, 0 fu (2026-11-21 pass) |
+| Required documents | README, CHANGELOG, SECURITY, CONTRIBUTING (added 2026-11-21), LICENSE (0BSD), CLAUDE.md, AGENTS.md: all present |
+| Doc lints | `check-docs.mjs` (workspace) is the gate. The shared `eslint-plugin-jsdoc` fragment is switched on here after the Phase 5 release of `@meddleware/frontend-config` |
+| Standards spoken | HTML living standard (`<dialog>`, `popover`, `<output>`, `<meter>`, `<data>`, `<fieldset>`) — implements; WAI-ARIA 1.2 and the ARIA Authoring Practices (tabs, toolbar, radio group, dialog) — implements; WCAG 2.2 AA with AAA as the bar — implements, proven by the gallery sweeps; CSS cascade layers, `:has()` and `color-mix()` — implements; JSON (RFC 8259) for `/runtime-config.json` — consumes; URL (WHATWG) through `safeHref` / `safePath` — consumes; Clipboard API — consumes; SPDX `0BSD`, Sigstore / SLSA — as the other packages |
+| Deviations | none |
+| Drafts relied on | Popover API and `closedby` (WHATWG HTML, recent): used with a script fallback where `closedby` is missing (UiDialog) |
+| Data a person can take away | none: the package holds no data about anyone; the colour-mode choice is the person's own, stored only if they ask |
+| Personal data | none |
+| Browser storage | `mw-color-mode` in `localStorage`, written only after the person ticks "Remember on this device" (STORAGE_LEDGER B2); `theme-init.js` reads it before first paint |
+| Requests to other hosts | `StatusWidget` and `useStatusSnapshot` fetch `https://status.meddleware.co.uk/api/status` by default (the platform's own status API; an app may pass another `apiUrl`); `loadRuntimeConfig` fetches the app's own `/runtime-config.json`; nothing else |
 
 **Front matter (VUE lens):**
 
@@ -188,6 +213,11 @@ the same release (F11, the real-browser contrast gate's own catches). A twelfth,
 Critical / High / Medium / Low / Info / Positive.
 
 ## Scope
+
+**In scope on 2026-11-21 (Part B documentation pass):** every tracked file, 137 in all: 52 components, the composables and internal modules, the tests (18 files in `src/__tests__/`, two beside their modules),
+the e2e specs, the gallery, the scripts, the Vite plugin and configurations, the workflows, and the documents. Environment and commands: `npm ci`; `npm run type-check`; `npm run lint`; `npm test` (18 files,
+200 tests, and the brand check); `npm run build`; `npm run check:dist` (48 component stylesheets); `npm run test:e2e` on Chromium (63 tests); `npx --no-install mw-audit-gate` (0 advisories); `npm pack --dry-run`
+(241 files, 336,917 bytes after the documentation pass against 322,503 before; the difference is the descriptions now in the `.d.ts` files).
 
 **In scope (first pass `1c74afb` = tag `v0.1.30`; re-verified at tag `v0.1.31` = `19d0855` and `main` `fe87de4`):**
 
@@ -743,6 +773,27 @@ Scope: everything since the 2026-10-19 review (`0.1.32`): 97 files, about +4 000
 **Impact:** a tip left open over a form while the person works from the keyboard, until the pointer is moved.
 **Remediation / evidence:** Escape dismisses the tip wherever the focus is, while the tip is hovered or focused, without moving either; it stays closed until the pointer has left and the focus has gone, and a document-level listener exists only while the tip is hovered or focused. The listeners are attached from script, so the wrapper has no handler in the template (semantic markup). `src/__tests__/dismissals.test.ts` (hover, focus, listener lifetime). The shared sweep now also parks the pointer before the keyboard pass (frontend-config). 0.1.38.
 
+### Part B documentation pass (2026-11-21)
+
+Scope: every tracked file read against the workspace's `docs/operations/DOCUMENTATION_STANDARD.md` and annotated (Part B Phase 1, the fifth repository, and the largest: 137 files); the DOCS, RFC, IOP and PRIV lenses
+applied for the first time. Before and after editing the unit tests (200), the browser tests (63 on Chromium), type-check, lint, build and the delivery contract passed. The shipped `dist/` was compared with the build
+from before the pass: the file list is identical, the JavaScript and CSS are identical once Vue's scoped-style hashes are normalised (the plugin derives them from each file's source text, so editing a comment changes
+them), and the `.d.ts` files differ only by comments (the descriptions are now in them). Outside the build, the TypeScript and JavaScript compile to identical output with comments removed (except the generator
+`scripts/build-brand.mjs`, which now writes doc comments into the generated `src/brand/mark.ts`), the YAML parses to identical values (except the audit-gate command in `node-ci.yml`, FU-0196), and `.gitignore` has
+the same patterns.
+
+### F27 — Documentation drift found by the documentation pass, one of it privacy-relevant
+**Severity:** Low   **Disposition:** RESOLVED (2026-11-21, unreleased)
+**Where:** `README.md`, `CLAUDE.md`, this audit, `.github/audit-gate.mjs`.
+**Issue:** (1) the README says its export table is authoritative (CLAUDE.md: "add a row"), yet 34 of the 103 exports appeared nowhere in it: `UiRoleGuide` (added in 0.1.46), `CopyrightLine`, `UiToolIntro`,
+`StatusWidget`, the whole runtime-configuration API, `useStickyOffset` and the status composable's types; (2) the README and CLAUDE.md both said `useColorMode` "persists to `localStorage`", which has not been true since
+D134: it stores nothing until the person ticks "Remember on this device"; a consumer or an auditor reading the documents would conclude that every visit writes to storage; (3) the README named
+`.github/workflows/publish.yml`, which does not exist (`npm-publish.yml`); (4) this audit gave 0.1.39 as current, a consumer list that predates `link-in-bio-ui`, and 77 unit tests; (5) `.github/audit-gate.mjs` was an
+un-annotated copy of the shared gate (one of the nine copies of FU-0196) although `@meddleware/frontend-config`, a dependency, ships it as `mw-audit-gate`.
+**Impact:** none on the code. The storage claim over-stated what the package does, in the direction that would have made a consumer add a notice or a consent step it does not need.
+**Remediation / evidence:** the README lists every export (checked by a script that reads `src/index.ts`) and states the storage behaviour; CLAUDE.md states it and the build; the publishing section names the right
+file; the facts here are checked against npm and the consumers' manifests; CI runs `npx --no-install mw-audit-gate` and the copy is removed (FU-0196).
+
 ### Delta notes (A11Y lens, `AUDIT_TEMPLATE_A11Y.md`)
 - **Cross-package check:** `src/__tests__/lint-helpers.test.ts` asserts that every name `@meddleware/eslint-config` accepts as a URL helper (`URL_HELPERS`) is exported by `@meddleware/web-utils` as a function, and that the list is the documented five — the two packages have no dependency on each other, and `ui` is where both are installed.
 - **Gate inventory:** the shared sweep over the gallery's `all`, `panels` and `dialog` views (axe AA and AAA — 7:1 text, 3:1 non-text — in all ten theme × season looks; reflow at 320 px; 200% text; forced colours; reduced motion; the keyboard pass incl. focus not obscured); in addition forced colours (controls keep a visible edge; the chosen state is not carried by a background alone), reduced motion (no transitions, immediate colour-mode change) and drawer behaviour (incl. focus return); jsdom axe over every component for structure and ARIA (`a11y.test.ts`, `a11y-primitives.test.ts`); five browser projects in CI; 261 e2e tests.
@@ -807,7 +858,7 @@ workspace baseline (TypeScript 7 is deferred by decision; vitest 5 current).
 | Check | Result |
 | --- | --- |
 | `exports` / `types` | `.` → `dist/index.d.ts` / `dist/ui.js`; `./base.css` |
-| `files` | `["dist"]` → 47 files, 112 kB unpacked; the PDF is gone (F6); content and size asserted in CI |
+| `files` | `["dist"]` → 241 files, 337 kB unpacked on 2026-11-21 (47 files, 112 kB on 2026-10-19); the PDF is gone (F6); content and size asserted in CI (under 1 MB) |
 | `sideEffects` | `["*.css", "*.vue"]` — accurate (`index.ts` imports CSS) |
 | Declarations for consumers | built by `vue-tsc -p tsconfig.build.json` |
 
@@ -817,7 +868,7 @@ No lifecycle scripts and no `overrides`. `build` runs in CI and publish.
 
 ### B.TS-3 Supply-chain gates
 
-Lockfile; `npm ci` in every job; the audit gate (`node .github/audit-gate.mjs`) with an expiring
+Lockfile; `npm ci` in every job; the audit gate (`npx --no-install mw-audit-gate` since 2026-11-21, from `@meddleware/frontend-config`; a copy of the same file at `node .github/audit-gate.mjs` before, FU-0196) with an expiring
 allowlist in CI and, through `verify`, in publish; publish npm pinned (11.20.0). Holds.
 
 ### B.VUE-1 Hosting
@@ -826,6 +877,58 @@ Not applicable to the library. Consumers' CSP must allow `connect-src https://st
 for `StatusWidget`, and `img-src data:` for `.mw-noise`; both are covered in consumer audits.
 
 ---
+
+### B.DOCS-1 Ledger state
+
+137 tracked files: 125 done (122 measured against the thresholds), 12 excluded (lockfile, licence text, generated `docs/INTEROP.md`, the two published legal notices, assets), 0 pending, 0 `fu:` rows
+(2026-11-21, commit recorded in the ledger).
+
+### B.DOCS-2 Commands run
+
+Every command in the README's Development section, CLAUDE.md's Commands section and CONTRIBUTING.md was run on 2026-11-21 and gave what the documents say: `npm ci`, `npm run type-check`, `npm run lint`, `npm test`
+(200 tests and the brand check), `npm run build`, `npm run check:dist`, `npm run build:brand` (the three raster files and the SVG are byte-identical; only `mark.ts` changed, by its new comments),
+`npm run test:e2e` (63 tests on Chromium), `npx --no-install mw-audit-gate`, `npm pack --dry-run`.
+
+### B.DOCS-3 Generated documentation
+
+`docs/INTEROP.md` is generated by the workspace's `scripts/interop/gen-interop.py` from `config/interop.yaml` and checked there. `src/brand/mark.ts` is generated by `scripts/build-brand.mjs` from `src/brand/kopimi-k.svg`
+(its documentation is written by the generator, and `scripts/check-brand.mjs` fails when the committed file differs). `dist/` (including the `.d.ts` files) is generated by `npm run build` and is not tracked.
+
+### B.RFC-1 Standards inventory
+
+| Interface | Standard (and version) | Role | Where | Conformance evidence | Deviation |
+| --- | --- | --- | --- | --- | --- |
+| Modal dialog | HTML `<dialog>`, `closedby` | implements | `UiDialog.vue` | `behaviour.test.ts` (over a jsdom shim), the e2e sweeps | `closedby` is not in every engine: a backdrop-click listener is the fallback |
+| Drawer and hint | HTML Popover API (`popover`, `showPopover`) | implements | `AppSidebar.vue`, `UiFieldHint.vue` | `shell.spec.ts`, `field-hint.spec.ts` in five engines | jsdom has no Popover API; the code guards with `?.` and the browser suites prove it |
+| Tabs, toolbar, radio group | WAI-ARIA 1.2 and the ARIA Authoring Practices | implements | `AppTabNav.vue`, `UiToolbar.vue`, `UiSegmentedControl.vue`, `UiRoleGuide.vue` | `behaviour.test.ts`, `components.test.ts` | — |
+| Accessibility | WCAG 2.2 A, AA and AAA (contrast 7:1 text, 3:1 non-text; 2.4.11; 1.4.13; 2.5.8) | implements | every component; the gallery sweeps | `a11y*.test.ts` (axe), `e2e/a11y.spec.ts`, `forced-colors.spec.ts`, `motion.spec.ts` | — |
+| Links | WHATWG URL | consumes, then allow-lists | `safeHref`, `safePath` (web-utils) in every component that binds a URL | `safety.test.ts`, `components.test.ts` | refuses `http:` off loopback and credentials |
+| Runtime config | JSON (RFC 8259) over HTTP, same origin | consumes | `runtime-config.ts` | `runtime-config.test.ts` | fetched with no credentials and no redirects; only three endpoint keys are honoured |
+| Clipboard | Async Clipboard API | consumes | `UiCopyButton.vue` | `components.test.ts` | a refusal is silent and claims nothing |
+| Module and CSS | ECMAScript modules; CSS cascade layers (`@layer`), `:has()`, `color-mix()` | implements | `dist/`, every stylesheet | `scripts/check-dist.mjs` | — |
+| Provenance | Sigstore / SLSA (npm provenance) | consumes | `npm-publish.yml` | `dist.attestations` on npm (checked for earlier releases; not re-read on 2026-11-21) | — |
+
+### B.IOP-1 Export and exit drill
+
+Not applicable: the package holds no data about anyone. A consumer leaves by copying a component out of `dist/` or `src/` (0BSD) and the shared tokens; every component is a plain `.vue` file that depends only on the
+design tokens and `@meddleware/web-utils`.
+
+### B.IOP-2 Exit register entries
+
+npm (publication) and GitHub Actions (CI). The Playwright browsers in CI come from Microsoft's CDN. No run-time dependency beyond the two first-party packages and Vue (a peer).
+
+### B.IOP-3 API stability
+
+The public API is the 103 names exported from `src/index.ts`, now all listed in the README. Versioning is patch-only until mainnet (workspace policy), so a consumer's `^0.1.x` is an exact pin; a rename or removal is a
+breaking change and is announced in `CHANGELOG.md`. The deprecated `UiBadge` `variant` and `UiSegmentedControl` `ariaLabel` props are kept and documented as deprecated. The five URL-helper names are trusted by name in
+`@meddleware/eslint-config` (`lint-helpers.test.ts` checks they exist in web-utils).
+
+### B.PRIV-1 / B.PRIV-2 / B.PRIV-3 Privacy inventories
+
+Personal data: none held. Client-side: the only storage is `mw-color-mode` in `localStorage`, written after the person ticks "Remember on this device" and removed when they untick it; it is read by `useColorMode` and
+`theme-init.js` (and listed in the workspace's STORAGE_LEDGER B2). No cookie, no `sessionStorage`, no IndexedDB, no cache. `UiRoleGuide` mirrors the chosen path in the address (`#for-<id>`) and stores nothing.
+Requests: `StatusWidget` and `useStatusSnapshot` poll the status API anonymously (`credentials: 'omit'`, no cache) once a minute while the tab is visible, to `https://status.meddleware.co.uk` by default; this is
+the platform's own host, and the polling only starts once a component using it is on screen. `loadRuntimeConfig` fetches the app's own origin. Logs: none (`console.warn` appears only in a development build). Recorded 2026-11-21.
 
 ## Section C — Test-coverage & hermetic/live split
 
@@ -943,6 +1046,21 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 | TS-M8 | yes | B.TS-3 |
 | TS-M9 | N/A (no `@mysten/*` dependency) | — |
 
+**Lens baselines (DOCS, RFC, IOP, PRIV), first recorded 2026-11-21:**
+
+| ID | Holds? | Evidence |
+| --- | --- | --- |
+| DOCS-M1 | yes (all seven documents; 0BSD; CHANGELOG per release with an Unreleased section) | B.DOCS-1 |
+| DOCS-M2 | yes (every file's header and every declaration documented; every prop, emit and slot described; ledger rows done) | `check-docs.mjs --report ui` |
+| DOCS-M3 | yes (every export in the README; the build-time variables are in the README and the runtime-config header; no other environment variables) | README, `runtime-config.ts` |
+| DOCS-M4 | yes (commands run, links resolve, ids exist) | B.DOCS-2 |
+| DOCS-M5 | yes (no TODO, FIXME, XXX or HACK) | `check-docs.mjs` |
+| DOCS-M6 | yes (CLAUDE.md verified against the code, F27; its new Gotchas record that a root-level template comment breaks the unit tests; AGENTS.md points to it) | this pass |
+| DOCS-M7 | yes (no secrets or private data; template comments never reach `dist/`, the script comments are stripped by the build, and the `.d.ts` files carry only the prop descriptions, intended for editors) | the `dist/` comparison |
+| RFC-M1 to RFC-M7 | yes where they apply (B.RFC-1); M5 is the hosts', not a package's | B.RFC-1 |
+| IOP-M3, IOP-M5 | yes (B.IOP-3; no data, no ads, no tracking); IOP-M1, M2, M4, M6, M7: not applicable (no data, no service) | B.IOP-1 to 3 |
+| PRIV-M1 to PRIV-M8 | yes: nothing stored before an action (D134); the one storage key is the person's own choice and removable; requests are anonymous and to the platform's own hosts | B.PRIV |
+
 ## Implementation suggestions (SHOULD / MAY)
 
 - **S1** *(done in 0.1.31)* A Playwright component gallery loaded with the real tokens, running axe
@@ -1031,6 +1149,14 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 - 2026-10-22 (audit close-out) — OQ1 decided: `[12, 10]` truncation by default, the treasury address shown in full (the implementation of 2026-10-08 stands, no code change). Not re-run in this pass: the unit tests and the contrast gate. Counts unchanged.
 - 2026-11-01 — frontend-wave delta review of 0.1.33–0.1.37 (and 0.1.38 released 2026-11-05). Read the runtime-config, theme-init, link/clipboard, status, Popover-drawer and form components and the delivery tooling; ran the audit gate, type-check, lint, 168 unit tests, build, check:dist, pack contents and the five-browser gallery e2e with the CI font (186 passed). Found and fixed F13 (field edges below WCAG 1.4.11 — new `--control-border`), F14 (non-Response fetch mock) and, once the library's gate became the shared sweep (F23), F19–F22 (badge wrapping, a keyboard-unreachable scroll region in the progress dialog, flex-parent overflow, the sticky status bar covering focus); F15–F18 recorded as Positive; drawer focus-return now asserted (261 e2e tests on five browsers, CI font). Release-tool marks for 0.1.35–0.1.37 reworded to "released". `**Template:**` dates reconciled to the 2026-11-01 registry (TS/VUE changes add rows; VUE's colour row moved to A11Y, applied here in full) with no disposition change.
 
+- 2026-11-21 — Part B documentation pass and first application of the DOCS, RFC, IOP and PRIV lenses (above, "Part B documentation pass"). Baseline before editing: `npm ci`, type-check, lint, 200 tests in 18
+  files, build, 63 browser tests on Chromium, the audit gate. All 137 files covered to the documentation standard (headers, TSDoc on every declaration, every prop, emit and slot described, why-comments on every
+  CSS rule group); `CONTRIBUTING.md` added; README Development section, a complete export table and the corrected storage statement; CLAUDE.md Commands, Gotchas and Related sections. Found and fixed **F27**
+  (documentation drift, one of it privacy-relevant). Learned and recorded (CLAUDE.md Gotchas): an HTML comment before a component's root element makes it a fragment in development builds and breaks the
+  unit tests, so 38 template notes were moved into the script blocks. Verified live: npm `0.1.46` latest; eighteen consumers; Dependabot #17 green, #18's real-browser job failing (FU-0199). Re-run after
+  editing: the same commands, all passing; the diff proven comment-only outside the build, and `dist/` proven identical apart from scoped-style hashes and `.d.ts` comments. Recorded outside the repository:
+  FU-0196 applied here (the copy of the gate is gone), FU-0199. Counts: F1 to F27 (five Positive); 22 dispositioned findings, all RESOLVED.
+
 ## Pre-save consistency checklist (this pass)
 
 - [x] Section A ↔ findings: all rows HOLDS except A10 (GAP, F6 ACCEPTED-RISK).
@@ -1041,4 +1167,6 @@ Re-counted 2026-10-09: Vitest 5.0.2 **77 passed, 10 files**; coverage 84.43 / 72
 - [x] Executive summary ↔ dispositions and ceiling (Medium; realised Low; nothing open).
 - [x] C.1 counts measured 2026-10-09.
 - [x] Re-verification log entry added.
+- [x] 2026-11-21: Template line cites DOCS, RFC, IOP and PRIV with their registry dates; their front-matter fields, Section B subsections and MUST rows added; F27 recorded in the findings and the log; the deployment
+  status, consumers, packaging counts and test counts current.
 - 2026-10-24 — runtime endpoint config added (`src/runtime-config.ts`, workspace ADR-0005): only `VITE_INDEXER_URL`, `VITE_WALRUS_RELAY_TESTNET`, `VITE_WALRUS_RELAY_MAINNET` may be overridden; values must be https (local http in dev) without credentials, query or fragment; same-origin path only, `credentials: omit`, `redirect: error`, 3 s timeout, 16 KiB cap, JSON content type required; frozen result; 8 tests. No new finding.

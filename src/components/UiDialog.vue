@@ -12,6 +12,7 @@
 // non-interactive <dialog> element itself.
 import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useId, watch } from 'vue'
 
+/** Whether the dialog is open (`v-model:open`); it is set to false when the dialog closes by any route. */
 const open = defineModel<boolean>('open', { default: false })
 
 const props = withDefaults(
@@ -35,16 +36,28 @@ const emit = defineEmits<{
   close: [returnValue: string]
 }>()
 
+// The native <dialog> element, which does the modal work.
 const el = ref<HTMLDialogElement | null>(null)
+// A unique id for the heading, so `aria-labelledby` names this dialog even when several are on a page.
 const titleId = useId()
+// The CSS width, bound into the stylesheet with `v-bind`.
 const dialogWidth = computed(() => props.width ?? 'min(var(--mw-content-narrow), 90vw)')
 
+// The `closedby` attribute (light dismiss) is newer than <dialog>; where it is missing a backdrop-click listener is added instead.
 const supportsClosedBy = typeof HTMLDialogElement !== 'undefined' && 'closedBy' in HTMLDialogElement.prototype
 
+/**
+ * Close the dialog, if it is open.
+ * @param returnValue - handed to the `close` event (an empty string when dismissed)
+ */
 function close(returnValue = ''): void {
   if (el.value?.open) el.value.close(returnValue)
 }
 
+/**
+ * Make the element match the `open` model: show it modally, or close it.
+ * @param isOpen - the wanted state
+ */
 function sync(isOpen: boolean): void {
   const d = el.value
   if (!d) return
@@ -52,6 +65,7 @@ function sync(isOpen: boolean): void {
   else if (!isOpen && d.open) d.close()
 }
 
+// What counts as a control inside the dialog, for deciding whether the dialog itself must be a tab stop.
 const FOCUSABLE = 'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
 
 /**
@@ -66,21 +80,30 @@ function syncFocusable(): void {
   else d.setAttribute('tabindex', '0')
 }
 
+/** Set `closedby`: `any` lets Escape and a click on the backdrop close the dialog, `none` forbids both (a dialog that must be answered). */
 function applyClosedBy(): void {
   // Not yet in Vue's DialogHTMLAttributes typings, so set it directly.
   el.value?.setAttribute('closedby', props.dismissible ? 'any' : 'none')
 }
 
-// Fallback light-dismiss: the article fills the dialog box, so a click whose target is the
-// <dialog> itself can only have landed on the backdrop.
+/**
+ * Fallback light dismiss for browsers without `closedby`: the article fills the dialog box, so a click whose target is the <dialog> itself can
+ * only have landed on the backdrop.
+ * @param e - the click event on the dialog
+ */
 function onBackdropClick(e: MouseEvent): void {
   if (props.dismissible && e.target === el.value) close()
 }
 
+/**
+ * The browser's Escape handling: cancel it for a dialog that is not dismissible.
+ * @param e - the `cancel` event
+ */
 function onCancel(e: Event): void {
   if (!props.dismissible) e.preventDefault()
 }
 
+/** Whatever closed the dialog (Escape, the button, a form, `close()`), keep the model in step and tell the parent. */
 function onClose(): void {
   open.value = false
   emit('close', el.value?.returnValue ?? '')
@@ -99,7 +122,9 @@ onBeforeUnmount(() => {
 watch(open, sync, { flush: 'post' })
 watch(() => props.dismissible, applyClosedBy)
 
+// A parent can close the dialog from outside (for instance after a successful action) through a template ref.
 defineExpose({ close })
+// Template: No click handler on the <dialog> in the template: Escape and backdrop dismissal come from `closedby`, or from the listener added in onMounted.
 </script>
 
 <template>
@@ -130,6 +155,7 @@ defineExpose({ close })
 </template>
 
 <style scoped>
+/* The dialog box: a token surface and a large shadow, as wide as the narrow content width by default and never taller than the viewport. */
 .mw-dialog {
   --_width: v-bind(dialogWidth);
   width: var(--_width);
@@ -141,6 +167,7 @@ defineExpose({ close })
   color: var(--text);
   box-shadow: var(--shadow-3);
 }
+/* The backdrop uses the shared token and a slight blur, so the page behind reads as out of reach. */
 .mw-dialog::backdrop {
   background: var(--backdrop);
   backdrop-filter: blur(var(--space-4xs));
@@ -162,6 +189,7 @@ defineExpose({ close })
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
 }
+/* The close button is a plain × (an icon-sized target); its accessible name is the `closeLabel` prop. */
 .mw-dialog__close {
   padding: 0 var(--space-3xs);
   border: 0;
@@ -175,6 +203,7 @@ defineExpose({ close })
 .mw-dialog__close:hover {
   color: var(--text);
 }
+/* Actions sit at the inline end and wrap rather than overflow at a large text size. */
 .mw-dialog__actions {
   display: flex;
   flex-wrap: wrap;

@@ -3,6 +3,20 @@
 All notable changes to `@meddleware/ui` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- Documentation pass (line-level annotation): every component, composable, test, script, workflow and configuration file explains itself; every
+  prop, emit and slot is documented (so the shipped `.d.ts` files carry the descriptions in editors); a Development section in the README and
+  Commands, Gotchas and Related sections in CLAUDE.md; CONTRIBUTING.md. No behaviour change: the built JavaScript and CSS are identical apart from
+  Vue's scoped-style hashes.
+- The README's export table lists every export (it lacked `UiRoleGuide`, `CopyrightLine`, `UiToolIntro`, `StatusWidget`, the runtime
+  configuration functions and the status composable's types) and no longer says `useColorMode` persists the choice: it stores nothing until the
+  person ticks "Remember on this device" (D134). The publishing section names `npm-publish.yml` (it said `publish.yml`).
+- `src/brand/mark.ts` (generated) now carries doc comments, written by `scripts/build-brand.mjs`.
+- CI audits dependencies with the shared `mw-audit-gate` from `@meddleware/frontend-config` instead of a copy of the same file in this repository
+  (`.github/audit-gate.mjs` is removed; FU-0196).
+
 ## [0.1.46] - 2026-11-20
 
 - `UiRoleGuide` reflows at 200% text on a phone: its grids may shrink below their content's minimum (`minmax(0, 1fr)`), found by the

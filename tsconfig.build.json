@@ -1,6 +1,9 @@
+// Build settings (`npm run build` runs `vue-tsc -p` on this file, then Vite): emit the declarations (dist/**/*.d.ts) for the public API. Only
+// declarations are emitted here; Vite writes the JavaScript and the CSS.
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    // dist/ mirrors src/ (components/UiButton.vue → components/UiButton.vue.d.ts).
     "rootDir": "./src",
     "noEmit": false,
     "declaration": true,
@@ -8,5 +11,6 @@
     "emitDeclarationOnly": true,
     "outDir": "dist"
   },
+  // The tests are type-checked by the base config but are not part of the package.
   "exclude": ["src/**/*.test.ts", "src/__tests__/**"]
 }

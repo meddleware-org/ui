@@ -15,12 +15,15 @@ const roles: RoleGuideRole[] = [
   { id: 'run', title: 'Run my own', summary: 'Host it.', steps: ['Choose.', 'Host.', 'Name it.'] },
 ]
 
+// Remove anything a case attached to the document and reset the address, so the next case starts on a clean page.
 afterEach(() => {
   history.replaceState(null, '', '/')
   localStorage.clear()
   sessionStorage.clear()
 })
 
+// The radio group, the panels and the address mirror. Panel visibility itself is CSS (`:has`), which jsdom does not evaluate, so these tests
+// check the markup and the behaviour that script adds; the real browser rendering is checked in e2e.
 describe('UiRoleGuide', () => {
   it('is a radio group in a fieldset with a legend, one panel per path, the first chosen', () => {
     const w = mount(UiRoleGuide, { props: { roles, name: 'guide' } })

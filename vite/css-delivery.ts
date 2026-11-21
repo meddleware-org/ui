@@ -13,7 +13,9 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Plugin } from 'vite'
 
+/** The name Vite gives a component's extracted stylesheet: `<Component>.vue_vue_type_style_index_0_scoped_<hash>_lang.css`. */
 const STYLE = /^(.*\/)?([^/]+)\.vue_vue_type_style_index_\d+(?:_scoped_[0-9a-f]+)?_lang\.css$/
+/** The cascade-layer order statement every emitted stylesheet starts with, so the order holds whichever file a bundler loads first. */
 const ORDER = '@layer mw.reset, mw.components;'
 
 /** The published file name for an emitted asset: component styles become `components/<Name>.css`, the reset `reset.css`. */
@@ -24,12 +26,17 @@ export function assetFileName(name: string): string {
   return '[name][extname]'
 }
 
+/**
+ * The build plugin. It runs after the others (`enforce: 'post'`) so every stylesheet and chunk already exists, and only in a build.
+ * @returns the Vite plugin
+ */
 export function cssDelivery(): Plugin {
   return {
     name: 'mw-css-delivery',
     apply: 'build',
     enforce: 'post',
     generateBundle(_options, bundle) {
+      // Every extracted stylesheet by file name (the component styles and the reset), read once.
       const sources = new Map<string, string>()
       for (const [file, item] of Object.entries(bundle)) {
         if (item.type === 'asset' && file.endsWith('.css')) sources.set(file, String(item.source))
@@ -38,6 +45,7 @@ export function cssDelivery(): Plugin {
       // The reset entry exists only so Vite builds reset.css as its own file; its (empty) JS is not part of the package.
       delete bundle['styles/reset.js']
 
+      // Point each component's module at its own stylesheet: replace Vite's empty-CSS marker with a real import.
       for (const [file, item] of Object.entries(bundle)) {
         if (item.type !== 'chunk') continue
         const css = file.replace(/\.js$/, '.css')
@@ -47,11 +55,13 @@ export function cssDelivery(): Plugin {
         }
       }
 
+      // base.css: the layer order once, then the reset, then every component in name order (stable output); each file's own order line is dropped.
       const strip = (css: string) => css.replace(ORDER, '').trim()
       const parts = [ORDER, strip(sources.get('reset.css') ?? '')]
       for (const [file, css] of [...sources].sort(([a], [b]) => a.localeCompare(b))) {
         if (file.startsWith('components/')) parts.push(strip(css))
       }
+      // The pre-paint script is copied verbatim: it must stay a plain script (no module wrapper) to run before first paint.
       this.emitFile({ type: 'asset', fileName: 'theme-init.js', source: readFileSync(join(import.meta.dirname, '../src/theme-init.js'), 'utf8') })
       // The brand files (favicon set), published as `@meddleware/ui/brand/*`.
       const brandDir = join(import.meta.dirname, '../src/brand/files')

@@ -1,15 +1,22 @@
+// TypeScript settings for type-checking (`npm run type-check`, through vue-tsc so the <script> blocks of .vue files are checked too). Nothing is
+// emitted: tsconfig.build.json derives the settings that write the declarations.
 {
   "compilerOptions": {
+    // Current browsers and Node 26 run the source as written; Vite does the transforming for the build.
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    // The DOM types the components use (`Document`, `HTMLDialogElement`, the Popover API).
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "strict": true,
+    // A library ships no dead code: an unused local or parameter is a mistake here.
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "esModuleInterop": true,
+    // Do not type-check the dependencies' own declaration files: their correctness is not this package's to prove.
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    // Required by Vite (each file is transpiled alone) and by `verbatimModuleSyntax`, which keeps `import type` honest.
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "jsx": "preserve",

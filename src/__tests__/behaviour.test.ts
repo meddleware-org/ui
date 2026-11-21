@@ -11,13 +11,20 @@ import CopyrightLine from '../components/CopyrightLine.vue'
 
 beforeAll(installDialogShim)
 
+// Three tabs shared by the cases below.
 const TABS = [
   { id: 'a', label: 'Alpha' },
   { id: 'b', label: 'Beta' },
   { id: 'c', label: 'Gamma' },
 ]
 
+// The tabs pattern: ids link each tab to its panel, only the selected tab is in the Tab sequence, and the arrow keys move and activate.
 describe('AppTabNav (WAI-ARIA tabs)', () => {
+  /**
+   * A tab set mounted in the document (focus needs a real parent).
+   * @param modelValue - the selected tab's id
+   * @param allPanels - whether every tab's panel is in the DOM
+   */
   function mountTabs(modelValue = 'a', allPanels = false) {
     return mount(AppTabNav, {
       props: { tabs: TABS, modelValue, idPrefix: 'x', allPanels, 'onUpdate:modelValue': () => {} },
@@ -71,6 +78,7 @@ describe('AppTabNav (WAI-ARIA tabs)', () => {
   })
 })
 
+// The dialog's open, close and return-value plumbing, over the jsdom shim (the browser's top layer and inert background are checked in e2e).
 describe('UiDialog', () => {
   it('opens as a modal when open, and is labelled by its heading', async () => {
     const w = mount(UiDialog, { props: { open: true, title: 'Connect' }, attachTo: document.body })
@@ -130,6 +138,7 @@ describe('UiDialog', () => {
   })
 })
 
+// The wording of the notice: the named rights statements and the custom ones.
 describe('CopyrightLine text', () => {
   const text = (props: Record<string, unknown>) => mount(CopyrightLine, { props: { organisationName: 'Org', year: 2026, ...props } }).text()
 

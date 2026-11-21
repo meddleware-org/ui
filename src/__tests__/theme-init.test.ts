@@ -4,6 +4,11 @@
 import SOURCE from '../theme-init.js?raw'
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 
+/**
+ * Run theme-init.js as the browser would (a plain script, with `document.currentScript` and the environment faked), and return <html>.
+ * @param options - what the environment holds: a saved mode, the script's `data-default`, whether the system prefers dark, the month, and
+ *   whether storage throws
+ */
 function run(options: { stored?: string; fallback?: string; dark?: boolean; month?: number; storageThrows?: boolean } = {}): HTMLElement {
   document.documentElement.removeAttribute('data-theme')
   document.documentElement.removeAttribute('data-season')
@@ -17,6 +22,7 @@ function run(options: { stored?: string; fallback?: string; dark?: boolean; mont
   return document.documentElement
 }
 
+// Fixed time (the season depends on the month) and an empty store before every case.
 beforeEach(() => {
   vi.useFakeTimers()
   localStorage.clear()
@@ -27,6 +33,7 @@ afterEach(() => {
   Reflect.deleteProperty(document, 'currentScript')
 })
 
+// The script is loaded as raw text and run with `new Function`, so the test sees exactly what the browser would run, with no module wrapper.
 describe('theme-init.js', () => {
   it('uses the visitor\'s saved choice over the default, and ignores anything else in storage', () => {
     expect(run({ stored: 'dark', fallback: 'light' }).getAttribute('data-theme')).toBe('dark')

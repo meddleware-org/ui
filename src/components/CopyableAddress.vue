@@ -24,7 +24,9 @@ const props = withDefaults(
   { truncate: true, chars: () => [...DEFAULT_TRUNCATE_CHARS], label: 'Copy' },
 )
 
+// The default label: shortened unless the caller turned truncation off (a value that decides where funds go is shown whole).
 const display = computed(() => (props.truncate ? truncateMiddle(props.address, props.chars) : props.address))
+// Template: The value is a plain span (it may hold a link in the slot); only the icon button copies, so clicking the link never copies by accident.
 </script>
 
 <template>

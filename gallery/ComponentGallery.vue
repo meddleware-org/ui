@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// The component gallery page: every public component in representative states, on one page, selected by the `view` query parameter. The
+// real-browser sweeps (e2e/a11y.spec.ts, forced-colors, motion, shell) and the screenshots drive it, because jsdom has no layout and no
+// computed colours. A new component is added here (CLAUDE.md, "Adding a component"). Not published.
 import { ref } from 'vue'
 import {
   AppFooter, AppHeader, AppSidebar, AppTabNav, BrandMark, ColorModeControl, CopyableAddress, CopyrightLine, ExplorerLink,
@@ -8,8 +11,14 @@ import {
   UiFileField, UiStatusBar, UiStatusDot, UiStepper, UiTabPanel, UiTextField, UiToolIntro, UiToolbar, UiToolbarButton, useColorMode,
 } from '../src/index'
 
-const props = defineProps<{ view: string; theme: 'light' | 'dark' }>()
+const props = defineProps<{
+  /** Which part of the gallery to show (`all`, `panels`, `dialog`, …); a modal dialog has its own view because it makes the rest inert. */
+  view: string
+  /** The starting colour mode. */
+  theme: 'light' | 'dark'
+}>()
 
+// Sample state for the components below: a 66-character address, the selected tab, segment and step, form values, and a role guide.
 const address = `0x${'ab'.repeat(31)}cd`
 const tab = ref('a')
 // The real colour-mode state, so the control in the gallery does what it does in an app (and a screenshot can drive it). The page's theme
@@ -31,6 +40,7 @@ const symbol = ref('')
 
 <template>
   <!-- The dialog is modal (it makes the rest of the page inert), so it has its own view. -->
+  <!-- `open` makes the dialog show as soon as it mounts, so the sweep sees it without a click. -->
   <UiDialog v-if="view === 'dialog'" open title="Before you deploy" dismissible>
     <p>Terms apply. <a href="https://example.org/terms">Read the terms</a>.</p>
     <template #actions>
@@ -40,6 +50,7 @@ const symbol = ref('')
   </UiDialog>
 
   <!-- A hint inside a modal dialog: its text must be drawn above the dialog (the top layer), not behind it. -->
+  <!-- (Each view is an `v-if` branch: the dialog views first, then the hints and panels, then the full gallery in the last branch.) -->
   <UiDialog v-else-if="view === 'hints-dialog'" open title="Token settings" dismissible>
     <UiFormField id="dlg-name" label="Package name">
       <template #label-suffix><UiFieldHint field-id="dlg-name">The on-chain package name, in snake_case. It cannot change after deployment.</UiFieldHint></template>
@@ -50,10 +61,13 @@ const symbol = ref('')
   <!-- Field hints where they used to go wrong: in the headings of an EMPTY table in a narrow column (the text is longer than the table), at
        the right edge of the screen, and at the bottom of it. -->
   <main v-else-if="view === 'hints'" class="hints">
+    <!-- The heading and the three placements; each hint is opened by the e2e test (e2e/field-hint.spec.ts), not shown at rest. -->
     <h1>Field hints</h1>
+    <!-- A narrow column, so the hint texts are wider than the table: the case that used to add a sideways scrollbar. -->
     <div class="narrow">
       <UiDataTable caption="Activity" :rows="0" empty="No activity yet">
         <template #head>
+          <!-- Three columns: a plain one, then two with hints (a long one in a narrow table, and a short one). -->
           <th scope="col">Type</th>
           <th scope="col">
             Address
@@ -66,6 +80,7 @@ const symbol = ref('')
         </template>
       </UiDataTable>
     </div>
+    <!-- Near the right and bottom edges of the screen: the tip must slide or flip to stay on screen (placeTip). -->
     <p class="edge-right">Right edge <UiFieldHint field-id="h-right">A hint at the right edge of the screen: it slides left to stay on screen.</UiFieldHint></p>
     <p class="edge-bottom">Bottom edge <UiFieldHint field-id="h-bottom">A hint at the bottom of the screen: it opens above the button.</UiFieldHint></p>
   </main>
@@ -74,12 +89,15 @@ const symbol = ref('')
        appear below 45em. -->
   <UiAppShell v-else-if="view === 'panels'" contained>
     <template #header>
+      <!-- A light header over the page theme, with the menu button that opens the sidebar drawer below 45em. -->
       <AppHeader variant="light" sidebar-id="gallery-nav">
         <template #brand><a href="/"><BrandMark /> Meddleware</a></template>
         <template #actions><UiButton variant="ghost">Connect wallet</UiButton><button type="button">Connect</button></template>
       </AppHeader>
     </template>
+    <!-- The sidebar slot: the shell places it beside the main content and, below 45em, leaves it as a drawer outside the flow. -->
     <template #sidebar>
+      <!-- A dark sidebar: a two-level group (Blockchain, then Sui) with one active item and one real link. -->
       <AppSidebar id="gallery-nav" variant="dark">
         <SidebarGroup label="Blockchain">
           <SidebarGroup label="Sui" :level="2"><SidebarItem label="Treasury" active /><SidebarItem label="Docs" href="/docs" /></SidebarGroup>
@@ -87,22 +105,28 @@ const symbol = ref('')
         <template #foot><p><a href="https://example.org/wallet">Wallet help</a></p></template>
       </AppSidebar>
     </template>
+    <!-- The page body: a heading and a sentence, enough to give the shell a main landmark. -->
     <h1>Panels</h1>
     <p>Shell panels in the variants the main view does not use.</p>
+    <!-- The footer slot spans the full width under the content. -->
     <template #footer>
+      <!-- A dark footer with both documentation links, so the link styles are audited on a dark panel. -->
       <AppFooter variant="dark" docs-url="https://docs.example.org" dev-url="https://dev.example.org">
         <template #start><a href="https://example.org/legal">Legal</a></template>
       </AppFooter>
     </template>
   </UiAppShell>
 
+  <!-- The full gallery: a dark header with an address and a connect button, then a light sidebar beside the main content, then the footer. -->
   <template v-else>
     <AppHeader variant="dark">
       <template #brand><a href="/"><BrandMark /> Meddleware</a></template>
+      <!-- The header's actions: a copyable address with an explorer link, then buttons, so a crowded header is audited. -->
       <template #actions><CopyableAddress :address="address"><ExplorerLink href="https://suiscan.xyz/mainnet/account/0x1" :value="address" /></CopyableAddress><UiButton variant="ghost">Connect wallet</UiButton><UiButton variant="secondary">Connect</UiButton></template>
     </AppHeader>
 
     <div class="shell">
+      <!-- A light sidebar on the page theme (the other variant of the shell panels). -->
       <AppSidebar variant="light">
         <SidebarGroup label="Blockchain">
           <SidebarItem label="Sui" active />
@@ -112,53 +136,68 @@ const symbol = ref('')
       </AppSidebar>
 
       <main>
+        <!-- One <h1> for the page; each section below has an <h2>, so the heading outline is in order. -->
         <h1>Gallery</h1>
         <UiToolIntro>Deploy a token. <a href="https://example.org/docs">Documentation</a> explains each step.</UiToolIntro>
+        <!-- Running text with a plain link and the chain-value helpers: a link in body text must be distinguishable from its surroundings. -->
         <p>
           Running text with a <a href="https://example.org/a">plain link</a> and the address
           <ExplorerLink href="https://suiscan.xyz/mainnet/account/0x1" :value="address" />, copyable:
           <CopyableAddress :address="address" /> or just <UiCopyButton value="0x1" label="Copy id" />.
         </p>
+        <!-- Small secondary text, code and an amount: the muted and monospace styles on the page background. -->
         <p><small>Secondary metadata</small> <code>0x1234</code> <UiAmount :value="13_100_000n" symbol="WAL" /></p>
 
+        <!-- Every button variant and state, so each fill and label pair is measured at AAA in every look. -->
         <section>
           <h2>Buttons</h2>
           <UiButton variant="primary">Primary</UiButton>
           <UiButton variant="secondary">Secondary</UiButton>
           <UiButton variant="ghost">Ghost</UiButton>
           <UiButton variant="danger">Danger</UiButton>
+          <!-- Disabled and busy are exempt from contrast (disabled) or keep their colours (busy); both are drawn here so they are not forgotten. -->
           <UiButton variant="primary" disabled>Disabled</UiButton>
           <UiButton variant="primary" busy>Saving</UiButton>
           <UiButton variant="primary" size="sm">Small</UiButton>
+          <!-- The same component as a link (an `href`): the link form must look the same as the button form. -->
           <UiButton variant="ghost" href="https://example.org/x">As a link</UiButton>
           <UiButton variant="link" href="https://example.org/y">Link variant</UiButton>
           <UiToolbarButton>Refresh</UiToolbarButton>
         </section>
 
+        <!-- Messages and states: tints must keep the text at AAA, so every tone is drawn. -->
         <section>
           <h2>Notices, badges and status</h2>
           <UiNotice>Informational note.</UiNotice>
+          <!-- Each notice type: the warning, error and ok ones also set an ARIA role. -->
           <UiNotice type="warning">Careful: this is a warning.</UiNotice>
           <UiNotice type="error">Something failed.</UiNotice>
           <UiNotice type="ok">Saved.</UiNotice>
+          <!-- Badges: every tone, then the deprecated variant names (still supported). -->
           <UiBadge tone="ok">Posted</UiBadge>
           <UiBadge tone="warn" symbol="◐">Queued</UiBadge>
           <UiBadge tone="danger">Failed</UiBadge>
           <UiBadge tone="info">Note</UiBadge>
           <UiBadge tone="accent">Tag</UiBadge>
+          <!-- A badge with no tone is neutral; the two below use the old `variant` names. -->
           <UiBadge>Neutral</UiBadge>
           <UiBadge variant="active">Active (old)</UiBadge>
           <UiBadge variant="pending">Pending (old)</UiBadge>
+          <!-- The status dots and the widget (its fetch is faked in main.ts, so it settles into a state the sweeps can measure). -->
           <UiStatusDot status="operational" /><UiStatusDot status="degraded" /><UiStatusDot status="down" size="md" /><UiStatusDot status="unknown" />
           <StatusWidget api-url="/status.json" href="https://status.example.org" />
         </section>
 
+        <!-- The form controls, each with a label, a hint or an error where it has them: the 3:1 control edge is checked on these. -->
         <section>
           <h2>Forms</h2>
+          <!-- Text fields: with a hint, with an error (the invalid state), and as a textarea. -->
           <UiTextField id="name" v-model="name" label="Token name" hint="Shown in wallets" />
           <UiTextField id="symbol" v-model="symbol" label="Symbol" error="A symbol is required" />
           <UiTextField id="about" v-model="name" label="About" :rows="2" />
+          <!-- A native file input with its hint and accept filter. -->
           <UiFileField id="icon" label="Icon" hint="PNG or SVG, up to 256 KiB" accept="image/png,image/svg+xml" />
+          <!-- Select, date-time and checkbox fields, then the low-level field wrapper used with a bare select. -->
           <UiSelectField id="net" v-model="network" label="Network" :options="[['testnet', 'Testnet'], ['mainnet', 'Mainnet']]" />
           <UiDateTimeField id="at" v-model="sendAt" label="Send at" zone="Europe/London" />
           <UiCheckField v-model="flag" label="Send now" hint="goes live immediately" />
@@ -166,50 +205,61 @@ const symbol = ref('')
             <template #default="{ attrs }"><UiSelect v-bind="attrs"><option value="testnet">Testnet</option></UiSelect></template>
           </UiFormField>
           <UiFieldHint field-id="name">Explains the field.</UiFieldHint>
+          <!-- Segmented controls: a plain row, and the grid layout that wraps on a narrow screen. -->
           <UiSegmentedControl
             v-model="segment"
             label="Mode"
             :options="[{ id: 'x', label: 'X' }, { id: 'y', label: 'Y' }, { id: 'z', label: 'Z', disabled: true }]"
           />
           <UiSegmentedControl v-model="segment" label="Filter" layout="grid" :options="[{ id: 'x', label: 'Planned' }, { id: 'y', label: 'In progress' }, { id: 'z', label: 'Done' }, { id: 'w', label: 'Cancelled' }]" />
+          <!-- The colour-mode control (bound to the real state) and the two stepper forms: a wizard and a progress list. -->
           <ColorModeControl :model-value="mode" @update:model-value="setMode" />
           <UiStepper v-model="step" class="wide" :steps="[{ id: 'a', label: 'Details' }, { id: 'b', label: 'Review' }, { id: 'c', label: 'Deploy' }]" />
           <UiStepper orientation="vertical" :steps="[{ id: 'a', label: 'Publish', status: 'done' }, { id: 'b', label: 'Verify', status: 'busy' }, { id: 'c', label: 'Share', status: 'error' }, { id: 'd', label: 'Archive', status: 'pending' }]" />
         </section>
 
+        <!-- The role guide: a radio group and the panels it shows. -->
         <section>
           <h2>Role guide</h2>
           <UiRoleGuide name="gallery-guide" :roles="guideRoles" />
         </section>
 
+        <!-- Navigation: both tab variants with their panels, the toolbar and the pager. -->
         <section>
           <h2>Navigation</h2>
           <AppTabNav v-model="tab" id-prefix="t" aria-label="Sections" :tabs="[{ id: 'a', label: 'Alpha' }, { id: 'b', label: 'Beta' }]" />
+          <!-- A panel is paired to its tab by the shared id prefix. -->
           <UiTabPanel id-prefix="t" tab="a"><p>Alpha content</p></UiTabPanel>
           <AppTabNav v-model="tab" id-prefix="r" variant="raised" aria-label="Raised sections" :tabs="[{ id: 'a', label: 'Alpha' }, { id: 'b', label: 'Beta' }]" />
           <UiTabPanel id-prefix="r" tab="a"><p>Raised content</p></UiTabPanel>
+          <!-- A toolbar with a disabled button (skipped by the arrow keys) and a pager in the middle of a list. -->
           <UiToolbar label="Page actions" :actions="[{ id: 'home', label: 'Home' }, { id: 'help', label: 'Help' }, { id: 'off', label: 'Off', disabled: true }]" />
           <UiPager :index="1" has-next label="Gallery pages" />
         </section>
 
+        <!-- Panels and data: containers, readouts, tables, meters and small content pieces. -->
         <section>
           <h2>Panels and data</h2>
+          <!-- A titled panel holding an activity feed: one item with a plain label and one with a real datetime. -->
           <UiPanel title="Recent activity">
             <UiActivityFeed>
               <UiActivityItem type="Minted" time="ckpt 1" />
               <UiActivityItem type="Consumed" time="ckpt 2" datetime="2026-10-08T00:00:00Z" />
             </UiActivityFeed>
           </UiPanel>
+          <!-- A titled card with a footer, then a list of plain cards (one of them a link through its title). -->
           <UiCard title="Gate"><p>Body</p><template #footer><p>Footer</p></template></UiCard>
           <ul class="cards" role="list">
             <UiCard as="li" plain :level="3" title="A plain item"><p>No header band.</p></UiCard>
             <UiCard as="li" plain :level="3" title="A linked item" href="https://example.org/tool"><p>The whole card links.</p></UiCard>
           </ul>
+          <!-- A description list of stats; the long object id checks that a 66-character value wraps instead of widening the page. -->
           <UiStatGrid>
             <UiStatRow label="Balance"><UiAmount :value="1_500_000_000n" /></UiStatRow>
             <UiStatRow label="Gates">3</UiStatRow>
             <UiStatRow label="Object" align="left">0x1111111111111111111111111111111111111111111111111111111111111111</UiStatRow>
           </UiStatGrid>
+          <!-- One table with a row and one empty: the zebra and hairline styles, and the empty message. -->
           <UiDataTable caption="Gates" :rows="1" empty="Nothing yet">
             <template #head><th scope="col">Name</th><th scope="col">State</th></template>
             <tr><th scope="row">Alpha</th><td><UiBadge tone="ok">Active</UiBadge></td></tr>
@@ -217,9 +267,11 @@ const symbol = ref('')
           <UiDataTable caption="Empty gates" :rows="0" empty="Nothing yet">
             <template #head><th scope="col">Name</th><th scope="col">State</th></template>
           </UiDataTable>
+          <!-- The meter in its three states: within, close to, and over the limit. -->
           <UiMeter label="Within" :used="20" :limit="100" unit="USD" />
           <UiMeter label="Close" :used="85" :limit="100" unit="USD" />
           <UiMeter label="Over" :used="130" :limit="100" unit="USD" />
+          <!-- The remaining small components: empty state, live region, code block and the status bar. -->
           <UiEmptyState>No posts yet.<template #action><UiButton variant="ghost">Write one</UiButton></template></UiEmptyState>
           <UiLiveStatus message="Saved 2 changes" />
           <UiCodeBlock label="Payload" code='{ "network": "testnet", "gate": "0x1" }' />
@@ -228,6 +280,7 @@ const symbol = ref('')
       </main>
     </div>
 
+    <!-- A transparent footer over the page background (the usual case), with the Kopimi notice and both documentation links. -->
     <AppFooter variant="transparent" docs-url="https://docs.example.org" dev-url="https://dev.example.org">
       <template #start><CopyrightLine organisation-name="Meddleware" symbol-variant="kopimi" /></template>
     </AppFooter>
@@ -235,6 +288,7 @@ const symbol = ref('')
 </template>
 
 <style scoped>
+/* Layout of the gallery itself (not of any component): a sidebar beside the content, and sections that wrap their samples in a row. */
 .shell { display: flex; gap: var(--space-md); align-items: flex-start; }
 main { flex: 1; min-width: 0; padding: var(--space-sm); background: var(--bg); color: var(--text); }
 section { margin-block: var(--space-sm); display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; }

@@ -11,26 +11,39 @@
 import { nextTick, onBeforeUnmount, onMounted, onUpdated, ref } from 'vue'
 
 const props = defineProps<{
+  /** The text shown when there are no rows. */
   empty?: string
   /** Number of body rows; 0 shows `empty`. Omit it to treat "nothing in the default slot" as empty. */
   rows?: number
   /** The table's accessible name. */
   caption?: string
 }>()
-const slots = defineSlots<{ head(): unknown; default(): unknown; caption(): unknown }>()
+const slots = defineSlots<{
+  /** The header cells (`<th scope="col">` only: the component wraps them in the row). */
+  head(): unknown
+  /** The body rows (`<tr>`). */
+  default(): unknown
+  /** A caption with markup (otherwise use the `caption` prop). */
+  caption(): unknown
+}>()
 
+// The scroll box around the table, measured to know whether the table is wider than it.
 const wrap = ref<HTMLElement | null>(null)
+// True while the table is wider than its box: then the box becomes a labelled, focusable region and shows the hint.
 const scrollable = ref(false)
 let observer: ResizeObserver | null = null
 
+/** Work out whether the table needs to scroll sideways (a pixel of slack avoids flicker from fractional widths). */
 function measure(): void {
   const el = wrap.value
   if (el) scrollable.value = el.scrollWidth > el.clientWidth + 1
 }
 
+// Development warnings only: the checks below cost a DOM query, so they are skipped in a production build.
 const isDev = (import.meta as { env?: { DEV?: boolean } }).env?.DEV === true
 let warned = false
 let warnedScope = false
+/** Warn once (in development) about the two easy mistakes in the `head` slot: a `<tr>` inside it, and a `<th>` without `scope`. */
 function checkHead(): void {
   if (!isDev || warned) return
   if (wrap.value?.querySelector('thead tr tr')) {
@@ -43,6 +56,7 @@ function checkHead(): void {
   }
 }
 
+// A ResizeObserver on the box and on the table re-measures when either changes size (a window resize, a column that grows, a font change).
 onMounted(() => {
   measure()
   checkHead()
@@ -56,10 +70,12 @@ onMounted(() => {
 onUpdated(() => void nextTick(measure))
 onBeforeUnmount(() => observer?.disconnect())
 
+// Empty means `rows` is 0 when the caller gave it, otherwise "nothing in the default slot".
 const isEmpty = (): boolean => (props.rows !== undefined ? props.rows === 0 : !slots.default)
 
 // The wrapper is the horizontal scroll container. Deliberately not done on the <table> itself: giving a table display:block strips its
 // table semantics in some browser/assistive-technology combinations.
+// Template: When the table scrolls, the box becomes a named region and a tab stop so a keyboard user can scroll it (WCAG 2.1.1); when it does not, it is a plain div with no role. The empty text is a paragraph outside the table so an empty table is not announced as a table of nothing.
 </script>
 
 <template>
@@ -85,6 +101,7 @@ const isEmpty = (): boolean => (props.rows !== undefined ? props.rows === 0 : !s
 </template>
 
 <style scoped>
+/* The horizontal scroll container. */
 .mw-data-table-wrap {
   /* Positioned, so visually hidden (absolutely placed) cells are clipped here and cannot widen the page. */
   position: relative;
@@ -95,6 +112,7 @@ const isEmpty = (): boolean => (props.rows !== undefined ? props.rows === 0 : !s
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }
+/* The table fills the box; collapsed borders give single hairlines between rows. */
 .mw-data-table {
   width: 100%;
   border-collapse: collapse;
@@ -121,19 +139,23 @@ const isEmpty = (): boolean => (props.rows !== undefined ? props.rows === 0 : !s
   white-space: normal;
   vertical-align: middle;
 }
+/* Body cells: the same padding as headers so columns line up, with a hairline under each row. */
 .mw-data-table :deep(td) {
   padding: var(--space-3xs) var(--space-2xs);
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
+/* No rule under the last row (the box's own edge closes the table). */
 .mw-data-table :deep(tbody tr:last-child td),
 .mw-data-table :deep(tbody tr:last-child th) {
   border-bottom: none;
 }
+/* Zebra stripes on the lift surface help the eye follow a row across; the stripe is a faint tint, not the only row separator (the hairlines remain). */
 .mw-data-table :deep(tbody tr:nth-child(even) td),
 .mw-data-table :deep(tbody tr:nth-child(even) th) {
   background: var(--lift);
 }
+/* The empty message: centred, muted, with room so the table does not look broken. */
 .mw-data-table__empty {
   margin: 0;
   padding: var(--space-md) var(--space-sm);

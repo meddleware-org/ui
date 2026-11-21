@@ -21,10 +21,12 @@ const props = withDefaults(
   { as: 'section', level: 3, plain: false },
 )
 
+// The validated link, or undefined (no link) when the caller gave none or `safeHref` refused it (a non-https scheme, credentials).
 const url = computed(() => (props.href === undefined ? undefined : safeHref(props.href)))
 // `header`/`footer` are only scoped to the card inside sectioning content (`section`, `article`). Inside a list item they would become
 // page-level banner and contentinfo landmarks, so a card that is a list item uses plain elements.
 const band = computed(() => (props.as === 'li' ? 'div' : 'header'))
+// Template: The root element is the caller's choice (`section`, `article`, or `li` in a list); the header and footer are real header/footer elements only where that is valid (see `band`).
 </script>
 
 <template>
@@ -46,6 +48,8 @@ const band = computed(() => (props.as === 'li' ? 'div' : 'header'))
 </template>
 
 <style scoped>
+/* The card's surface. `position: relative` anchors the stretched link of a linked card; `overflow: hidden` lets the header and footer bands
+   reach the rounded corners. */
 .mw-card {
   position: relative;
   padding: var(--space-sm);
@@ -55,6 +59,7 @@ const band = computed(() => (props.as === 'li' ? 'div' : 'header'))
   color: var(--text);
   overflow: hidden;
 }
+/* The header band: negative margins undo the card's padding so the rule under it spans the full width. */
 .mw-card__header {
   margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-sm)) var(--space-sm);
   padding: var(--space-xs) var(--space-sm);
@@ -65,6 +70,7 @@ const band = computed(() => (props.as === 'li' ? 'div' : 'header'))
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
 }
+/* The footer band mirrors the header, on the lift surface to set it apart. */
 .mw-card__footer {
   margin: var(--space-sm) calc(-1 * var(--space-sm)) calc(-1 * var(--space-sm));
   padding: var(--space-xs) var(--space-sm);
@@ -92,6 +98,7 @@ const band = computed(() => (props.as === 'li' ? 'div' : 'header'))
   position: absolute;
   inset: 0;
 }
+/* Hover feedback for a linked card: the edge turns accent and a shadow lifts it; the text colours do not change. */
 .mw-card--link {
   transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }

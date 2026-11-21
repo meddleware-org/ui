@@ -9,12 +9,15 @@ const props = withDefaults(
   defineProps<{
     /** The amount in base units: a bigint, an integer, or a decimal string of an integer. */
     value: bigint | number | string | null | undefined
+    /** The ticker shown after the figure (default `SUI`; use `WAL` for Walrus amounts). */
     symbol?: string
+    /** Write every digit, with no rounding (for where a person approves a payment). */
     exact?: boolean
   }>(),
   { symbol: 'SUI', exact: false },
 )
 
+// The amount as a bigint, or null for anything that is not an integer: a bad value shows a dash instead of throwing in the middle of a render.
 const base = computed<bigint | null>(() => {
   const v = props.value
   if (v === null || v === undefined) return null
@@ -24,7 +27,9 @@ const base = computed<bigint | null>(() => {
     return null
   }
 })
+// Both formatters work on the exact digits (web-utils), so the same amount reads the same on every machine.
 const text = computed(() => (base.value === null ? '—' : (props.exact ? formatCoinExact : formatCoinAmount)(base.value, props.symbol)))
+// Template: <data> is the native element for a human-readable value with a machine-readable `value`.
 </script>
 
 <template>
@@ -32,6 +37,7 @@ const text = computed(() => (base.value === null ? '—' : (props.exact ? format
 </template>
 
 <style scoped>
+/* Monospace so columns of amounts line up; never wraps, because a figure split across lines is misread. */
 .mw-amount {
   font-family: var(--mw-font-mono);
   white-space: nowrap;

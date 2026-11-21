@@ -4,8 +4,11 @@ import { mount } from '@vue/test-utils'
 import CopyableAddress from '../components/CopyableAddress.vue'
 import ExplorerLink from '../components/ExplorerLink.vue'
 
+// Truncation is for scanning, not verifying (address poisoning): these tests pin when it applies and that the full value is always still there.
 const ADDRESS = `0x${'ab'.repeat(31)}cd` // 66 characters
 
+// CopyableAddress and ExplorerLink share one truncation rule (web-utils' `truncateMiddle`); they must agree, and `truncate=false` shows the value whole.
+// (The default shows 12 characters then 10, so a 66-character address is shortened and a short value is not.)
 describe('address truncation', () => {
   it('CopyableAddress shows 10 hex characters on each side by default', () => {
     const w = mount(CopyableAddress, { props: { address: ADDRESS } })

@@ -6,16 +6,20 @@ import { safePath, safeHref } from '@meddleware/web-utils'
 
 withDefaults(
   defineProps<{
+    /** The entry's text. */
     label: string
     /** A decorative leading glyph (hidden from assistive technology). */
     icon?: string
+    /** The current entry: highlighted and marked `aria-current="page"`. */
     active?: boolean
+    /** Disables the button form (a link cannot be disabled). */
     disabled?: boolean
     /** Render an `<a>` to this root-relative path or URL (checked with `safePath` / `safeHref`). */
     href?: string
   }>(),
   { active: false, disabled: false },
 )
+// Template: A real link when there is an `href` (a root-relative path goes through `safePath`, anything else through `safeHref`), a button otherwise.
 </script>
 <template>
   <a v-if="href !== undefined" :href="href.startsWith('/') ? safePath(href) : safeHref(href)" class="sidebar-item" :class="{ 'is-active': active }" :aria-current="active ? 'page' : undefined">
@@ -46,14 +50,17 @@ withDefaults(
   cursor: pointer;
   transition: background var(--transition-base), color var(--transition-base);
 }
+/* Hover tints from the item's own colour (`currentColor`), so it works on both the light and the dark panel. */
 .sidebar-item:hover:not(:disabled) {
   background: color-mix(in srgb, currentColor 10%, transparent);
   color: var(--_text, var(--text));
 }
+/* The current entry: a stronger accent tint, and the label in full text colour. */
 .sidebar-item.is-active {
   background: color-mix(in srgb, var(--accent) 26%, transparent);
   color: var(--_text, var(--text));
 }
+/* A disabled entry keeps its text (opacity would take it below contrast) and only loses the pointer cursor. */
 .sidebar-item:disabled {
   cursor: default;
 }
@@ -64,10 +71,12 @@ withDefaults(
     outline-offset: -2px;
   }
 }
+/* Inset ring: the item bleeds to the sidebar's edges, so an outer ring would be clipped. */
 .sidebar-item:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }
+/* A fixed-width cell so labels line up whether or not an entry has an icon. */
 .sidebar-item__icon {
   width: var(--space-sm);
   text-align: center;

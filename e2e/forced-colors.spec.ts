@@ -3,15 +3,24 @@
 // a second cue. This checks the states that matter keep a visible border or outline, and that keyboard focus is visible.
 import { test, expect, type Page } from '@playwright/test'
 
+// Forced-colours emulation is a Chromium feature in Playwright; the other engines add nothing here, so the file runs once.
 test.skip(({ browserName }) => browserName !== 'chromium', 'forced-colors emulation is checked on Chromium')
 
+/** What an element still draws when backgrounds are removed. */
 interface Edge {
+  /** How many of the four sides have a drawn border. */
   border: number
+  /** 1 when an outline is drawn, else 0. */
   outline: number
+  /** Whether it has a border or an outline: the condition the tests need. */
   ok: boolean
 }
 
-/** Whether an element has a border or outline that is drawn (a width, a style, and a colour that is not transparent). */
+/**
+ * Whether an element has a border or outline that is drawn (a width, a style, and a colour that is not transparent).
+ * @param page - the gallery page
+ * @param selector - the element to check (the first match)
+ */
 async function edge(page: Page, selector: string): Promise<Edge> {
   return page.locator(selector).first().evaluate((el) => {
     const s = getComputedStyle(el)
@@ -23,6 +32,7 @@ async function edge(page: Page, selector: string): Promise<Edge> {
   })
 }
 
+// Every test starts with forced colours on, on the gallery's "all" view (every component in one page).
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ forcedColors: 'active' })
   await page.goto('/?view=all')
@@ -30,6 +40,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('controls keep a visible edge when backgrounds are removed', async ({ page }) => {
+  // The controls and containers a person must be able to find by their edge.
   const selectors = [
     '.mw-btn--primary',
     '.mw-btn--secondary',
@@ -45,6 +56,7 @@ test('controls keep a visible edge when backgrounds are removed', async ({ page 
     '.mw-code__pre',
     '.mw-toolbar-btn',
   ]
+  // Collect every failure and compare with an empty list, so one run names all the elements that lack an edge, not just the first.
   const missing: string[] = []
   for (const s of selectors) if (!(await edge(page, s)).ok) missing.push(s)
   expect(missing).toEqual([])
@@ -63,6 +75,7 @@ test('the chosen state is not carried by a background alone', async ({ page }) =
 test('keyboard focus is visible', async ({ page }) => {
   await page.keyboard.press('Tab') // the skip link or the first control
   await page.keyboard.press('Tab')
+  // Whatever holds focus must show an outline: in forced colours the browser draws its own, so a missing one means the page removed it.
   const focused = await page.evaluate(() => {
     const el = document.activeElement as HTMLElement
     const s = getComputedStyle(el)

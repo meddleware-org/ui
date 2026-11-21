@@ -2,11 +2,13 @@
 // popover and no layout, so this is checked in a real browser, against the gallery's `panels` view.
 import { test, expect } from '@playwright/test'
 
+// Phone width (an iPhone-sized screen): below 45em the sidebar is a drawer.
 test.describe('narrow screen', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
   test('the sidebar is hidden until the menu button opens it, and Escape closes it', async ({ page }) => {
     await page.goto('/?view=panels')
+    // Found by accessible name, as a person using a screen reader would: the menu button, and the sidebar's named navigation.
     const menu = page.getByRole('button', { name: 'Menu' })
     const nav = page.getByRole('navigation', { name: 'Primary' })
     await expect(menu).toBeVisible()
@@ -25,6 +27,7 @@ test.describe('narrow screen', () => {
   test('choosing an item closes the drawer, and the menu button works from the keyboard', async ({ page }) => {
     await page.goto('/?view=panels')
     const nav = page.getByRole('navigation', { name: 'Primary' })
+    // Open with the keyboard (focus then Enter), not a click: the button must work without a pointer.
     await page.getByRole('button', { name: 'Menu' }).focus()
     await page.keyboard.press('Enter')
     await expect(nav).toBeVisible()
@@ -36,12 +39,14 @@ test.describe('narrow screen', () => {
   test('the drawer fits the screen and does not scroll the page sideways', async ({ page }) => {
     await page.goto('/?view=panels')
     await page.getByRole('button', { name: 'Menu' }).click()
+    // The drawer is at most 85% of the screen wide (`min(var(--_width), 85vw)`), leaving some page visible behind it.
     const box = await page.locator('aside').boundingBox()
     expect(box!.width).toBeLessThanOrEqual(390 * 0.85 + 1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
   })
 })
 
+// Desktop width: the sidebar is a column beside the content and the menu button does not exist.
 test.describe('wide screen', () => {
   test.use({ viewport: { width: 1280, height: 800 } })
 

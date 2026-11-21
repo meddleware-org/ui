@@ -3,14 +3,22 @@
 import UiFormField from './UiFormField.vue'
 import UiSelect from './UiSelect.vue'
 
+// Attributes go to the select inside the field, not to the field's wrapper.
 defineOptions({ inheritAttrs: false })
+/** The chosen option's value (an empty string for the placeholder). */
 const model = defineModel<string>({ default: '' })
 defineProps<{
+  /** The select's id (the label points at it). */
   id: string
+  /** The label text. */
   label: string
+  /** The choices as `[value, label]` pairs. */
   options: ReadonlyArray<readonly [string, string]>
+  /** When given, an empty-valued first option with this text (the "any" or "none" choice). */
   placeholder?: string
+  /** Help text under the field. */
   hint?: string
+  /** An error message; also marks the select invalid. */
   error?: string | null
 }>()
 </script>

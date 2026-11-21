@@ -4,7 +4,16 @@
 // The skip link jumps to `<main>`; browsers move the keyboard starting point to the target, so it needs no tabindex (and no focus outline).
 import UiSkipLink from './UiSkipLink.vue'
 
-withDefaults(defineProps<{ /** The `id` of the main landmark; the skip link points at it. */ mainId?: string; contained?: boolean }>(), { mainId: 'main', contained: false })
+withDefaults(
+  defineProps<{
+    /** The `id` of the main landmark; the skip link points at it. */
+    mainId?: string
+    /** Limit the main content to the tool width (`--mw-tool-content-max`) and pad it; false lets the page use the full width. */
+    contained?: boolean
+  }>(),
+  { mainId: 'main', contained: false },
+)
+// Template: Document order is the keyboard order: skip link, header, sidebar, main, footer. The landmarks (header, nav, main, footer) come from the slotted elements and the <main> here, so the shell adds no ARIA roles of its own.
 </script>
 
 <template>
@@ -18,12 +27,15 @@ withDefaults(defineProps<{ /** The `id` of the main landmark; the skip link poin
 </template>
 
 <style scoped>
+/* A grid frame: header row, a growing content row, footer row; at least the viewport tall (`dvh`, so a phone's address bar is accounted for) so
+   a short page keeps its footer at the bottom. */
 .mw-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr auto;
   min-height: 100dvh;
 }
+/* With a sidebar the first column is the sidebar's own width and the content takes the rest. */
 .mw-shell--sidebar {
   grid-template-columns: auto minmax(0, 1fr);
 }
@@ -32,6 +44,7 @@ withDefaults(defineProps<{ /** The `id` of the main landmark; the skip link poin
 .mw-shell > :slotted(footer) {
   grid-column: 1 / -1;
 }
+/* `min-width: 0` lets the main column shrink below its widest child instead of forcing a sideways scroll. */
 .mw-shell__main {
   min-width: 0;
 }
@@ -40,6 +53,7 @@ withDefaults(defineProps<{ /** The `id` of the main landmark; the skip link poin
 .mw-shell--sidebar > .mw-shell__main {
   grid-column: 2;
 }
+/* Narrow screens: the sidebar becomes an off-canvas drawer (AppSidebar), so the grid is a single column. */
 @media (width < 45em) {
   .mw-shell--sidebar {
     grid-template-columns: minmax(0, 1fr);
@@ -48,6 +62,7 @@ withDefaults(defineProps<{ /** The `id` of the main landmark; the skip link poin
     grid-column: 1;
   }
 }
+/* The tool width, centred, with room below for the footer. */
 .mw-shell__main--contained {
   width: 100%;
   max-width: var(--mw-tool-content-max);

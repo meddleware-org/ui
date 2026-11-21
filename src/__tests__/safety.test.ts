@@ -5,9 +5,15 @@ import { mount, flushPromises } from '@vue/test-utils'
 import CopyrightLine from '../components/CopyrightLine.vue'
 import CopyableAddress from '../components/CopyableAddress.vue'
 
+// The symbol link must only ever carry a safe destination, whatever the caller passes.
 describe('CopyrightLine symbol link', () => {
   /** The one canonical host for the legal documents, so an app ships no copies. */
   const DEFAULT = 'https://meddleware.co.uk/legal/copyright.html'
+  /**
+   * The href the notice's symbol link renders for a given override and other props.
+   * @param symbolHref - the caller's override, if any
+   * @param extra - other props (`legalBase`, `symbolVariant`)
+   */
   const href = (symbolHref?: string, extra: Record<string, unknown> = {}) =>
     mount(CopyrightLine, { props: { organisationName: 'Org', symbolHref, ...extra } }).find('a').attributes('href')
 
@@ -18,6 +24,7 @@ describe('CopyrightLine symbol link', () => {
   })
 
   it('refuses script URLs and paths that leave the site, falling back to the default', () => {
+    // Each unsafe value is refused and the default document is used instead, so the symbol never loses its destination.
     expect(href('javascript:alert(1)')).toBe(DEFAULT)
     expect(href('//evil.example/x')).toBe(DEFAULT)
     expect(href('/\\evil.example/x')).toBe(DEFAULT)
@@ -34,17 +41,20 @@ describe('CopyrightLine symbol link', () => {
   })
 
   it('serves the documents from legalBase: another host, or the app\'s own origin', () => {
+    // `legalBase` is where the documents are served: an app that serves its own copies passes a root-relative path.
     expect(href(undefined, { legalBase: '/legal/' })).toBe('/legal/copyright.html')
     expect(href(undefined, { legalBase: '/legal', symbolVariant: 'kopimi' })).toBe('/legal/powr.broccoli-kopimi.pdf')
     expect(href(undefined, { legalBase: 'https://legal.example/docs/', symbolVariant: 'copyleft' })).toBe('https://legal.example/docs/copyleft.html')
   })
 
   it('refuses an unsafe legalBase, falling back to the app\'s own /legal/', () => {
+    // A bad base falls back to the app's own `/legal/` (a same-origin path), not to the canonical host: the caller asked for something else.
     expect(href(undefined, { legalBase: 'javascript:alert(1)//' })).toBe('/legal/copyright.html')
     expect(href(undefined, { legalBase: '//evil.example/' })).toBe('/legal/copyright.html')
   })
 })
 
+// Truncation is for scanning, not verifying: where funds go the address is shown whole, and the copy always has the full value.
 describe('CopyableAddress', () => {
   afterEach(() => vi.unstubAllGlobals())
 
@@ -65,6 +75,7 @@ describe('CopyableAddress', () => {
   })
 })
 
+// Nothing is stored before the person asks (D134): the choice applies for the visit, and is written only while "Remember" is on.
 describe('useColorMode', () => {
   afterEach(() => localStorage.clear())
 

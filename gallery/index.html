@@ -1,11 +1,14 @@
 <!doctype html>
+<!-- The gallery's page: a mount point and the entry module (main.ts). The sweeps load it by URL with `view`, `theme` and `season` parameters. -->
 <html lang="en">
   <head>
+    <!-- UTF-8, and a mobile viewport so the 320 px and 390 px sweeps see the layout a phone would. -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@meddleware/ui gallery</title>
   </head>
   <body>
+    <!-- The component gallery is mounted here by main.ts; nothing is rendered without scripting, because the sweeps need a running app. -->
     <div id="app"></div>
     <script type="module" src="./main.ts"></script>
   </body>

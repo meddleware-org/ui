@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The frame every standalone MeddleWare tool app shares: the page shell, a dark header with the tool's name, the actions the tool needs
+// The frame every standalone Meddleware tool app shares: the page shell, a dark header with the tool's name, the actions the tool needs
 // (a wallet button, a network badge …) next to the colour-mode control, one visually hidden page heading, and the footer with the
 // documentation links and the copyright line. The tool itself is the default slot.
 //
@@ -42,7 +42,9 @@ const props = withDefaults(
   { docsUrl: undefined, devUrl: undefined, pageHeading: true, contained: true, defaultMode: 'dark' },
 )
 
+// The colour mode lives in the composable (saved only if the person asks to remember it, D134); the control below drives it.
 const { mode, set, remember, setRemember } = useColorMode(props.defaultMode)
+// The docs and developer links default to the tool's page on each site, built from its slug; an app may override either, or pass `false` to omit it.
 const docs = computed(() => (props.docsUrl === false ? undefined : props.docsUrl || `https://docs.meddleware.co.uk/blockchain/sui/${props.slug}/`))
 const dev = computed(() => (props.devUrl === false ? undefined : props.devUrl || `https://meddleware.dev/sui/${props.slug}/`))
 </script>
@@ -59,6 +61,7 @@ const dev = computed(() => (props.devUrl === false ? undefined : props.devUrl ||
       </AppHeader>
     </template>
 
+    <!-- One page heading, visually hidden: the header shows the brand, which is not a heading, so the page still gets an h1 for its outline. -->
     <h1 v-if="pageHeading" class="mw-visually-hidden">{{ title }}</h1>
     <slot />
 

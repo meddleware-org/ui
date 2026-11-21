@@ -4,10 +4,12 @@
 // size follows the text (1em tall) unless the container sets `--mw-brand-size`.
 import { MARK_PATH, MARK_VIEW_BOX } from '../brand/mark'
 
+// The mark's geometry comes from `brand/mark.ts`, which is generated from the vendored SVG (never edited by hand).
 defineProps<{
   /** An accessible name, for a mark that stands alone. Without it the mark is hidden from assistive technology. */
   label?: string
 }>()
+// Template: An inline SVG so it inherits `currentColor` (a background-image could not). With a label it is an image; without one it is hidden from assistive technology because the name sits beside it. `focusable=false` keeps old Edge and IE from making it a tab stop.
 </script>
 
 <template>
@@ -24,6 +26,7 @@ defineProps<{
 </template>
 
 <style scoped>
+/* 1em square by default, so it scales with the text it sits in; a container overrides the size with --mw-brand-size. */
 .mw-brand-mark {
   inline-size: var(--mw-brand-size, 1em);
   block-size: var(--mw-brand-size, 1em);

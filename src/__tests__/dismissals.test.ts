@@ -8,14 +8,18 @@ import AppHeader from '../components/AppHeader.vue'
 import UiFieldHint from '../components/UiFieldHint.vue'
 import { useStickyOffset } from '../composables/useStickyOffset'
 
+// The hint's WCAG 1.4.13 behaviour (dismissible, hoverable, persistent) over fake timers, which stand in for the close delay.
 describe('UiFieldHint', () => {
+  /** Press a key on the document, as the keyboard does (the component listens there). */
   const press = (key: string) => document.dispatchEvent(new KeyboardEvent('keydown', { key }))
+  /** A hint attached to the document (focus and popover need a real parent) with some help text. */
   const mountHint = () => mount(UiFieldHint, { props: { fieldId: 'f1' }, slots: { default: 'Explains the field.' }, attachTo: document.body })
   /** The pointer leaving closes the text after a short delay (so it can cross the gap to the text), so a test waits that long. */
   const leaveAndWait = async (root: { trigger: (e: string) => Promise<void> }) => {
     await root.trigger('mouseleave')
     vi.advanceTimersByTime(200)
   }
+  // Fake timers for the close delay; the body is emptied after each case so a leftover hint cannot catch the next case's events.
   beforeEach(() => vi.useFakeTimers())
   afterEach(() => {
     vi.useRealTimers()
@@ -27,6 +31,7 @@ describe('UiFieldHint', () => {
     const tip = w.find('#f1-hint')
     expect(tip.element.tagName).toBe('SMALL')
     expect(tip.attributes('popover')).toBe('manual')
+    // No ARIA role: HTML has no tooltip element, and the description reaches assistive technology through aria-describedby.
     expect(tip.attributes('role')).toBeUndefined()
     expect(w.find('button').attributes('aria-describedby')).toBe('f1-hint')
     expect(tip.text()).toBe('Explains the field.')
@@ -38,12 +43,15 @@ describe('UiFieldHint', () => {
     const root = w.find('.mw-field-hint')
     await root.trigger('mouseenter')
     expect(root.classes()).toContain('mw-field-hint--open')
+    // Escape dismisses it without moving the pointer or the focus (WCAG 1.4.13).
     press('Escape')
     await nextTick()
     expect(root.classes()).toContain('mw-field-hint--dismissed')
     expect(root.classes()).not.toContain('mw-field-hint--open')
+    // Any other key changes nothing: the tip stays dismissed while the pointer is still there.
     press('a')
     expect(root.classes()).toContain('mw-field-hint--dismissed')
+    // Once the pointer has really left, the dismissal ends, so the next visit can open it again.
     await leaveAndWait(root)
     await nextTick()
     expect(root.classes()).not.toContain('mw-field-hint--dismissed')
@@ -57,6 +65,7 @@ describe('UiFieldHint', () => {
     press('Escape')
     await nextTick()
     expect(root.classes()).toContain('mw-field-hint--dismissed')
+    // Focus leaving ends the dismissal; focus coming back shows the tip again.
     await root.trigger('focusout')
     expect(root.classes()).not.toContain('mw-field-hint--dismissed')
     await root.trigger('focusin')
@@ -69,6 +78,7 @@ describe('UiFieldHint', () => {
     const w = mountHint()
     const root = w.find('.mw-field-hint')
     await root.trigger('mouseenter')
+    // 50 ms is inside the 150 ms close delay: the tip must still be open (the pointer is crossing the gap to the text).
     await root.trigger('mouseleave')
     vi.advanceTimersByTime(50)
     await nextTick()
@@ -86,6 +96,7 @@ describe('UiFieldHint', () => {
   it('pressing the button toggles the text, which is how a touch screen opens it, and a press elsewhere closes it', async () => {
     const w = mountHint()
     const root = w.find('.mw-field-hint')
+    // A press pins the text open: a touch screen sends hover events before the click, so a toggle would open and close it in one tap.
     await w.find('button').trigger('click')
     expect(root.classes()).toContain('mw-field-hint--open')
     // Pinned: it stays when nothing is hovered or focused.
@@ -117,6 +128,7 @@ describe('UiFieldHint', () => {
   })
 
   it('a press inside the hint does not count as a press elsewhere', async () => {
+    // A person reading the text may press on it (to select a word); that must not be taken for a press "elsewhere" and close it.
     const w = mountHint()
     const root = w.find('.mw-field-hint')
     await w.find('button').trigger('click')
@@ -126,6 +138,7 @@ describe('UiFieldHint', () => {
   })
 
   it('listens for Escape only while it is hovered, focused or pinned, and not after it is gone', async () => {
+    // The document-level keydown listener is only worth having while the hint is in use; spies count its adds and removes.
     const add = vi.spyOn(document, 'addEventListener')
     const remove = vi.spyOn(document, 'removeEventListener')
     const w = mountHint()
@@ -147,6 +160,7 @@ describe('UiFieldHint', () => {
   })
 })
 
+// A sticky header publishes its real height as a custom property on <html>, written on a frame and only when it changed.
 describe('sticky offsets', () => {
   let callback: ((entries: unknown[]) => void) | null = null
   let disconnected = 0
