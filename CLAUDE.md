@@ -230,6 +230,10 @@ npx --no-install mw-audit-gate                             # the dependency gate
 - **`src/brand/mark.ts` is generated** (`npm run build:brand`): change `scripts/build-brand.mjs`, not the file.
 - **`.github/audit-gate.mjs` is not here any more**: CI runs `npx --no-install mw-audit-gate` (FU-0196).
 
+## Documentation rules (workspace documentation standard, D144)
+
+Every file has a header and every declaration a TSDoc comment (private declarations included); comments say why. In a Vue single-file component the header is a `//` comment just inside `<script>` (never an HTML comment before the root element in `<template>`), template notes are `<!-- -->` inside the root, and style notes are `/* */`. `node scripts/check-docs.mjs --report ui` (in the workspace repository) is the gate. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Related
 
 - The audit: [`docs/audit/ui-audit.md`](docs/audit/ui-audit.md).
