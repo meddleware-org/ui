@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); version
 
 ## [Unreleased]
 
+## [0.1.47] - 2026-11-27
+
 ### Changed
 - Documentation pass (line-level annotation): every component, composable, test, script, workflow and configuration file explains itself; every
   prop, emit and slot is documented (so the shipped `.d.ts` files carry the descriptions in editors); a Development section in the README and
